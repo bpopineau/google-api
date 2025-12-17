@@ -51,7 +51,7 @@ def send_cmd(
     clients = get_clients()
 
     msg_id = send_email(
-        clients.gmail,
+        clients.gmail.service,
         to=_split_emails(to),
         subject=subject,
         body=body,
@@ -83,7 +83,7 @@ def search_cmd(
     clients = get_clients()
 
     results = search_messages(
-        clients.gmail,
+        clients.gmail.service,
         query,
         max_results=max_results,
         include_spam_trash=include_spam_trash,
@@ -139,7 +139,7 @@ def mark_read_cmd(
     """Remove the UNREAD label from a message."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    _ = mark_read(clients.gmail, message_id)
+    _ = mark_read(clients.gmail.service, message_id)
 
     if state.json:
         state.console.print(
@@ -159,7 +159,7 @@ def view_cmd(
     """View full message details and body."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    msg = get_message(clients.gmail, message_id)
+    msg = get_message(clients.gmail.service, message_id)
 
     if state.json:
         state.console.print(format_output(msg, json_mode=True))

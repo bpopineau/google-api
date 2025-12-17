@@ -34,10 +34,10 @@ def get_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     values = get_range(
-        clients.sheets,
+        clients.sheets.service,
         identifier,
         a1_range,
-        drive=clients.drive,
+        drive=clients.drive.service,
         parent_id=parent_id,
         allow_multiple=allow_multiple,
     )
@@ -73,11 +73,11 @@ def append_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     result = append_row(
-        clients.sheets,
+        clients.sheets.service,
         identifier,
         sheet_name,
         values,
-        drive=clients.drive,
+        drive=clients.drive.service,
         parent_id=parent_id,
         allow_multiple=allow_multiple,
         value_input_option="USER_ENTERED" if user_entered else "RAW",
@@ -122,11 +122,11 @@ def update_cmd(
     values = _parse_rows(row, delimiter=delimiter)
 
     result = update_range(
-        clients.sheets,
+        clients.sheets.service,
         identifier,
         a1_range,
         values,
-        drive=clients.drive,
+        drive=clients.drive.service,
         parent_id=parent_id,
         allow_multiple=allow_multiple,
         value_input_option="USER_ENTERED" if user_entered else "RAW",
@@ -157,9 +157,9 @@ def list_tabs_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     results = get_sheets(
-        clients.sheets,
+        clients.sheets.service,
         identifier,
-        drive=clients.drive,
+        drive=clients.drive.service,
         parent_id=parent_id,
         allow_multiple=allow_multiple,
     )

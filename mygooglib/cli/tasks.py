@@ -23,7 +23,7 @@ def list_lists_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
-    results = list_tasklists(clients.tasks, max_results=max_results)
+    results = list_tasklists(clients.tasks.service, max_results=max_results)
 
     if state.json:
         state.console.print(format_output(results, json_mode=True))
@@ -56,7 +56,7 @@ def list_cmd(
     clients = get_clients()
 
     results = list_tasks(
-        clients.tasks,
+        clients.tasks.service,
         tasklist_id=tasklist_id,
         show_completed=completed,
         max_results=max_results,
@@ -98,7 +98,7 @@ def add_cmd(
     clients = get_clients()
 
     task_id = add_task(
-        clients.tasks,
+        clients.tasks.service,
         title=title,
         tasklist_id=tasklist_id,
         notes=notes,
@@ -127,7 +127,9 @@ def complete_cmd(
 
     if not task_id:
         # Interactive mode
-        tasks = list_tasks(clients.tasks, tasklist_id=tasklist_id, show_completed=False)
+        tasks = list_tasks(
+            clients.tasks.service, tasklist_id=tasklist_id, show_completed=False
+        )
         if not tasks:
             state.console.print("No pending tasks found.")
             return
@@ -158,7 +160,7 @@ def complete_cmd(
             state.console.print("[red]Invalid input.[/red]")
             return
 
-    complete_task(clients.tasks, task_id, tasklist_id=tasklist_id)
+    complete_task(clients.tasks.service, task_id, tasklist_id=tasklist_id)
 
     if state.json:
         state.console.print(

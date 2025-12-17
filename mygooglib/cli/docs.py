@@ -38,11 +38,11 @@ def render_cmd(
         raise typer.Exit(1)
 
     doc_id = render_template(
-        clients.docs,
+        clients.docs.service,
         template_id,
         data_dict,
         title=title,
-        drive=clients.drive,
+        drive=clients.drive.service,
     )
 
     if state.json:
@@ -63,7 +63,7 @@ def export_pdf_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
-    out_path = export_pdf(clients.drive, doc_id, dest_path)
+    out_path = export_pdf(clients.drive.service, doc_id, dest_path)
 
     if state.json:
         state.console.print(format_output({"path": str(out_path)}, json_mode=True))

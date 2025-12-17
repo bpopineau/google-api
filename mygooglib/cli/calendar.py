@@ -30,7 +30,7 @@ def list_cmd(
     clients = get_clients()
 
     results = list_events(
-        clients.calendar,
+        clients.calendar.service,
         calendar_id=calendar_id,
         time_min=time_min,
         time_max=time_max,
@@ -76,7 +76,7 @@ def add_cmd(
     clients = get_clients()
 
     event_id = add_event(
-        clients.calendar,
+        clients.calendar.service,
         summary=summary,
         start=start,
         end=end,

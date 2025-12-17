@@ -133,7 +133,9 @@ def upload_cmd(
     """Upload a local file to Drive."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    file_id = upload_file(clients.drive, local_path, parent_id=parent_id, name=name)
+    file_id = upload_file(
+        clients.drive.service, local_path, parent_id=parent_id, name=name
+    )
 
     if state.json:
         state.console.print(format_output({"id": file_id}, json_mode=True))
@@ -158,7 +160,7 @@ def download_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     out_path = download_file(
-        clients.drive, file_id, dest_path, export_mime_type=export_mime_type
+        clients.drive.service, file_id, dest_path, export_mime_type=export_mime_type
     )
 
     if state.json:
@@ -185,7 +187,11 @@ def sync_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     summary = sync_folder(
-        clients.drive, local_path, drive_folder_id, recursive=recursive, dry_run=dry_run
+        clients.drive.service,
+        local_path,
+        drive_folder_id,
+        recursive=recursive,
+        dry_run=dry_run,
     )
 
     if state.json:
