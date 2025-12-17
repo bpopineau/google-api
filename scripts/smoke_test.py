@@ -38,7 +38,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from mygooglib import get_clients
-from mygooglib.drive import list_files, sync_folder
+from mygooglib.drive import sync_folder
 from mygooglib.gmail import mark_read, search_messages, send_email
 from mygooglib.sheets import (
     append_row,
@@ -75,7 +75,17 @@ def _print_jsonable(obj: Any) -> None:
         keys = sorted(obj.keys())
         print(f"dict[{len(keys)}] keys={keys}")
         # print a few important keys if present
-        for k in ("id", "threadId", "updatedRange", "updatedRows", "updatedCells"):
+        for k in (
+            "id",
+            "threadId",
+            "created",
+            "updated",
+            "skipped",
+            "errors",
+            "updatedRange",
+            "updatedRows",
+            "updatedCells",
+        ):
             if k in obj:
                 print(f"  {k}: {obj.get(k)}")
         return
@@ -318,9 +328,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "all":
         now = datetime.now(timezone.utc).isoformat()
 
-        print("== Drive: list_files (root, first 5) ==")
-        drive_files = list_files(clients.drive, page_size=5)
-        _print_jsonable(drive_files)
+        print("== Drive: list (root, first 5) ==")
+        response = (
+            clients.drive.files()
+            .list(
+                q="trashed = false",
+                pageSize=5,
+                fields="files(id,name,mimeType,modifiedTime,parents)",
+            )
+            .execute()
+        )
+        _print_jsonable(response.get("files", []))
 
         if args.drive_sync_local_path and args.drive_sync_folder_id:
             if not args.write:
