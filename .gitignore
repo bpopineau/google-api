@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual env
+.venv/
+
+# Local tooling
+.env
+
+# Google OAuth secrets (never commit)
+credentials.json
+token.json
+*.credentials.json
+*.token.json
+
+# Local secret directory convention for this repo
+.secrets/
+
+# Local notes (copy from template)
+docs/LOCAL_AUTH_NOTE.md
+
+# OS
+.DS_Store
+Thumbs.db

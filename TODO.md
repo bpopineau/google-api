@@ -11,13 +11,13 @@
 - [x] **OAuth Consent Screen**: Configure consent screen (and add yourself as a test user if needed).
 - [x] **Create OAuth Client**: Create OAuth 2.0 client credentials for a **Desktop app**.
 - [x] **Download OAuth**: Save `credentials.json` (OAuth client) securely.
-- [ ] **Decide Token Location**: Pick a local secret dir + final paths for `credentials.json` and `token.json`.
+- [x] **Decide Token Location**: Pick a local secret dir + final paths for `credentials.json` and `token.json`.
 - [ ] **Run OAuth Flow**: Obtain and save `token.json` (one-time consent).
 - [ ] **Refresh Behavior**: Confirm refresh token works (re-run script a second time with no prompt).
-- [ ] **Define Scopes List**: Write the combined scopes list needed for your v0.1 workflows (so you only consent once).
-- [ ] **Scope Strategy**: Decide whether to request all scopes up front vs per-service tokens.
+- [x] **Define Scopes List**: Write the combined scopes list needed for your v0.1 workflows (so you only consent once).
+- [x] **Scope Strategy**: Decide whether to request all scopes up front vs per-service tokens.
 - [ ] **Service Account (Optional)**: Decide if a service account is needed (share resources if used).
-- [ ] **Ignore Secrets**: Add credential files to `.gitignore` and avoid hard-coding.
+- [x] **Ignore Secrets**: Add credential files to `.gitignore` and avoid hard-coding.
 - [ ] **Docs Note**: Write down which account is authorized + what scopes were granted (so future-you knows).
 
 **Step 3 — Organize Library Structure**
