@@ -1,19 +1,20 @@
 **Personal Google APIs Library Checklist**
 
 **Step 1 — Identify Personal Automation Goals**
-- [ ] **List Goals**: Write 3–8 personal automation tasks (Drive, Sheets, Docs, Calendar, Tasks, Gmail).
-- [ ] **Select Common Actions**: Choose core actions per service (upload/download, read/write ranges, create docs/events, send email).
-- [ ] **Scope**: Mark features as "Must", "Nice", or "Later".
-- [ ] **Inputs/Outputs**: For each goal, note inputs (IDs, paths, titles) + desired outputs (IDs, files, plain Python data).
-- [ ] **Minimum Viable API**: Define a “v0.1” set of methods you’ll actually use this month.
-- [ ] **Naming Conventions**: Decide on method naming (e.g., `list_*`, `get_*`, `create_*`, `delete_*`) and 1-index vs 0-index for Sheets.
+- [x] **Source of truth**: Maintain all Step 1 details in [AUTOMATION_GOALS.md](AUTOMATION_GOALS.md).
+- [x] **v0.1 decisions captured**: Workflows, Must/Nice/Later, v0.1 API surface, I/O contracts, naming conventions.
+- [x] **Step 1 sign-off**: Confirm Step 1 is complete before starting auth/client implementation.
 
 **Step 2 — Set Up And Secure Credentials**
-- [ ] **Enable APIs**: Enable Drive, Sheets, Docs, Calendar, Tasks, Gmail in Google Cloud Console.
-- [ ] **Download OAuth**: Save `credentials.json` (OAuth client) securely.
+- [x] **Create/Select Project**: Create a Google Cloud project for this library (personal use).
+- [x] **Enable APIs**: Enable Drive, Sheets, Docs, Calendar, Tasks, Gmail in Google Cloud Console.
+- [x] **OAuth Consent Screen**: Configure consent screen (and add yourself as a test user if needed).
+- [x] **Create OAuth Client**: Create OAuth 2.0 client credentials for a **Desktop app**.
+- [x] **Download OAuth**: Save `credentials.json` (OAuth client) securely.
 - [ ] **Decide Token Location**: Pick a local secret dir + final paths for `credentials.json` and `token.json`.
 - [ ] **Run OAuth Flow**: Obtain and save `token.json` (one-time consent).
 - [ ] **Refresh Behavior**: Confirm refresh token works (re-run script a second time with no prompt).
+- [ ] **Define Scopes List**: Write the combined scopes list needed for your v0.1 workflows (so you only consent once).
 - [ ] **Scope Strategy**: Decide whether to request all scopes up front vs per-service tokens.
 - [ ] **Service Account (Optional)**: Decide if a service account is needed (share resources if used).
 - [ ] **Ignore Secrets**: Add credential files to `.gitignore` and avoid hard-coding.
@@ -79,14 +80,15 @@
 - [ ] **Parents/Subtasks**: Decide whether to support subtasks (optional).
 
 **Step 10 — Gmail Wrapper**
-- [ ] **Send Email**: Implement `send_email(to, subject, body, attachments=None)` using `EmailMessage` + base64url encode.
-- [ ] **Text vs HTML (Optional)**: Decide whether to support HTML bodies; keep default plain text.
+- [ ] **Send Email (v0.1 Must)**: Implement `send_email(to, subject, body, attachments=None)` using `EmailMessage` + base64url encode; return `message_id`.
+- [ ] **Search (v0.1 Must)**: Implement `search_messages(query)` returning lightweight message objects (id, subject, sender, snippet; optionally date).
+- [ ] **Mark Read (v0.1 Must)**: Implement `mark_read(message_id)` (or `message.mark_read()`) via modify/label updates.
+- [ ] **Message Parsing**: Extract common headers (From, To, Subject, Date) + snippet consistently.
 - [ ] **Attachments**: Implement file attachment handling with proper MIME type guessing.
-- [ ] **Search/Fetch**: Add `search_messages(query)` returning parsed message objects.
-- [ ] **Message Parsing**: Extract common headers (From, To, Subject, Date) + snippet.
-- [ ] **Modify Helpers**: Implement `mark_read`, `mark_unread`, `trash`, `archive` (label changes).
-- [ ] **Attachments Download**: Implement `download_attachment(name, save_dir)` and `download_all_attachments`.
-- [ ] **Label Helpers**: Provide label lookup + optional label creation.
+- [ ] **Attachments Download (Optional)**: Implement `download_attachment(name, save_dir)` and `download_all_attachments`.
+- [ ] **Modify Helpers (Optional)**: Implement `mark_unread`, `trash`, `archive` (label changes).
+- [ ] **Label Helpers (Optional)**: Provide label lookup + optional label creation.
+- [ ] **Text vs HTML (Optional)**: Decide whether to support HTML bodies; keep default plain text.
 
 **Step 11 — Pythonic Patterns**
 - [ ] **Retries**: Add `@retry` (google-api-core or custom) for transient errors (429/5xx).
