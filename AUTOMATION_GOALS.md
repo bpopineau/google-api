@@ -140,7 +140,8 @@ Goal: ~12 excellent functions, not 120 thin wrappers.
 
 Auth/Factory (Must):
 - `auth.get_creds()`
-- `client.create()` (or similar) returning typed clients
+- `client.get_clients()` returning typed clients
+	- also available as `mygooglib.create()` / `mygooglib.create_clients()` aliases
 
 Drive (Must):
 - `upload_file(...)`

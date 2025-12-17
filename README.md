@@ -38,6 +38,15 @@ from mygooglib import get_clients
 clients = get_clients()  # loads/refreshes token as needed
 ```
 
+Aliases (equivalent):
+
+```python
+from mygooglib import create, create_clients
+
+clients = create()
+clients = create_clients()
+```
+
 ### Drive
 
 ```python
@@ -98,6 +107,19 @@ if results:
 python scripts/smoke_test.py --help
 ```
 
+Run everything in one go (read-only by default):
+
+```bash
+python scripts/smoke_test.py all
+```
+
+Run everything including writes (Gmail send + Sheets write; optional Drive sync):
+
+```bash
+python scripts/smoke_test.py all --write
+python scripts/smoke_test.py all --write --drive-sync-local-path "C:\\path\\to\\folder" --drive-sync-folder-id "<FOLDER_ID>"
+```
+
 ## Manual smoke checklist
 
 Run these once after OAuth setup (or any time you want a quick confidence check).
@@ -135,14 +157,14 @@ python scripts/smoke_test.py sheets-get --identifier "My Sheet" --range "Sheet1!
 4) Gmail: send to yourself + verify via search:
 
 ```bash
-python scripts/smoke_test.py gmail-send --to you@example.com --subject "mygooglib smoke" --body "Hello"
+python scripts/smoke_test.py gmail-send --subject "mygooglib smoke" --body "Hello"
 python scripts/smoke_test.py gmail-search --query "subject:mygooglib smoke newer_than:1d" --max 3
+```
 
 5) Drive: sync a local folder into a Drive folder:
 
 ```bash
 python scripts/smoke_test.py drive-sync --local-path "C:\\path\\to\\folder" --drive-folder-id "<FOLDER_ID>"
-```
 ```
 
 ## Notes
