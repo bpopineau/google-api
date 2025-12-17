@@ -273,6 +273,8 @@ def sync_folder(
     drive: Any,
     local_path: str | os.PathLike,
     drive_folder_id: str,
+    *,
+    recursive: bool = True,
 ) -> dict:
     """Sync a local folder to a Drive folder.
 
@@ -283,6 +285,7 @@ def sync_folder(
         drive: Drive API Resource
         local_path: Local folder to sync
         drive_folder_id: Target Drive folder ID
+        recursive: If True (default), sync subfolders recursively.
 
     Returns:
         Summary dict: {created: int, updated: int, skipped: int, errors: list[str]}
@@ -291,54 +294,90 @@ def sync_folder(
     if not local_dir.is_dir():
         raise NotADirectoryError(f"Not a directory: {local_dir}")
 
-    # Get existing files in Drive folder
-    remote_files = list_files(drive, parent_id=drive_folder_id)
-    remote_by_name: dict[str, dict] = {f["name"]: f for f in remote_files}
-
     created = 0
     updated = 0
     skipped = 0
     errors: list[str] = []
 
-    # Iterate local files (non-recursive for now)
-    for item in local_dir.iterdir():
-        if item.is_dir():
-            # Skip subdirectories for v0.1 (could recurse later)
-            continue
+    from datetime import datetime, timezone
 
-        try:
-            if item.name in remote_by_name:
-                # File exists remotely — check if update needed
-                remote = remote_by_name[item.name]
-                remote_modified = remote.get("modifiedTime", "")
-                local_modified = item.stat().st_mtime
+    def _ensure_remote_folder(parent_id: str, name: str) -> str:
+        nonlocal created
+        # List once per lookup; keeps behavior simple and predictable.
+        existing = list_files(
+            drive,
+            parent_id=parent_id,
+            mime_type=FOLDER_MIME_TYPE,
+        )
+        for f in existing:
+            if f.get("name") == name:
+                return f["id"]
+        folder_id = create_folder(drive, name, parent_id=parent_id)
+        created += 1
+        return folder_id
 
-                # Parse remote time (ISO format) and compare
-                # Simple heuristic: always update if local is newer
-                from datetime import datetime, timezone
+    def _sync_dir(local_current: Path, remote_parent_id: str) -> None:
+        nonlocal created, updated, skipped, errors
 
-                try:
-                    remote_dt = datetime.fromisoformat(
-                        remote_modified.replace("Z", "+00:00")
-                    )
-                    local_dt = datetime.fromtimestamp(local_modified, tz=timezone.utc)
-
-                    if local_dt > remote_dt:
-                        _update_file(drive, remote["id"], item)
-                        updated += 1
-                    else:
-                        skipped += 1
-                except (ValueError, KeyError):
-                    # Can't parse time, update to be safe
-                    _update_file(drive, remote["id"], item)
-                    updated += 1
+        # Get existing items in this Drive folder.
+        remote_items = list_files(drive, parent_id=remote_parent_id)
+        remote_files_by_name: dict[str, dict] = {}
+        remote_folders_by_name: dict[str, dict] = {}
+        for item in remote_items:
+            name = item.get("name")
+            if not name:
+                continue
+            if item.get("mimeType") == FOLDER_MIME_TYPE:
+                remote_folders_by_name.setdefault(name, item)
             else:
-                # New file — upload
-                upload_file(drive, item, parent_id=drive_folder_id)
-                created += 1
+                remote_files_by_name.setdefault(name, item)
 
-        except Exception as e:
-            errors.append(f"{item.name}: {e}")
+        for entry in local_current.iterdir():
+            try:
+                if entry.is_dir():
+                    if not recursive:
+                        continue
+
+                    remote_folder = remote_folders_by_name.get(entry.name)
+                    remote_folder_id = (
+                        remote_folder.get("id")
+                        if remote_folder
+                        else _ensure_remote_folder(remote_parent_id, entry.name)
+                    )
+                    _sync_dir(entry, remote_folder_id)
+                    continue
+
+                # Local file
+                remote = remote_files_by_name.get(entry.name)
+                if remote:
+                    remote_modified = remote.get("modifiedTime", "")
+                    local_modified = entry.stat().st_mtime
+
+                    try:
+                        remote_dt = datetime.fromisoformat(
+                            remote_modified.replace("Z", "+00:00")
+                        )
+                        local_dt = datetime.fromtimestamp(
+                            local_modified, tz=timezone.utc
+                        )
+
+                        if local_dt > remote_dt:
+                            _update_file(drive, remote["id"], entry)
+                            updated += 1
+                        else:
+                            skipped += 1
+                    except (ValueError, KeyError):
+                        # Can't parse time, update to be safe.
+                        _update_file(drive, remote["id"], entry)
+                        updated += 1
+                else:
+                    upload_file(drive, entry, parent_id=remote_parent_id)
+                    created += 1
+
+            except Exception as e:
+                errors.append(f"{entry.relative_to(local_dir)}: {e}")
+
+    _sync_dir(local_dir, drive_folder_id)
 
     return {
         "created": created,

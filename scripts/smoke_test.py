@@ -8,6 +8,9 @@ Examples:
   # Show available options
   python scripts/smoke_test.py --help
 
+    # Drive: sync a local folder into a Drive folder
+    python scripts/smoke_test.py drive-sync --local-path "C:\\path\\to\\folder" --drive-folder-id "<FOLDER_ID>"
+
   # Gmail: send an email to yourself
   python scripts/smoke_test.py gmail-send --to you@example.com --subject "Test" --body "Hello"
 
@@ -28,6 +31,7 @@ import argparse
 from typing import Any
 
 from mygooglib import get_clients
+from mygooglib.drive import sync_folder
 from mygooglib.gmail import mark_read, search_messages, send_email
 from mygooglib.sheets import (
     append_row,
@@ -64,6 +68,21 @@ def _print_jsonable(obj: Any) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Smoke tests for mygooglib")
     sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p_drive_sync = sub.add_parser(
+        "drive-sync",
+        help="Sync a local folder into a Drive folder (upload/update only; no deletes)",
+    )
+    p_drive_sync.add_argument(
+        "--local-path",
+        required=True,
+        help="Local folder path to sync",
+    )
+    p_drive_sync.add_argument(
+        "--drive-folder-id",
+        required=True,
+        help="Destination Drive folder id",
+    )
 
     p_send = sub.add_parser("gmail-send", help="Send a test email")
     p_send.add_argument("--to", required=True, help="Recipient email")
@@ -198,6 +217,15 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     clients = get_clients()
+
+    if args.cmd == "drive-sync":
+        summary = sync_folder(
+            clients.drive,
+            args.local_path,
+            args.drive_folder_id,
+        )
+        _print_jsonable(summary)
+        return 0
 
     if args.cmd == "gmail-send":
         cc = [s.strip() for s in (args.cc or "").split(",") if s.strip()] or None

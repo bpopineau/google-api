@@ -123,7 +123,7 @@ def search_messages(
             raw: If True, return the raw list() response for the first page
 
     Returns:
-            By default, list of dicts with keys: id, threadId, subject, from, to, date, snippet.
+            By default, list of dicts with keys: id, threadId, subject, sender, from, to, date, snippet.
             If raw=True, returns the first page list() response.
     """
     if max_results < 1:
@@ -171,11 +171,13 @@ def search_messages(
                 )
                 payload = meta.get("payload") or {}
                 headers = _headers_to_dict(payload.get("headers"))
+                sender = headers.get("from")
                 collected.append(
                     {
                         "id": meta.get("id"),
                         "threadId": meta.get("threadId"),
                         "subject": headers.get("subject"),
+                        "sender": sender,
                         "from": headers.get("from"),
                         "to": headers.get("to"),
                         "date": headers.get("date"),

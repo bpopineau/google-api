@@ -41,10 +41,13 @@ clients = get_clients()  # loads/refreshes token as needed
 ### Drive
 
 ```python
-from mygooglib.drive import upload_file, list_files
+from mygooglib.drive import upload_file, list_files, sync_folder
 
 file_id = upload_file(clients.drive, "./report.pdf")
 files = list_files(clients.drive, query="name contains 'report'")
+
+# Safe sync (upload/update only; no deletes)
+summary = sync_folder(clients.drive, r"C:\\path\\to\\folder", "<FOLDER_ID>")
 ```
 
 ### Sheets
@@ -134,6 +137,12 @@ python scripts/smoke_test.py sheets-get --identifier "My Sheet" --range "Sheet1!
 ```bash
 python scripts/smoke_test.py gmail-send --to you@example.com --subject "mygooglib smoke" --body "Hello"
 python scripts/smoke_test.py gmail-search --query "subject:mygooglib smoke newer_than:1d" --max 3
+
+5) Drive: sync a local folder into a Drive folder:
+
+```bash
+python scripts/smoke_test.py drive-sync --local-path "C:\\path\\to\\folder" --drive-folder-id "<FOLDER_ID>"
+```
 ```
 
 ## Notes

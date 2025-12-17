@@ -11,4 +11,8 @@ Quick start:
 from mygooglib.auth import get_creds
 from mygooglib.client import get_clients
 
-__all__ = ["get_creds", "get_clients"]
+# Non-breaking aliases for a cleaner public API.
+create = get_clients
+create_clients = get_clients
+
+__all__ = ["get_creds", "get_clients", "create", "create_clients"]
