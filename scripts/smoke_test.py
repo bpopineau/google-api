@@ -50,7 +50,7 @@ from mygooglib.sheets import (
 
 # Defaults for local testing (safe to keep in-repo for personal use).
 DEFAULT_TEST_SPREADSHEET_IDENTIFIER = "17KBIrDF3CZ0s5U8QQf0aUHmkttVbkHWt44-ApGFTvSw"
-DEFAULT_TEST_EMAIL_TO = "brandon@esscoelectric"
+DEFAULT_TEST_EMAIL_TO = "brandon@esscoelectric.com"
 
 # Safe default ranges/targets for smoke operations.
 DEFAULT_TEST_SHEETS_READ_RANGE = "Sheet1!A1:C3"
