@@ -95,6 +95,47 @@ if results:
 python scripts/smoke_test.py --help
 ```
 
+## Manual smoke checklist
+
+Run these once after OAuth setup (or any time you want a quick confidence check).
+
+1) Confirm token refresh works (no re-consent prompt expected):
+
+```bash
+python scripts/check_token_refresh.py
+```
+
+2) Drive: list a few files (safe read-only call):
+
+```python
+from mygooglib import get_clients
+from mygooglib.drive import list_files
+
+clients = get_clients()
+files = list_files(clients.drive, page_size=5)
+for f in files:
+    print(f["id"], f["name"])
+```
+
+3) Sheets: read a small range (use id/title/url):
+
+```bash
+python scripts/smoke_test.py sheets-get --identifier "<ID_OR_TITLE_OR_URL>" --range "Sheet1!A1:C3"
+```
+
+If `--identifier` is a title, title lookup uses Drive. Optionally scope it:
+
+```bash
+python scripts/smoke_test.py sheets-get --identifier "My Sheet" --range "Sheet1!A1:C3" --parent-id "<FOLDER_ID>"
+```
+
+4) Gmail: send to yourself + verify via search:
+
+```bash
+python scripts/smoke_test.py gmail-send --to you@example.com --subject "mygooglib smoke" --body "Hello"
+python scripts/smoke_test.py gmail-search --query "subject:mygooglib smoke newer_than:1d" --max 3
+```
+
 ## Notes
 
 - The ergonomic wrappers are currently implemented as **free functions** that take the raw service objects from `get_clients()`.

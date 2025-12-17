@@ -48,11 +48,11 @@
 - [ ] **delete_file / share_file (Later)**: Not implemented in v0.1 (not in Must scope).
 
 **Step 6 — Sheets Wrapper**
-- [ ] **Spreadsheet API**: Implement `open_by_title`, `open_by_id`.
+- [x] **Spreadsheet API**: Implement `open_by_title`, `open_by_id`.
 - [ ] **Worksheet Access**: Decide on worksheet object model (spreadsheet object + worksheet objects vs simple methods).
-- [ ] **A1 Helpers**: Implement conversions (row/col → A1, A1 → row/col).
+- [x] **A1 Helpers**: Implement conversions (row/col → A1, A1 → row/col).
 - [ ] **Cell/Row/Col**: Add `get_value`, `update_value`, `get_row`, `get_column`, `append_row`, `get_all_values`.
-- [ ] **Value Input**: Decide default `valueInputOption` (RAW) + allow override.
+- [x] **Value Input**: Decide default `valueInputOption` (RAW) + allow override.
 - [ ] **Range/Bulk**: Provide batch updates and optional Pandas DataFrame export.
 - [ ] **Name Access**: Optionally support header-name column access and sheet-by-title.
 - [ ] **Slicing (Later)**: Optionally support slice-based range reads/updates.
@@ -81,11 +81,11 @@
 - [ ] **Parents/Subtasks**: Decide whether to support subtasks (optional).
 
 **Step 10 — Gmail Wrapper**
-- [ ] **Send Email (v0.1 Must)**: Implement `send_email(to, subject, body, attachments=None)` using `EmailMessage` + base64url encode; return `message_id`.
-- [ ] **Search (v0.1 Must)**: Implement `search_messages(query)` returning lightweight message objects (id, subject, sender, snippet; optionally date).
-- [ ] **Mark Read (v0.1 Must)**: Implement `mark_read(message_id)` (or `message.mark_read()`) via modify/label updates.
-- [ ] **Message Parsing**: Extract common headers (From, To, Subject, Date) + snippet consistently.
-- [ ] **Attachments**: Implement file attachment handling with proper MIME type guessing.
+- [x] **Send Email (v0.1 Must)**: Implement `send_email(to, subject, body, attachments=None)` using `EmailMessage` + base64url encode; return `message_id`.
+- [x] **Search (v0.1 Must)**: Implement `search_messages(query)` returning lightweight message objects (id, subject, sender, snippet; optionally date).
+- [x] **Mark Read (v0.1 Must)**: Implement `mark_read(message_id)` (or `message.mark_read()`) via modify/label updates.
+- [x] **Message Parsing**: Extract common headers (From, To, Subject, Date) + snippet consistently.
+- [x] **Attachments**: Implement file attachment handling with proper MIME type guessing.
 - [ ] **Attachments Download (Optional)**: Implement `download_attachment(name, save_dir)` and `download_all_attachments`.
 - [ ] **Modify Helpers (Optional)**: Implement `mark_unread`, `trash`, `archive` (label changes).
 - [ ] **Label Helpers (Optional)**: Provide label lookup + optional label creation.
@@ -114,17 +114,17 @@
 - [ ] **Notifications**: Optionally add alerting (email/log) on failures.
 
 **Step 14 — Docs, Tests, Maintenance**
-- [ ] **README**: Create usage examples and setup steps (OAuth, install).
-- [ ] **Examples**: Ensure each service has one minimal “happy path” snippet.
+- [x] **README**: Create usage examples and setup steps (OAuth, install).
+- [x] **Examples**: Ensure each service has one minimal “happy path” snippet.
 - [ ] **requirements**: Add `requirements.txt` (pin versions).
 - [ ] **Dependency Notes**: Document what’s optional (e.g., pandas) vs required.
 - [ ] **Tests**: Add simple unit/integration tests for key methods (auth, send_email, upload_file).
-- [ ] **Manual Smoke Checklist**: Write a short “run these once” checklist (token refresh, list Drive files, send email to self).
+- [x] **Manual Smoke Checklist**: Write a short “run these once” checklist (token refresh, list Drive files, send email to self).
 - [ ] **Update Plan**: Schedule occasional dependency updates and quota checks.
 
 **Optional Quick Tasks**
 - [ ] **.gitignore**: Add `credentials.json`, `token.json`.
-- [ ] **Example Scripts**: Add `examples/` with 2–3 scripts (send email, upload file, append sheet).
+- [x] **Example Scripts**: Add `examples/` with 2–3 scripts (send email, upload file, append sheet).
 - [ ] **Local Config**: Optionally add `.env` support for credential/token paths.
 - [ ] **Debug Logging Toggle**: Add one environment variable to enable debug logs.
 - [ ] **License/Notes**: Add personal notes about risk of broad scopes and secrets handling.
