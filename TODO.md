@@ -12,39 +12,40 @@
 - [x] **Create OAuth Client**: Create OAuth 2.0 client credentials for a **Desktop app**.
 - [x] **Download OAuth**: Save `credentials.json` (OAuth client) securely.
 - [x] **Decide Token Location**: Pick a local secret dir + final paths for `credentials.json` and `token.json`.
-- [ ] **Run OAuth Flow**: Obtain and save `token.json` (one-time consent).
-- [ ] **Refresh Behavior**: Confirm refresh token works (re-run script a second time with no prompt).
+- [x] **Run OAuth Flow**: Obtain and save `token.json` (one-time consent).
+- [x] **Refresh Behavior**: Confirm refresh token works (re-run script a second time with no prompt).
 - [x] **Define Scopes List**: Write the combined scopes list needed for your v0.1 workflows (so you only consent once).
 - [x] **Scope Strategy**: Decide whether to request all scopes up front vs per-service tokens.
 - [ ] **Service Account (Optional)**: Decide if a service account is needed (share resources if used).
 - [x] **Ignore Secrets**: Add credential files to `.gitignore` and avoid hard-coding.
-- [ ] **Docs Note**: Write down which account is authorized + what scopes were granted (so future-you knows).
+- [x] **Docs Note**: Write down which account is authorized + what scopes were granted (so future-you knows).
 
 **Step 3 — Organize Library Structure**
-- [ ] **Create Package Layout**: Add `mygooglib/` with `__init__.py` and modules: `drive.py`, `sheets.py`, `docs.py`, `calendar.py`, `tasks.py`, `gmail.py`.
-- [ ] **Auth Module**: Add `auth.py` to load `token.json` / run InstalledAppFlow.
-- [ ] **Common Utilities**: Add a `utils/` package (or module) for shared helpers (IDs/paths, pagination, datetime, A1 conversion, email encoding).
-- [ ] **Exceptions**: Add `exceptions.py` with a small, readable exception hierarchy (base `GoogleApiError`, etc.).
+- [x] **Create Package Layout**: Add `mygooglib/` with `__init__.py` and modules: `drive.py`, `sheets.py`, `docs.py`, `calendar.py`, `tasks.py`, `gmail.py`.
+- [x] **Auth Module**: Add `auth.py` to load `token.json` / run InstalledAppFlow.
+- [x] **Common Utilities**: Add a `utils/` package (or module) for shared helpers (IDs/paths, pagination, datetime, A1 conversion, email encoding).
+- [x] **Exceptions**: Add `exceptions.py` with a small, readable exception hierarchy (base `GoogleApiError`, etc.).
 - [ ] **Types (Optional)**: Add basic dataclasses/TypedDicts for returned objects you care about (event summary, message header fields).
-- [ ] **Decide Install**: Optionally prepare for local install (`pip install -e .`).
+- [x] **Decide Install**: Optionally prepare for local install (`pip install -e .`).
 
 **Step 4 — Initialize And Reuse API Clients**
-- [ ] **Build Services Once**: Use `build()` for each API and reuse service objects.
+- [x] **Build Services Once**: Use `build()` for each API and reuse service objects.
 - [ ] **Client Cache**: Decide if you want a simple singleton cache keyed by (service, version, user) to avoid rebuilding.
-- [ ] **Combine Scopes**: Define a single scopes list covering all planned services.
-- [ ] **Per-Service Build**: Confirm versions (Drive v3, Sheets v4, Docs v1, Calendar v3, Tasks v1, Gmail v1).
-- [ ] **Factory**: Add `create_all_clients(creds)` or similar to instantiate wrappers.
-- [ ] **Escape Hatch**: Expose raw `service` objects (read-only) for advanced calls not yet wrapped.
+- [x] **Combine Scopes**: Define a single scopes list covering all planned services.
+- [x] **Per-Service Build**: Confirm versions (Drive v3, Sheets v4, Docs v1, Calendar v3, Tasks v1, Gmail v1).
+- [x] **Factory**: Add `create_all_clients(creds)` or similar to instantiate wrappers.
+- [x] **Escape Hatch**: Expose raw `service` objects (read-only) for advanced calls not yet wrapped.
 
 **Step 5 — Drive Wrapper**
-- [ ] **Core Methods**: Implement `upload_file`, `download_file`, `list_files`, `create_folder`, `delete_file`, `share_file`.
-- [ ] **Pagination**: Ensure `list_files` iterates `pageToken` until exhausted.
-- [ ] **Query Helpers**: Add `list_files(query=None, parent_id=None)` and `find_file(name, parent_id=None)`.
-- [ ] **Path-ish Helpers (Optional)**: Provide helpers for “folder by name under parent” since Drive uses IDs.
+- [x] **Core Methods**: Implement `upload_file`, `download_file`, `list_files`, `create_folder`, `find_by_name`, `sync_folder`.
+- [x] **Pagination**: Ensure `list_files` iterates `pageToken` until exhausted.
+- [x] **Query Helpers**: Add `list_files(query=None, parent_id=None)` and `find_by_name(name, parent_id=None)`.
+- [ ] **Path-ish Helpers (Optional)**: Provide helpers for "folder by name under parent" since Drive uses IDs.
 - [ ] **MIME/Convert Options**: Add optional `convert=True` where useful.
-- [ ] **Upload Defaults**: Decide behavior for `name=None` (use filename) and `parent_id=None` (root).
-- [ ] **Return Shapes**: Decide whether to return just IDs, or minimal metadata dicts.
+- [x] **Upload Defaults**: Decide behavior for `name=None` (use filename) and `parent_id=None` (root).
+- [x] **Return Shapes**: Decide whether to return just IDs, or minimal metadata dicts.
 - [ ] **Pass-Through**: Allow advanced `**kwargs` to underlying API.
+- [ ] **delete_file / share_file (Later)**: Not implemented in v0.1 (not in Must scope).
 
 **Step 6 — Sheets Wrapper**
 - [ ] **Spreadsheet API**: Implement `open_by_title`, `open_by_id`.

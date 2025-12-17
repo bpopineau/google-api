@@ -7,7 +7,20 @@ from pathlib import Path
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from scripts.oauth_setup import V0_1_SCOPES, _default_secrets_dir
+# Duplicated here to avoid cross-module import issues when running scripts directly.
+V0_1_SCOPES: list[str] = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/gmail.send",
+    "https://www.googleapis.com/auth/gmail.modify",
+]
+
+
+def _default_secrets_dir() -> Path:
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    if local_app_data:
+        return Path(local_app_data) / "mygooglib"
+    return Path.home() / ".config" / "mygooglib"
 
 
 def _token_path() -> Path:
