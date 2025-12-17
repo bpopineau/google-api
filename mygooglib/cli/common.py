@@ -8,6 +8,7 @@ from typing import Any
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 from rich.text import Text
 
 
@@ -45,7 +46,14 @@ def format_output(value: Any, *, json_mode: bool) -> str:
 
 
 def print_error(console: Console, message: str) -> None:
-    console.print(Text(message, style="bold red"))
+    console.print(
+        Panel(
+            Text(message, style="bold red"),
+            title="Error",
+            border_style="red",
+            expand=False,
+        )
+    )
 
 
 def print_success(console: Console, message: str) -> None:

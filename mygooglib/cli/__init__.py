@@ -20,15 +20,18 @@ from mygooglib import get_clients
 from mygooglib.exceptions import GoogleApiError
 
 from . import auth as auth_cmd
+from . import calendar as calendar_cmd
+from . import docs as docs_cmd
 from . import drive as drive_cmd
 from . import gmail as gmail_cmd
 from . import sheets as sheets_cmd
+from . import tasks as tasks_cmd
 from .common import CliState, configure_environment, format_output, print_error
 
 app = typer.Typer(
     name="mygoog",
-    help="Personal Google automation CLI (Drive/Sheets/Gmail).",
-    add_completion=False,
+    help="Personal Google automation CLI (Drive/Sheets/Gmail/Calendar/Tasks/Docs).",
+    add_completion=True,
     no_args_is_help=True,
 )
 
@@ -36,6 +39,9 @@ app.add_typer(auth_cmd.app, name="auth")
 app.add_typer(drive_cmd.app, name="drive")
 app.add_typer(sheets_cmd.app, name="sheets")
 app.add_typer(gmail_cmd.app, name="gmail")
+app.add_typer(calendar_cmd.app, name="calendar")
+app.add_typer(tasks_cmd.app, name="tasks")
+app.add_typer(docs_cmd.app, name="docs")
 
 
 @app.callback()
@@ -100,6 +106,9 @@ def clients_cmd(ctx: typer.Context) -> None:
         "drive": bool(getattr(clients, "drive", None)),
         "sheets": bool(getattr(clients, "sheets", None)),
         "gmail": bool(getattr(clients, "gmail", None)),
+        "calendar": bool(getattr(clients, "calendar", None)),
+        "tasks": bool(getattr(clients, "tasks", None)),
+        "docs": bool(getattr(clients, "docs", None)),
     }
     state.console.print(format_output(output, json_mode=state.json))
 

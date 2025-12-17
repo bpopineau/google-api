@@ -226,3 +226,142 @@ def mark_read(
         raise
 
     return response if raw else None
+
+
+def get_message(
+    gmail: Any,
+    message_id: str,
+    *,
+    user_id: str = "me",
+    raw: bool = False,
+) -> dict:
+    """Get full message details including body.
+
+    Args:
+        gmail: Gmail API Resource
+        message_id: Message ID
+        user_id: Gmail userId (default "me")
+        raw: If True, return the raw API response
+
+    Returns:
+        Dict with id, threadId, subject, from, to, date, snippet, and body.
+    """
+    try:
+        request = (
+            gmail.users().messages().get(userId=user_id, id=message_id, format="full")
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+    except HttpError as e:
+        raise_for_http_error(e, context="Gmail get_message")
+        raise
+
+    if raw:
+        return response
+
+    payload = response.get("payload") or {}
+    headers = _headers_to_dict(payload.get("headers"))
+
+    # Extract body
+    body = ""
+    parts = [payload]
+    while parts:
+        part = parts.pop(0)
+        if part.get("parts"):
+            parts.extend(part.get("parts"))
+        if part.get("mimeType") == "text/plain":
+            data = part.get("body", {}).get("data")
+            if data:
+                body += base64.urlsafe_b64decode(data).decode("utf-8")
+
+    return {
+        "id": response.get("id"),
+        "threadId": response.get("threadId"),
+        "subject": headers.get("subject"),
+        "from": headers.get("from"),
+        "to": headers.get("to"),
+        "date": headers.get("date"),
+        "snippet": response.get("snippet"),
+        "body": body,
+    }
+
+
+class GmailClient:
+    """Simplified Gmail API wrapper focusing on common operations."""
+
+    def __init__(self, service: Any):
+        """Initialize with an authorized Gmail API service object."""
+        self.service = service
+
+    def send_email(
+        self,
+        *,
+        to: str | Sequence[str],
+        subject: str,
+        body: str,
+        attachments: Sequence[str | Path] | None = None,
+        cc: str | Sequence[str] | None = None,
+        bcc: str | Sequence[str] | None = None,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> str | dict:
+        """Send a plain-text email with optional file attachments."""
+        return send_email(
+            self.service,
+            to=to,
+            subject=subject,
+            body=body,
+            attachments=attachments,
+            cc=cc,
+            bcc=bcc,
+            user_id=user_id,
+            raw=raw,
+        )
+
+    def search_messages(
+        self,
+        query: str,
+        *,
+        user_id: str = "me",
+        max_results: int = 50,
+        include_spam_trash: bool = False,
+        raw: bool = False,
+    ) -> list[dict] | dict:
+        """Search Gmail and return lightweight message dicts."""
+        return search_messages(
+            self.service,
+            query,
+            user_id=user_id,
+            max_results=max_results,
+            include_spam_trash=include_spam_trash,
+            raw=raw,
+        )
+
+    def mark_read(
+        self,
+        message_id: str,
+        *,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> dict | None:
+        """Mark a message as read by removing the UNREAD label."""
+        return mark_read(
+            self.service,
+            message_id,
+            user_id=user_id,
+            raw=raw,
+        )
+
+    def get_message(
+        self,
+        message_id: str,
+        *,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> dict:
+        """Get full message details including body."""
+        return get_message(
+            self.service,
+            message_id,
+            user_id=user_id,
+            raw=raw,
+        )

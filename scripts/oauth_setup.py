@@ -5,12 +5,14 @@ from pathlib import Path
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-# v0.1 Must workflows: Drive sync, Sheets read/write, Gmail send/search/mark_read
+# v0.1 Must workflows: Drive sync, Sheets read/write, Gmail send/search/mark_read, Calendar, Tasks
 V0_1_SCOPES: list[str] = [
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/gmail.send",
     "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/tasks",
 ]
 
 

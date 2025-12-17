@@ -34,19 +34,10 @@ Examples:
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from mygooglib import get_clients
-from mygooglib.drive import list_files, sync_folder
-from mygooglib.gmail import mark_read, search_messages, send_email
-from mygooglib.sheets import (
-    append_row,
-    get_range,
-    open_by_title,
-    resolve_spreadsheet,
-    update_range,
-)
 
 # Defaults for local testing (safe to keep in-repo for personal use).
 DEFAULT_TEST_SPREADSHEET_IDENTIFIER = "17KBIrDF3CZ0s5U8QQf0aUHmkttVbkHWt44-ApGFTvSw"
@@ -329,7 +320,7 @@ def main(argv: list[str] | None = None) -> int:
         now = datetime.now(timezone.utc).isoformat()
 
         print("== Drive: list (root, first 5) ==")
-        files = list_files(clients.drive, page_size=5)
+        files = clients.drive.list_files(page_size=5)
         _print_jsonable(files)
 
         if args.drive_sync_local_path and args.drive_sync_folder_id:
@@ -337,8 +328,7 @@ def main(argv: list[str] | None = None) -> int:
                 print("== Drive: sync_folder skipped (provide --write to enable) ==")
             else:
                 print("== Drive: sync_folder ==")
-                summary = sync_folder(
-                    clients.drive,
+                summary = clients.drive.sync_folder(
                     args.drive_sync_local_path,
                     args.drive_sync_folder_id,
                 )
@@ -349,41 +339,34 @@ def main(argv: list[str] | None = None) -> int:
             )
 
         print("== Sheets: get_range ==")
-        values = get_range(
-            clients.sheets,
+        values = clients.sheets.get_range(
             args.sheets_identifier,
             args.sheets_read_range,
-            drive=clients.drive,
         )
         _print_jsonable(values)
 
         if args.write:
             print("== Sheets: append_row ==")
-            append_result = append_row(
-                clients.sheets,
+            append_result = clients.sheets.append_row(
                 args.sheets_identifier,
                 args.sheets_append_sheet,
                 ["mygooglib-smoke", now],
-                drive=clients.drive,
             )
             _print_jsonable(append_result)
 
             print("== Sheets: update_range ==")
-            update_result = update_range(
-                clients.sheets,
+            update_result = clients.sheets.update_range(
                 args.sheets_identifier,
                 args.sheets_update_range,
                 [[now]],
                 value_input_option="RAW",
-                drive=clients.drive,
             )
             _print_jsonable(update_result)
         else:
             print("== Sheets: write ops skipped (use --write) ==")
 
         print("== Gmail: search_messages ==")
-        results = search_messages(
-            clients.gmail,
+        results = clients.gmail.search_messages(
             args.gmail_query,
             max_results=args.gmail_max,
         )
@@ -392,15 +375,14 @@ def main(argv: list[str] | None = None) -> int:
             msg_id = results[0].get("id")
             if msg_id:
                 if args.write:
-                    mark_read(clients.gmail, msg_id)
+                    clients.gmail.mark_read(msg_id)
                     print(f"marked read: {msg_id}")
                 else:
                     print("mark_read skipped (use --write)")
 
         if args.write:
             print("== Gmail: send_email ==")
-            message_id = send_email(
-                clients.gmail,
+            message_id = clients.gmail.send_email(
                 to=args.email_to,
                 subject=f"mygooglib smoke all {now}",
                 body=f"mygooglib smoke all run at {now}",
@@ -410,11 +392,45 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print("== Gmail: send_email skipped (use --write) ==")
 
+        print("== Calendar: list_events (primary, next 7 days) ==")
+        now_dt = datetime.now(timezone.utc)
+        next_week = now_dt + timedelta(days=7)
+        events = clients.calendar.list_events(time_min=now_dt, time_max=next_week)
+        _print_jsonable(events)
+
+        if args.write:
+            print("== Calendar: add_event ==")
+            event_id = clients.calendar.add_event(
+                summary=f"mygooglib smoke test {now}",
+                start=now_dt + timedelta(hours=1),
+                duration_minutes=30,
+            )
+            print(f"added event id: {event_id}")
+        else:
+            print("== Calendar: add_event skipped (use --write) ==")
+
+        print("== Tasks: list_tasklists ==")
+        tasklists = clients.tasks.list_tasklists()
+        _print_jsonable(tasklists)
+
+        print("== Tasks: list_tasks (@default) ==")
+        tasks = clients.tasks.list_tasks()
+        _print_jsonable(tasks)
+
+        if args.write:
+            print("== Tasks: add_task ==")
+            task_id = clients.tasks.add_task(
+                title=f"mygooglib smoke task {now}",
+                due=now_dt + timedelta(days=1),
+            )
+            print(f"added task id: {task_id}")
+        else:
+            print("== Tasks: add_task skipped (use --write) ==")
+
         return 0
 
     if args.cmd == "drive-sync":
-        summary = sync_folder(
-            clients.drive,
+        summary = clients.drive.sync_folder(
             args.local_path,
             args.drive_folder_id,
         )
@@ -424,8 +440,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "gmail-send":
         cc = [s.strip() for s in (args.cc or "").split(",") if s.strip()] or None
         bcc = [s.strip() for s in (args.bcc or "").split(",") if s.strip()] or None
-        message_id = send_email(
-            clients.gmail,
+        message_id = clients.gmail.send_email(
             to=args.to,
             subject=args.subject,
             body=args.body,
@@ -438,21 +453,19 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "gmail-search":
-        results = search_messages(clients.gmail, args.query, max_results=args.max)
+        results = clients.gmail.search_messages(args.query, max_results=args.max)
         _print_jsonable(results)
         if args.mark_read and results:
             msg_id = results[0].get("id")
             if msg_id:
-                mark_read(clients.gmail, msg_id)
+                clients.gmail.mark_read(msg_id)
                 print(f"marked read: {msg_id}")
         return 0
 
     if args.cmd == "sheets-get":
-        values = get_range(
-            clients.sheets,
+        values = clients.sheets.get_range(
             args.identifier,
             args.range,
-            drive=clients.drive,
             parent_id=args.parent_id,
             allow_multiple=args.allow_multiple,
         )
@@ -460,12 +473,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "sheets-append":
-        result = append_row(
-            clients.sheets,
+        result = clients.sheets.append_row(
             args.identifier,
             args.sheet,
             args.values,
-            drive=clients.drive,
             parent_id=args.parent_id,
             allow_multiple=args.allow_multiple,
         )
@@ -474,13 +485,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "sheets-update":
         values = [row.split(",") for row in args.row]
-        result = update_range(
-            clients.sheets,
+        result = clients.sheets.update_range(
             args.identifier,
             args.range,
             values,
             value_input_option="USER_ENTERED" if args.user_entered else "RAW",
-            drive=clients.drive,
             parent_id=args.parent_id,
             allow_multiple=args.allow_multiple,
         )
@@ -488,8 +497,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "sheets-open-by-title":
-        sheet_id = open_by_title(
-            clients.drive,
+        sheet_id = clients.sheets.open_by_title(
             args.title,
             parent_id=args.parent_id,
             allow_multiple=args.allow_multiple,
@@ -499,8 +507,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.cmd == "sheets-resolve":
-        sheet_id = resolve_spreadsheet(
-            clients.drive,
+        sheet_id = clients.sheets.resolve_spreadsheet(
             args.identifier,
             parent_id=args.parent_id,
             allow_multiple=args.allow_multiple,

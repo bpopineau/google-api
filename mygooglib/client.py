@@ -5,9 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from googleapiclient.discovery import Resource, build
+from googleapiclient.discovery import build
 
 from mygooglib.auth import get_creds
+from mygooglib.calendar import CalendarClient
+from mygooglib.docs import DocsClient
+from mygooglib.drive import DriveClient
+from mygooglib.gmail import GmailClient
+from mygooglib.sheets import SheetsClient
+from mygooglib.tasks import TasksClient
 from mygooglib.utils.logging import configure_from_env
 
 if TYPE_CHECKING:
@@ -18,12 +24,12 @@ if TYPE_CHECKING:
 class Clients:
     """Container holding all Google API service wrappers."""
 
-    drive: Resource
-    sheets: Resource
-    # docs: Resource  # TODO: add when Docs wrapper is implemented
-    # calendar: Resource
-    # tasks: Resource
-    gmail: Resource
+    drive: DriveClient
+    sheets: SheetsClient
+    docs: DocsClient
+    calendar: CalendarClient
+    tasks: TasksClient
+    gmail: GmailClient
 
 
 _DEFAULT_CLIENTS: Clients | None = None
@@ -55,10 +61,20 @@ def get_clients(
     if creds is None:
         creds = get_creds()
 
+    drive_service = build("drive", "v3", credentials=creds)
+    sheets_service = build("sheets", "v4", credentials=creds)
+    docs_service = build("docs", "v1", credentials=creds)
+    gmail_service = build("gmail", "v1", credentials=creds)
+    calendar_service = build("calendar", "v3", credentials=creds)
+    tasks_service = build("tasks", "v1", credentials=creds)
+
     clients = Clients(
-        drive=build("drive", "v3", credentials=creds),
-        sheets=build("sheets", "v4", credentials=creds),
-        gmail=build("gmail", "v1", credentials=creds),
+        drive=DriveClient(drive_service),
+        sheets=SheetsClient(sheets_service, drive=drive_service),
+        docs=DocsClient(docs_service, drive=drive_service),
+        calendar=CalendarClient(calendar_service),
+        tasks=TasksClient(tasks_service),
+        gmail=GmailClient(gmail_service),
     )
 
     if use_cache and is_default_creds:

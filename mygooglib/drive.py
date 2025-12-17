@@ -273,6 +273,7 @@ def sync_folder(
     drive_folder_id: str,
     *,
     recursive: bool = True,
+    dry_run: bool = False,
 ) -> dict:
     """Sync a local folder to a Drive folder.
 
@@ -284,6 +285,7 @@ def sync_folder(
         local_path: Local folder to sync
         drive_folder_id: Target Drive folder ID
         recursive: If True (default), sync subfolders recursively.
+        dry_run: If True, don't actually perform any changes.
 
     Returns:
         Summary dict: {created: int, updated: int, skipped: int, errors: list[str]}
@@ -310,6 +312,11 @@ def sync_folder(
         for f in existing:
             if f.get("name") == name:
                 return f["id"]
+
+        if dry_run:
+            created += 1
+            return "DRY_RUN_FOLDER_ID"
+
         folder_id = create_folder(drive, name, parent_id=parent_id)
         created += 1
         return folder_id
@@ -360,16 +367,19 @@ def sync_folder(
                         )
 
                         if local_dt > remote_dt:
-                            _update_file(drive, remote["id"], entry)
+                            if not dry_run:
+                                _update_file(drive, remote["id"], entry)
                             updated += 1
                         else:
                             skipped += 1
                     except (ValueError, KeyError):
                         # Can't parse time, update to be safe.
-                        _update_file(drive, remote["id"], entry)
+                        if not dry_run:
+                            _update_file(drive, remote["id"], entry)
                         updated += 1
                 else:
-                    upload_file(drive, entry, parent_id=remote_parent_id)
+                    if not dry_run:
+                        upload_file(drive, entry, parent_id=remote_parent_id)
                     created += 1
 
             except Exception as e:
@@ -382,4 +392,115 @@ def sync_folder(
         "updated": updated,
         "skipped": skipped,
         "errors": errors,
+        "dry_run": dry_run,
     }
+
+
+class DriveClient:
+    """Simplified Google Drive API wrapper focusing on common operations."""
+
+    def __init__(self, service: Any):
+        """Initialize with an authorized Drive API service object."""
+        self.service = service
+
+    def list_files(
+        self,
+        *,
+        query: str | None = None,
+        parent_id: str | None = None,
+        mime_type: str | None = None,
+        trashed: bool = False,
+        page_size: int = 100,
+        fields: str = DEFAULT_FIELDS,
+    ) -> list[dict]:
+        """List files matching criteria with full pagination."""
+        return list_files(
+            self.service,
+            query=query,
+            parent_id=parent_id,
+            mime_type=mime_type,
+            trashed=trashed,
+            page_size=page_size,
+            fields=fields,
+        )
+
+    def find_by_name(
+        self,
+        name: str,
+        *,
+        parent_id: str | None = None,
+        mime_type: str | None = None,
+    ) -> dict | None:
+        """Find first file with exact name."""
+        return find_by_name(
+            self.service,
+            name,
+            parent_id=parent_id,
+            mime_type=mime_type,
+        )
+
+    def create_folder(
+        self,
+        name: str,
+        *,
+        parent_id: str | None = None,
+        raw: bool = False,
+    ) -> str | dict:
+        """Create a folder in Drive."""
+        return create_folder(
+            self.service,
+            name,
+            parent_id=parent_id,
+            raw=raw,
+        )
+
+    def upload_file(
+        self,
+        local_path: str | os.PathLike,
+        *,
+        parent_id: str | None = None,
+        name: str | None = None,
+        mime_type: str | None = None,
+        raw: bool = False,
+    ) -> str | dict:
+        """Upload a local file to Drive."""
+        return upload_file(
+            self.service,
+            local_path,
+            parent_id=parent_id,
+            name=name,
+            mime_type=mime_type,
+            raw=raw,
+        )
+
+    def download_file(
+        self,
+        file_id: str,
+        dest_path: str | os.PathLike,
+        *,
+        export_mime_type: str | None = None,
+    ) -> Path:
+        """Download a file from Drive."""
+        return download_file(
+            self.service,
+            file_id,
+            dest_path,
+            export_mime_type=export_mime_type,
+        )
+
+    def sync_folder(
+        self,
+        local_path: str | os.PathLike,
+        drive_folder_id: str,
+        *,
+        recursive: bool = True,
+        dry_run: bool = False,
+    ) -> dict:
+        """Sync a local folder to a Drive folder."""
+        return sync_folder(
+            self.service,
+            local_path,
+            drive_folder_id,
+            recursive=recursive,
+            dry_run=dry_run,
+        )

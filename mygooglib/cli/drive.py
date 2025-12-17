@@ -6,7 +6,14 @@ import typer
 from rich.table import Table
 
 from mygooglib import get_clients
-from mygooglib.drive import download_file, list_files, sync_folder, upload_file
+from mygooglib.drive import (
+    create_folder,
+    download_file,
+    find_by_name,
+    list_files,
+    sync_folder,
+    upload_file,
+)
 
 from .common import CliState, format_output, print_kv, print_success
 
@@ -33,7 +40,7 @@ def list_cmd(
     clients = get_clients()
 
     results = list_files(
-        clients.drive,
+        clients.drive.service,
         query=query,
         parent_id=parent_id,
         mime_type=mime_type,
@@ -60,6 +67,56 @@ def list_cmd(
         )
 
     state.console.print(table)
+
+
+@app.command("find")
+def find_cmd(
+    ctx: typer.Context,
+    name: str = typer.Argument(..., help="Exact filename to match."),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Limit search to this folder."
+    ),
+    mime_type: str | None = typer.Option(
+        None, "--mime-type", help="Filter by MIME type."
+    ),
+) -> None:
+    """Find a file by exact name."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    result = find_by_name(
+        clients.drive.service, name, parent_id=parent_id, mime_type=mime_type
+    )
+
+    if state.json:
+        state.console.print(format_output(result, json_mode=True))
+        return
+
+    if not result:
+        state.console.print(f"File not found: {name}")
+        raise typer.Exit(1)
+
+    print_success(state.console, "Found")
+    for k in ("name", "id", "mimeType", "modifiedTime"):
+        print_kv(state.console, k, result.get(k))
+
+
+@app.command("create-folder")
+def create_folder_cmd(
+    ctx: typer.Context,
+    name: str = typer.Argument(..., help="Folder name."),
+    parent_id: str | None = typer.Option(None, "--parent-id", help="Parent folder ID."),
+) -> None:
+    """Create a new folder."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    folder_id = create_folder(clients.drive.service, name, parent_id=parent_id)
+
+    if state.json:
+        state.console.print(format_output({"id": folder_id}, json_mode=True))
+        return
+
+    print_success(state.console, "Folder created")
+    print_kv(state.console, "id", folder_id)
 
 
 @app.command("upload")
@@ -120,19 +177,25 @@ def sync_cmd(
     recursive: bool = typer.Option(
         True, "--recursive/--no-recursive", help="Sync subfolders recursively."
     ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="Show what would be done without making changes."
+    ),
 ) -> None:
     """Sync a local folder to a Drive folder (safe: no deletes)."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
     summary = sync_folder(
-        clients.drive, local_path, drive_folder_id, recursive=recursive
+        clients.drive, local_path, drive_folder_id, recursive=recursive, dry_run=dry_run
     )
 
     if state.json:
         state.console.print(format_output(summary, json_mode=True))
         return
 
-    print_success(state.console, "Sync complete")
+    if dry_run:
+        state.console.print("[bold yellow]DRY RUN - No changes made[/bold yellow]")
+
+    print_success(state.console, "Sync complete" if not dry_run else "Dry run complete")
     for k in ("created", "updated", "skipped"):
         print_kv(state.console, k, summary.get(k))
     errors = summary.get("errors") or []

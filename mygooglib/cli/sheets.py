@@ -4,7 +4,7 @@ import typer
 from rich.table import Table
 
 from mygooglib import get_clients
-from mygooglib.sheets import append_row, get_range, update_range
+from mygooglib.sheets import append_row, get_range, get_sheets, update_range
 
 from .common import CliState, format_output, print_kv, print_success
 
@@ -140,3 +140,45 @@ def update_cmd(
     if result:
         for k, v in result.items():
             print_kv(state.console, k, v)
+
+
+@app.command("list-tabs")
+def list_tabs_cmd(
+    ctx: typer.Context,
+    identifier: str = typer.Argument(..., help="Spreadsheet ID, title, or URL."),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Optional Drive folder ID to scope title searches."
+    ),
+    allow_multiple: bool = typer.Option(
+        False, "--allow-multiple", help="Allow multiple title matches (uses first)."
+    ),
+) -> None:
+    """List all sheets (tabs) in a spreadsheet."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    results = get_sheets(
+        clients.sheets,
+        identifier,
+        drive=clients.drive,
+        parent_id=parent_id,
+        allow_multiple=allow_multiple,
+    )
+
+    if state.json:
+        state.console.print(format_output(results, json_mode=True))
+        return
+
+    table = Table(title=f"Sheets in {identifier}")
+    table.add_column("index", justify="right")
+    table.add_column("title")
+    table.add_column("id")
+    table.add_column("type")
+
+    for s in results:
+        table.add_row(
+            str(s.get("index")),
+            str(s.get("title")),
+            str(s.get("id")),
+            str(s.get("type")),
+        )
+    state.console.print(table)

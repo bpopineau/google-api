@@ -11,12 +11,14 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 from mygooglib.utils.logging import get_logger
 
-# v0.1 scopes: Drive, Sheets, Gmail send/modify
+# v0.1 scopes: Drive, Sheets, Gmail send/modify, Calendar, Tasks
 SCOPES: list[str] = [
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/gmail.send",
     "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/calendar",
+    "https://www.googleapis.com/auth/tasks",
 ]
 
 

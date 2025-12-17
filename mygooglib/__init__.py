@@ -3,9 +3,10 @@
 Quick start:
     from mygooglib import get_clients
     clients = get_clients()
-    # Drive helpers are free functions that take the raw service Resource:
-    from mygooglib.drive import upload_file
-    file_id = upload_file(clients.drive, "./report.pdf")
+    # Use the ergonomic client wrappers:
+    file_id = clients.drive.upload_file("./report.pdf")
+    values = clients.sheets.get_range("SPREADSHEET_ID", "Sheet1!A1:C10")
+    clients.gmail.send_email(to="me@example.com", subject="Hello", body="World")
 """
 
 from mygooglib.auth import get_creds

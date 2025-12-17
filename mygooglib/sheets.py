@@ -378,3 +378,208 @@ def append_row(
         "updatedColumns": updates.get("updatedColumns"),
         "updatedCells": updates.get("updatedCells"),
     }
+
+
+def get_sheets(
+    sheets: Any,
+    spreadsheet_id: str,
+    *,
+    drive: Any | None = None,
+    parent_id: str | None = None,
+    allow_multiple: bool = False,
+    raw: bool = False,
+) -> list[dict] | dict:
+    """Get metadata for all sheets (tabs) in a spreadsheet.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        drive: Drive API Resource (for title resolution)
+        parent_id: Optional parent ID for title resolution
+        allow_multiple: Allow multiple title matches
+        raw: If True, return full API response
+
+    Returns:
+        List of sheet metadata dicts (title, id, index, type).
+    """
+    spreadsheet_real_id = (
+        resolve_spreadsheet(
+            drive,
+            spreadsheet_id,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+        if drive is not None
+        else spreadsheet_id
+    )
+
+    try:
+        request = sheets.spreadsheets().get(
+            spreadsheetId=spreadsheet_real_id, fields="sheets(properties)"
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+    except HttpError as e:
+        raise_for_http_error(e, context="Sheets get_sheets")
+        raise
+
+    if raw:
+        return response
+
+    results = []
+    for s in response.get("sheets", []):
+        props = s.get("properties", {})
+        results.append(
+            {
+                "title": props.get("title"),
+                "id": props.get("sheetId"),
+                "index": props.get("index"),
+                "type": props.get("sheetType"),
+            }
+        )
+    return results
+
+
+class SheetsClient:
+    """Simplified Google Sheets API wrapper focusing on common operations."""
+
+    def __init__(self, service: Any, drive: Any | None = None):
+        """Initialize with an authorized Sheets API service object.
+
+        Args:
+            service: Sheets API Resource from get_clients().sheets
+            drive: Optional Drive API Resource for title-based resolution
+        """
+        self.service = service
+        self.drive = drive
+
+    def resolve_spreadsheet(
+        self,
+        identifier: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+    ) -> str:
+        """Resolve a spreadsheet identifier (ID, title, or URL) to an ID."""
+        return resolve_spreadsheet(
+            self.drive,
+            identifier,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+
+    def open_by_title(
+        self,
+        title: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+    ) -> str:
+        """Find a Google Sheet by title using the Drive API."""
+        return open_by_title(
+            self.drive,
+            title,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+
+    def get_range(
+        self,
+        spreadsheet_id: str,
+        a1_range: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        major_dimension: str | None = None,
+        value_render_option: str | None = None,
+        date_time_render_option: str | None = None,
+        raw: bool = False,
+    ) -> list[list[Any]] | dict:
+        """Read a range of values from a spreadsheet."""
+        return get_range(
+            self.service,
+            spreadsheet_id,
+            a1_range,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            major_dimension=major_dimension,
+            value_render_option=value_render_option,
+            date_time_render_option=date_time_render_option,
+            raw=raw,
+        )
+
+    def update_range(
+        self,
+        spreadsheet_id: str,
+        a1_range: str,
+        values: Sequence[Sequence[Any]],
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        value_input_option: str = "RAW",
+        include_values_in_response: bool = False,
+        response_value_render_option: str | None = None,
+        response_date_time_render_option: str | None = None,
+        raw: bool = False,
+    ) -> dict | None:
+        """Update a range of values in a spreadsheet."""
+        return update_range(
+            self.service,
+            spreadsheet_id,
+            a1_range,
+            values,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            value_input_option=value_input_option,
+            include_values_in_response=include_values_in_response,
+            response_value_render_option=response_value_render_option,
+            response_date_time_render_option=response_date_time_render_option,
+            raw=raw,
+        )
+
+    def append_row(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        values: Sequence[Any],
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        value_input_option: str = "RAW",
+        insert_data_option: str | None = None,
+        include_values_in_response: bool = False,
+        raw: bool = False,
+    ) -> dict | None:
+        """Append a single row to the end of a sheet."""
+        return append_row(
+            self.service,
+            spreadsheet_id,
+            sheet_name,
+            values,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            value_input_option=value_input_option,
+            insert_data_option=insert_data_option,
+            include_values_in_response=include_values_in_response,
+            raw=raw,
+        )
+
+    def get_sheets(
+        self,
+        spreadsheet_id: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        raw: bool = False,
+    ) -> list[dict] | dict:
+        """Get metadata for all sheets (tabs) in a spreadsheet."""
+        return get_sheets(
+            self.service,
+            spreadsheet_id,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            raw=raw,
+        )
