@@ -1,6 +1,10 @@
 # Local auth note (template)
 
-Copy this file to `docs/LOCAL_AUTH_NOTE.md` (which should remain uncommitted), and fill it in after you run OAuth.
+Copy this file to `docs/LOCAL_AUTH_NOTE.md` (keep it local/private) and fill it in after you run OAuth.
+
+Tip: token/credentials paths are controlled by:
+- `MYGOOGLIB_CREDENTIALS_PATH`
+- `MYGOOGLIB_TOKEN_PATH`
 
 ## Authorized account
 - Google account email: 

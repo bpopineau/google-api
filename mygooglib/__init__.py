@@ -3,7 +3,9 @@
 Quick start:
     from mygooglib import get_clients
     clients = get_clients()
-    clients.drive.upload_file(...)
+    # Drive helpers are free functions that take the raw service Resource:
+    from mygooglib.drive import upload_file
+    file_id = upload_file(clients.drive, "./report.pdf")
 """
 
 from mygooglib.auth import get_creds

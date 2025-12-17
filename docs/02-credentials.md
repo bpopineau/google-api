@@ -59,15 +59,22 @@ Rename the downloaded file to: `credentials.json`
 
 ## 5) Store Secrets Locally (NOT in the repo)
 
-Pick a folder on your machine that is NOT inside the repository, for example:
+Pick a folder on your machine that is NOT inside the repository.
 
-- Windows: `%APPDATA%\google-integrations-suite\`
-- macOS: `~/.config/google-integrations-suite/`
-- Linux: `~/.config/google-integrations-suite/`
+`mygooglib` defaults to:
+
+- Windows: `%LOCALAPPDATA%\mygooglib\`
+- macOS: `~/.config/mygooglib/`
+- Linux: `~/.config/mygooglib/`
 
 Put `credentials.json` there.
 
-Later, when we implement auth, the library will create `token.json` in the same folder after the first login.
+On first login, the library will create `token.json` in the same folder.
+
+You can override both paths via environment variables:
+
+- `MYGOOGLIB_CREDENTIALS_PATH`
+- `MYGOOGLIB_TOKEN_PATH`
 
 ---
 
@@ -106,5 +113,5 @@ You are done with Step 02 when:
 - [ ] All target APIs are enabled in your Google Cloud project
 - [ ] OAuth consent screen is configured and you are added as a test user
 - [ ] Desktop OAuth client is created
-- [ ] `credentials.json` is downloaded and stored outside the repo
+- [ ] `credentials.json` is downloaded and stored outside the repo (default: `%LOCALAPPDATA%\mygooglib\credentials.json`)
 - [ ] You have a plan to ignore `credentials.json` + `token.json` in git
