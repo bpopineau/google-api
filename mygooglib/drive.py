@@ -11,6 +11,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.retry import execute_with_retry_http_error
 
 # Google Workspace MIME types
 FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
@@ -64,22 +65,19 @@ def list_files(
 
     try:
         while True:
-            response = (
-                drive.files()
-                .list(
-                    q=q,
-                    pageSize=page_size,
-                    pageToken=page_token,
-                    fields=f"nextPageToken, files({fields})",
-                )
-                .execute()
+            request = drive.files().list(
+                q=q,
+                pageSize=page_size,
+                pageToken=page_token,
+                fields=f"nextPageToken, files({fields})",
             )
+            response = execute_with_retry_http_error(request, is_write=False)
             all_files.extend(response.get("files", []))
             page_token = response.get("nextPageToken")
             if not page_token:
                 break
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Drive list_files")
 
     return all_files
 
@@ -118,7 +116,8 @@ def create_folder(
     name: str,
     *,
     parent_id: str | None = None,
-) -> str:
+    raw: bool = False,
+) -> str | dict:
     """Create a folder in Drive.
 
     Args:
@@ -127,7 +126,7 @@ def create_folder(
         parent_id: Parent folder ID (None = root)
 
     Returns:
-        The new folder's ID.
+        The new folder's ID by default. If raw=True, returns the full API response.
     """
     metadata: dict = {
         "name": name,
@@ -137,10 +136,11 @@ def create_folder(
         metadata["parents"] = [parent_id]
 
     try:
-        folder = drive.files().create(body=metadata, fields="id").execute()
-        return folder["id"]
+        request = drive.files().create(body=metadata, fields="id")
+        folder = execute_with_retry_http_error(request, is_write=True)
+        return folder if raw else folder["id"]
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Drive create_folder")
         raise  # unreachable but satisfies type checker
 
 
@@ -151,7 +151,8 @@ def upload_file(
     parent_id: str | None = None,
     name: str | None = None,
     mime_type: str | None = None,
-) -> str:
+    raw: bool = False,
+) -> str | dict:
     """Upload a local file to Drive.
 
     Args:
@@ -162,7 +163,7 @@ def upload_file(
         mime_type: Override MIME type (None = auto-detect)
 
     Returns:
-        The uploaded file's ID.
+        The uploaded file's ID by default. If raw=True, returns the full API response.
     """
     path = Path(local_path)
     if not path.exists():
@@ -180,12 +181,11 @@ def upload_file(
     media = MediaFileUpload(str(path), mimetype=detected_mime, resumable=True)
 
     try:
-        result = (
-            drive.files().create(body=metadata, media_body=media, fields="id").execute()
-        )
-        return result["id"]
+        request = drive.files().create(body=metadata, media_body=media, fields="id")
+        result = execute_with_retry_http_error(request, is_write=True)
+        return result if raw else result["id"]
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Drive upload_file")
         raise  # unreachable but satisfies type checker
 
 
@@ -214,7 +214,8 @@ def download_file(
 
     try:
         # Get file metadata to check if it's a Google Workspace file
-        meta = drive.files().get(fileId=file_id, fields="mimeType, name").execute()
+        meta_request = drive.files().get(fileId=file_id, fields="mimeType, name")
+        meta = execute_with_retry_http_error(meta_request, is_write=False)
         file_mime = meta.get("mimeType", "")
 
         is_workspace_file = file_mime.startswith("application/vnd.google-apps.")
@@ -238,7 +239,7 @@ def download_file(
                 _, done = downloader.next_chunk()
 
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Drive download_file")
 
     return dest
 
@@ -258,14 +259,11 @@ def _update_file(
     media = MediaFileUpload(str(local_path), mimetype=detected_mime, resumable=True)
 
     try:
-        result = (
-            drive.files()
-            .update(fileId=file_id, media_body=media, fields="id")
-            .execute()
-        )
+        request = drive.files().update(fileId=file_id, media_body=media, fields="id")
+        result = execute_with_retry_http_error(request, is_write=True)
         return result["id"]
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Drive _update_file")
         raise  # unreachable but satisfies type checker
 
 

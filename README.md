@@ -44,6 +44,29 @@ python scripts/oauth_setup.py
 
 More detail: see [docs/02-credentials.md](docs/02-credentials.md).
 
+## Logging + retries
+
+### Logging (opt-in)
+
+By default, `mygooglib` does not configure logging. To enable basic console logs:
+
+- `MYGOOGLIB_DEBUG=1` (sets log level to DEBUG)
+- `MYGOOGLIB_LOG_LEVEL=INFO|DEBUG|WARNING` (explicit level; overrides `MYGOOGLIB_DEBUG`)
+
+### Retries (safe defaults)
+
+The Google API Python client does not automatically retry. `mygooglib` retries transient errors for **read** requests by default.
+
+Write retries are **disabled by default** to avoid duplicate side effects (e.g., sending an email twice or appending a row twice).
+
+Env vars:
+
+- `MYGOOGLIB_RETRY_ENABLED=0|1` (default 1)
+- `MYGOOGLIB_RETRY_ATTEMPTS_READ` (default 4)
+- `MYGOOGLIB_RETRY_ATTEMPTS_WRITE` (default 1)
+- `MYGOOGLIB_RETRY_INITIAL_BACKOFF_S` (default 0.5)
+- `MYGOOGLIB_RETRY_MAX_BACKOFF_S` (default 8.0)
+
 ## Quick start
 
 ```python

@@ -3,10 +3,19 @@
 from __future__ import annotations
 
 import datetime as dt
-from zoneinfo import ZoneInfo
+import os
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-# Default timezone for naive datetimes (can be overridden via env or config)
-DEFAULT_TZ = ZoneInfo("America/New_York")
+# Default timezone for naive datetimes.
+#
+# On some Windows installs, IANA timezone data isn't available unless the
+# optional `tzdata` package is installed. We fall back to UTC rather than
+# failing at import time.
+_DEFAULT_TZ_KEY = os.environ.get("MYGOOGLIB_DEFAULT_TZ", "America/New_York")
+try:
+    DEFAULT_TZ = ZoneInfo(_DEFAULT_TZ_KEY)
+except ZoneInfoNotFoundError:
+    DEFAULT_TZ = dt.timezone.utc
 
 
 def to_rfc3339(value: dt.datetime | dt.date) -> str:

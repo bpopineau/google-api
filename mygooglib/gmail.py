@@ -16,6 +16,7 @@ from typing import Any
 from googleapiclient.errors import HttpError
 
 from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.retry import execute_with_retry_http_error
 
 
 def _as_address_list(value: str | Sequence[str] | None) -> str | None:
@@ -85,9 +86,10 @@ def send_email(
     payload = {"raw": encoded}
 
     try:
-        response = gmail.users().messages().send(userId=user_id, body=payload).execute()
+        request = gmail.users().messages().send(userId=user_id, body=payload)
+        response = execute_with_retry_http_error(request, is_write=True)
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Gmail send_email")
         raise
 
     return response if raw else response.get("id")
@@ -135,7 +137,7 @@ def search_messages(
 
     try:
         while len(collected) < max_results:
-            response = (
+            list_request = (
                 gmail.users()
                 .messages()
                 .list(
@@ -145,8 +147,8 @@ def search_messages(
                     pageToken=page_token,
                     maxResults=min(500, max_results - len(collected)),
                 )
-                .execute()
             )
+            response = execute_with_retry_http_error(list_request, is_write=False)
             if first_page is None:
                 first_page = response
 
@@ -158,7 +160,7 @@ def search_messages(
                 msg_id = ref.get("id")
                 if not msg_id:
                     continue
-                meta = (
+                get_request = (
                     gmail.users()
                     .messages()
                     .get(
@@ -167,8 +169,8 @@ def search_messages(
                         format="metadata",
                         metadataHeaders=["From", "To", "Subject", "Date"],
                     )
-                    .execute()
                 )
+                meta = execute_with_retry_http_error(get_request, is_write=False)
                 payload = meta.get("payload") or {}
                 headers = _headers_to_dict(payload.get("headers"))
                 sender = headers.get("from")
@@ -192,7 +194,7 @@ def search_messages(
                 break
 
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Gmail search_messages")
         raise
 
     if raw:
@@ -209,7 +211,7 @@ def mark_read(
 ) -> dict | None:
     """Mark a message as read by removing the UNREAD label."""
     try:
-        response = (
+        request = (
             gmail.users()
             .messages()
             .modify(
@@ -217,10 +219,10 @@ def mark_read(
                 id=message_id,
                 body={"removeLabelIds": ["UNREAD"]},
             )
-            .execute()
         )
+        response = execute_with_retry_http_error(request, is_write=True)
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Gmail mark_read")
         raise
 
     return response if raw else None

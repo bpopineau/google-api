@@ -13,6 +13,7 @@ from typing import Any
 from googleapiclient.errors import HttpError
 
 from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.retry import execute_with_retry_http_error
 
 GOOGLE_SHEET_MIME = "application/vnd.google-apps.spreadsheet"
 
@@ -184,7 +185,7 @@ def get_range(
         )
 
     try:
-        response = (
+        request = (
             sheets.spreadsheets()
             .values()
             .get(
@@ -194,10 +195,10 @@ def get_range(
                 valueRenderOption=value_render_option,
                 dateTimeRenderOption=date_time_render_option,
             )
-            .execute()
         )
+        response = execute_with_retry_http_error(request, is_write=False)
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Sheets get_range")
         raise
 
     return response if raw else response.get("values", [])
@@ -260,7 +261,7 @@ def update_range(
 
     body = {"values": [list(row) for row in values]}
     try:
-        response = (
+        request = (
             sheets.spreadsheets()
             .values()
             .update(
@@ -272,10 +273,10 @@ def update_range(
                 responseDateTimeRenderOption=response_date_time_render_option,
                 body=body,
             )
-            .execute()
         )
+        response = execute_with_retry_http_error(request, is_write=True)
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Sheets update_range")
         raise
 
     if raw:
@@ -348,7 +349,7 @@ def append_row(
     body = {"values": [list(values)]}
 
     try:
-        response = (
+        request = (
             sheets.spreadsheets()
             .values()
             .append(
@@ -359,10 +360,10 @@ def append_row(
                 includeValuesInResponse=include_values_in_response,
                 body=body,
             )
-            .execute()
         )
+        response = execute_with_retry_http_error(request, is_write=True)
     except HttpError as e:
-        raise_for_http_error(e)
+        raise_for_http_error(e, context="Sheets append_row")
         raise
 
     if raw:

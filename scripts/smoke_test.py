@@ -38,7 +38,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from mygooglib import get_clients
-from mygooglib.drive import sync_folder
+from mygooglib.drive import list_files, sync_folder
 from mygooglib.gmail import mark_read, search_messages, send_email
 from mygooglib.sheets import (
     append_row,
@@ -329,16 +329,8 @@ def main(argv: list[str] | None = None) -> int:
         now = datetime.now(timezone.utc).isoformat()
 
         print("== Drive: list (root, first 5) ==")
-        response = (
-            clients.drive.files()
-            .list(
-                q="trashed = false",
-                pageSize=5,
-                fields="files(id,name,mimeType,modifiedTime,parents)",
-            )
-            .execute()
-        )
-        _print_jsonable(response.get("files", []))
+        files = list_files(clients.drive, page_size=5)
+        _print_jsonable(files)
 
         if args.drive_sync_local_path and args.drive_sync_folder_id:
             if not args.write:

@@ -33,7 +33,7 @@ class InvalidRequestError(GoogleApiError):
     pass
 
 
-def raise_for_http_error(http_error: Exception) -> None:
+def raise_for_http_error(http_error: Exception, *, context: str | None = None) -> None:
     """Convert googleapiclient.errors.HttpError to a library exception.
 
     Usage:
@@ -55,14 +55,25 @@ def raise_for_http_error(http_error: Exception) -> None:
         else str(http_error)
     )
 
+    prefix = f"{context}: " if context else ""
+
     if status == 400:
-        raise InvalidRequestError(f"Bad request: {reason}") from http_error
+        raise InvalidRequestError(f"{prefix}Bad request: {reason}") from http_error
     if status in (401, 403):
-        raise AuthError(f"Auth failed ({status}): {reason}") from http_error
+        hint = (
+            "Check that your token has the required scopes and that the resource is shared with the authorized account. "
+            "If you changed scopes recently, delete token.json and rerun scripts/oauth_setup.py."
+        )
+        raise AuthError(
+            f"{prefix}Auth failed ({status}): {reason}. {hint}"
+        ) from http_error
     if status == 404:
-        raise NotFoundError(f"Not found: {reason}") from http_error
+        raise NotFoundError(f"{prefix}Not found: {reason}") from http_error
     if status == 429:
-        raise QuotaExceededError(f"Rate limited: {reason}") from http_error
+        hint = "Rate limited/quota exceeded. Try again later or reduce request rate (batch reads/writes where possible)."
+        raise QuotaExceededError(
+            f"{prefix}Rate limited: {reason}. {hint}"
+        ) from http_error
 
     # Re-raise as generic wrapper for other codes
-    raise GoogleApiError(f"HTTP {status}: {reason}") from http_error
+    raise GoogleApiError(f"{prefix}HTTP {status}: {reason}") from http_error
