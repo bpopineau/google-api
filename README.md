@@ -8,6 +8,20 @@ Personal-use Python helpers for Google Drive, Sheets, and Gmail (more services l
 pip install -e .
 ```
 
+### Reproducible installs (uv)
+
+This repo also supports a locked dependency set via `uv.lock`.
+
+```bash
+uv sync --frozen
+```
+
+To include dev extras:
+
+```bash
+uv sync --frozen --extra dev
+```
+
 ## Credentials / OAuth
 
 This library uses OAuth (Desktop app) and stores local secrets outside git.
