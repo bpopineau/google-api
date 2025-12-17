@@ -11,6 +11,12 @@ Examples:
     # Drive: sync a local folder into a Drive folder
     python scripts/smoke_test.py drive-sync --local-path "C:\\path\\to\\folder" --drive-folder-id "<FOLDER_ID>"
 
+    # Run a full smoke pass (read-only by default)
+    python scripts/smoke_test.py all
+
+    # Run the full smoke pass including writes (sends an email, appends a row, updates a cell)
+    python scripts/smoke_test.py all --write
+
   # Gmail: send an email to yourself
   python scripts/smoke_test.py gmail-send --to you@example.com --subject "Test" --body "Hello"
 
@@ -28,10 +34,11 @@ Examples:
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 from typing import Any
 
 from mygooglib import get_clients
-from mygooglib.drive import sync_folder
+from mygooglib.drive import list_files, sync_folder
 from mygooglib.gmail import mark_read, search_messages, send_email
 from mygooglib.sheets import (
     append_row,
@@ -40,6 +47,16 @@ from mygooglib.sheets import (
     resolve_spreadsheet,
     update_range,
 )
+
+# Defaults for local testing (safe to keep in-repo for personal use).
+DEFAULT_TEST_SPREADSHEET_IDENTIFIER = "17KBIrDF3CZ0s5U8QQf0aUHmkttVbkHWt44-ApGFTvSw"
+DEFAULT_TEST_EMAIL_TO = "brandon@esscoelectric"
+
+# Safe default ranges/targets for smoke operations.
+DEFAULT_TEST_SHEETS_READ_RANGE = "Sheet1!A1:C3"
+DEFAULT_TEST_SHEETS_APPEND_SHEET = "Sheet1"
+DEFAULT_TEST_SHEETS_UPDATE_RANGE = "Sheet1!Z1:Z1"
+DEFAULT_TEST_GMAIL_QUERY = "newer_than:7d"
 
 
 def _print_jsonable(obj: Any) -> None:
@@ -69,6 +86,70 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Smoke tests for mygooglib")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
+    p_all = sub.add_parser(
+        "all",
+        help=(
+            "Run a full smoke pass across Drive/Sheets/Gmail. "
+            "Read-only by default; use --write for mutations."
+        ),
+    )
+    p_all.add_argument(
+        "--write",
+        action="store_true",
+        help="Enable write operations (sends an email + writes to Sheets + optional Drive sync)",
+    )
+    p_all.add_argument(
+        "--drive-sync-local-path",
+        default=None,
+        help="If provided with --drive-sync-folder-id, performs a Drive sync",
+    )
+    p_all.add_argument(
+        "--drive-sync-folder-id",
+        default=None,
+        help="If provided with --drive-sync-local-path, performs a Drive sync",
+    )
+    p_all.add_argument(
+        "--sheets-identifier",
+        default=DEFAULT_TEST_SPREADSHEET_IDENTIFIER,
+        help=f"Sheets identifier (default {DEFAULT_TEST_SPREADSHEET_IDENTIFIER})",
+    )
+    p_all.add_argument(
+        "--sheets-read-range",
+        default=DEFAULT_TEST_SHEETS_READ_RANGE,
+        help=f"Sheets A1 range to read (default {DEFAULT_TEST_SHEETS_READ_RANGE})",
+    )
+    p_all.add_argument(
+        "--sheets-append-sheet",
+        default=DEFAULT_TEST_SHEETS_APPEND_SHEET,
+        help=f"Sheet/tab name to append into (default {DEFAULT_TEST_SHEETS_APPEND_SHEET})",
+    )
+    p_all.add_argument(
+        "--sheets-update-range",
+        default=DEFAULT_TEST_SHEETS_UPDATE_RANGE,
+        help=f"Sheets A1 range to update (default {DEFAULT_TEST_SHEETS_UPDATE_RANGE})",
+    )
+    p_all.add_argument(
+        "--gmail-query",
+        default=DEFAULT_TEST_GMAIL_QUERY,
+        help=f"Gmail search query (default {DEFAULT_TEST_GMAIL_QUERY})",
+    )
+    p_all.add_argument(
+        "--gmail-max",
+        type=int,
+        default=3,
+        help="Max Gmail results to print (default 3)",
+    )
+    p_all.add_argument(
+        "--mark-read",
+        action="store_true",
+        help="Mark the first returned Gmail message as read",
+    )
+    p_all.add_argument(
+        "--email-to",
+        default=DEFAULT_TEST_EMAIL_TO,
+        help=f"Recipient for test email when --write is enabled (default {DEFAULT_TEST_EMAIL_TO})",
+    )
+
     p_drive_sync = sub.add_parser(
         "drive-sync",
         help="Sync a local folder into a Drive folder (upload/update only; no deletes)",
@@ -85,7 +166,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     p_send = sub.add_parser("gmail-send", help="Send a test email")
-    p_send.add_argument("--to", required=True, help="Recipient email")
+    p_send.add_argument(
+        "--to",
+        default=DEFAULT_TEST_EMAIL_TO,
+        help=f"Recipient email (default {DEFAULT_TEST_EMAIL_TO})",
+    )
     p_send.add_argument("--subject", required=True, help="Subject")
     p_send.add_argument("--body", required=True, help="Plain text body")
     p_send.add_argument("--cc", default=None, help="CC email(s), comma-separated")
@@ -106,8 +191,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_get = sub.add_parser("sheets-get", help="Read a range from Sheets")
     p_get.add_argument(
         "--identifier",
-        required=True,
-        help="Spreadsheet id, title, or full URL",
+        default=DEFAULT_TEST_SPREADSHEET_IDENTIFIER,
+        help=(
+            "Spreadsheet id, title, or full URL "
+            f"(default {DEFAULT_TEST_SPREADSHEET_IDENTIFIER})"
+        ),
     )
     p_get.add_argument("--range", required=True, help='A1 range, e.g. "Sheet1!A1:C3"')
     p_get.add_argument(
@@ -124,8 +212,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_append = sub.add_parser("sheets-append", help="Append a row to a sheet")
     p_append.add_argument(
         "--identifier",
-        required=True,
-        help="Spreadsheet id, title, or full URL",
+        default=DEFAULT_TEST_SPREADSHEET_IDENTIFIER,
+        help=(
+            "Spreadsheet id, title, or full URL "
+            f"(default {DEFAULT_TEST_SPREADSHEET_IDENTIFIER})"
+        ),
     )
     p_append.add_argument("--sheet", required=True, help="Sheet/tab name")
     p_append.add_argument("--values", nargs="+", required=True, help="Row values")
@@ -143,8 +234,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_update = sub.add_parser("sheets-update", help="Update a range in Sheets")
     p_update.add_argument(
         "--identifier",
-        required=True,
-        help="Spreadsheet id, title, or full URL",
+        default=DEFAULT_TEST_SPREADSHEET_IDENTIFIER,
+        help=(
+            "Spreadsheet id, title, or full URL "
+            f"(default {DEFAULT_TEST_SPREADSHEET_IDENTIFIER})"
+        ),
     )
     p_update.add_argument(
         "--range",
@@ -197,8 +291,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_resolve.add_argument(
         "--identifier",
-        required=True,
-        help="Spreadsheet id, title, or full URL",
+        default=DEFAULT_TEST_SPREADSHEET_IDENTIFIER,
+        help=(
+            "Spreadsheet id, title, or full URL "
+            f"(default {DEFAULT_TEST_SPREADSHEET_IDENTIFIER})"
+        ),
     )
     p_resolve.add_argument(
         "--parent-id",
@@ -217,6 +314,93 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     clients = get_clients()
+
+    if args.cmd == "all":
+        now = datetime.now(timezone.utc).isoformat()
+
+        print("== Drive: list_files (root, first 5) ==")
+        drive_files = list_files(clients.drive, page_size=5)
+        _print_jsonable(drive_files)
+
+        if args.drive_sync_local_path and args.drive_sync_folder_id:
+            if not args.write:
+                print("== Drive: sync_folder skipped (provide --write to enable) ==")
+            else:
+                print("== Drive: sync_folder ==")
+                summary = sync_folder(
+                    clients.drive,
+                    args.drive_sync_local_path,
+                    args.drive_sync_folder_id,
+                )
+                _print_jsonable(summary)
+        else:
+            print(
+                "== Drive: sync_folder skipped (missing --drive-sync-local-path/--drive-sync-folder-id) =="
+            )
+
+        print("== Sheets: get_range ==")
+        values = get_range(
+            clients.sheets,
+            args.sheets_identifier,
+            args.sheets_read_range,
+            drive=clients.drive,
+        )
+        _print_jsonable(values)
+
+        if args.write:
+            print("== Sheets: append_row ==")
+            append_result = append_row(
+                clients.sheets,
+                args.sheets_identifier,
+                args.sheets_append_sheet,
+                ["mygooglib-smoke", now],
+                drive=clients.drive,
+            )
+            _print_jsonable(append_result)
+
+            print("== Sheets: update_range ==")
+            update_result = update_range(
+                clients.sheets,
+                args.sheets_identifier,
+                args.sheets_update_range,
+                [[now]],
+                value_input_option="RAW",
+                drive=clients.drive,
+            )
+            _print_jsonable(update_result)
+        else:
+            print("== Sheets: write ops skipped (use --write) ==")
+
+        print("== Gmail: search_messages ==")
+        results = search_messages(
+            clients.gmail,
+            args.gmail_query,
+            max_results=args.gmail_max,
+        )
+        _print_jsonable(results)
+        if args.mark_read and results:
+            msg_id = results[0].get("id")
+            if msg_id:
+                if args.write:
+                    mark_read(clients.gmail, msg_id)
+                    print(f"marked read: {msg_id}")
+                else:
+                    print("mark_read skipped (use --write)")
+
+        if args.write:
+            print("== Gmail: send_email ==")
+            message_id = send_email(
+                clients.gmail,
+                to=args.email_to,
+                subject=f"mygooglib smoke all {now}",
+                body=f"mygooglib smoke all run at {now}",
+            )
+            print("sent message id:")
+            _print_jsonable(message_id)
+        else:
+            print("== Gmail: send_email skipped (use --write) ==")
+
+        return 0
 
     if args.cmd == "drive-sync":
         summary = sync_folder(
