@@ -82,6 +82,11 @@ def _global_options(
     ctx.obj = state
 
     configure_environment(state)
+    # Ensure our output starts on a fresh line in terminals.
+    # This avoids occasional visual artifacts where a long wrapped command line
+    # appears adjacent to Rich output (notably in some captured terminal logs).
+    if not json_output:
+        state.console.line()
     if debug:
         install_rich_traceback(show_locals=False, suppress=[typer])
 
