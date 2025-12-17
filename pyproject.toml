@@ -20,5 +20,13 @@ dev = [
     "ruff>=0.1",
 ]
 
+cli = [
+    "typer>=0.12",
+    "rich>=13",
+]
+
+[project.scripts]
+mygoog = "mygooglib.cli:main"
+
 [tool.setuptools.packages.find]
 include = ["mygooglib*"]

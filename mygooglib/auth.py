@@ -9,6 +9,8 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
+from mygooglib.utils.logging import get_logger
+
 # v0.1 scopes: Drive, Sheets, Gmail send/modify
 SCOPES: list[str] = [
     "https://www.googleapis.com/auth/drive",
@@ -37,6 +39,16 @@ def _get_paths() -> tuple[Path, Path]:
     return creds_path, token_path
 
 
+def get_auth_paths() -> tuple[Path, Path]:
+    """Return the resolved (credentials.json, token.json) paths.
+
+    This is useful for CLIs/scripts that want to display where secrets live,
+    without re-implementing internal path logic.
+    """
+
+    return _get_paths()
+
+
 def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     """Load or create OAuth credentials.
 
@@ -52,6 +64,8 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     scopes = scopes or SCOPES
     creds_path, token_path = _get_paths()
 
+    logger = get_logger("mygooglib.auth")
+
     creds: Credentials | None = None
 
     if token_path.exists():
@@ -61,8 +75,10 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
         return creds
 
     if creds and creds.expired and creds.refresh_token:
+        logger.info("Refreshing OAuth token (token path: %s)", token_path)
         creds.refresh(Request())
         token_path.write_text(creds.to_json(), encoding="utf-8")
+        logger.info("Saved refreshed token to %s", token_path)
         return creds
 
     # Need fresh authorization
@@ -73,10 +89,13 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
             "or set MYGOOGLIB_CREDENTIALS_PATH."
         )
 
+    logger.info("Launching OAuth flow (credentials path: %s)", creds_path)
     flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), scopes=scopes)
     new_creds = flow.run_local_server(port=0)
 
     token_path.parent.mkdir(parents=True, exist_ok=True)
     token_path.write_text(new_creds.to_json(), encoding="utf-8")
+
+    logger.info("Saved new token to %s", token_path)
 
     return new_creds  # type: ignore[return-value]

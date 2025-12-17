@@ -1,0 +1,142 @@
+from __future__ import annotations
+
+from pathlib import Path
+
+import typer
+from rich.table import Table
+
+from mygooglib import get_clients
+from mygooglib.drive import download_file, list_files, sync_folder, upload_file
+
+from .common import CliState, format_output, print_kv, print_success
+
+app = typer.Typer(help="Google Drive commands.", no_args_is_help=True)
+
+
+@app.command("list")
+def list_cmd(
+    ctx: typer.Context,
+    query: str | None = typer.Option(
+        None, "--query", "-q", help="Drive query string (q=...)."
+    ),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Limit to a folder ID."
+    ),
+    mime_type: str | None = typer.Option(
+        None, "--mime-type", help="Filter by MIME type."
+    ),
+    trashed: bool = typer.Option(False, "--trashed", help="Include trashed files."),
+    page_size: int = typer.Option(100, "--page-size", min=1, max=1000),
+) -> None:
+    """List Drive files (paginates)."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    results = list_files(
+        clients.drive,
+        query=query,
+        parent_id=parent_id,
+        mime_type=mime_type,
+        trashed=trashed,
+        page_size=page_size,
+    )
+
+    if state.json:
+        state.console.print(format_output(results, json_mode=True))
+        return
+
+    table = Table(title=f"Drive files ({len(results)})")
+    table.add_column("name", overflow="fold")
+    table.add_column("id", overflow="fold")
+    table.add_column("mimeType", overflow="fold")
+    table.add_column("modifiedTime")
+
+    for item in results:
+        table.add_row(
+            str(item.get("name") or ""),
+            str(item.get("id") or ""),
+            str(item.get("mimeType") or ""),
+            str(item.get("modifiedTime") or ""),
+        )
+
+    state.console.print(table)
+
+
+@app.command("upload")
+def upload_cmd(
+    ctx: typer.Context,
+    local_path: Path = typer.Argument(
+        ..., exists=True, dir_okay=False, file_okay=True, readable=True
+    ),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Destination folder ID."
+    ),
+    name: str | None = typer.Option(None, "--name", help="Override filename in Drive."),
+) -> None:
+    """Upload a local file to Drive."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    file_id = upload_file(clients.drive, local_path, parent_id=parent_id, name=name)
+
+    if state.json:
+        state.console.print(format_output({"id": file_id}, json_mode=True))
+        return
+
+    print_success(state.console, "Uploaded")
+    print_kv(state.console, "id", file_id)
+
+
+@app.command("download")
+def download_cmd(
+    ctx: typer.Context,
+    file_id: str = typer.Argument(..., help="Drive file ID."),
+    dest_path: Path = typer.Argument(..., help="Local destination path."),
+    export_mime_type: str | None = typer.Option(
+        None,
+        "--export-mime-type",
+        help="For Google Docs/Sheets/Slides, export as this MIME type (e.g., application/pdf).",
+    ),
+) -> None:
+    """Download a Drive file (export for Google Workspace files)."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    out_path = download_file(
+        clients.drive, file_id, dest_path, export_mime_type=export_mime_type
+    )
+
+    if state.json:
+        state.console.print(format_output({"path": str(out_path)}, json_mode=True))
+        return
+
+    print_success(state.console, "Downloaded")
+    print_kv(state.console, "path", out_path)
+
+
+@app.command("sync")
+def sync_cmd(
+    ctx: typer.Context,
+    local_path: Path = typer.Argument(..., exists=True, file_okay=False, dir_okay=True),
+    drive_folder_id: str = typer.Argument(..., help="Target Drive folder ID."),
+    recursive: bool = typer.Option(
+        True, "--recursive/--no-recursive", help="Sync subfolders recursively."
+    ),
+) -> None:
+    """Sync a local folder to a Drive folder (safe: no deletes)."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    summary = sync_folder(
+        clients.drive, local_path, drive_folder_id, recursive=recursive
+    )
+
+    if state.json:
+        state.console.print(format_output(summary, json_mode=True))
+        return
+
+    print_success(state.console, "Sync complete")
+    for k in ("created", "updated", "skipped"):
+        print_kv(state.console, k, summary.get(k))
+    errors = summary.get("errors") or []
+    if errors:
+        state.err_console.print(f"errors: {len(errors)}")
+        for err in errors:
+            state.err_console.print(f"- {err}")

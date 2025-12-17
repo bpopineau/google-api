@@ -8,6 +8,30 @@ Personal-use Python helpers for Google Drive, Sheets, and Gmail (more services l
 pip install -e .
 ```
 
+### CLI (Typer + Rich)
+
+Install with the CLI extra:
+
+```bash
+pip install -e ".[cli]"
+```
+
+Run:
+
+```bash
+mygoog --help
+mygoog auth status
+mygoog drive list --page-size 5
+mygoog sheets get "My Sheet" "Sheet1!A1:C3"
+mygoog gmail search "newer_than:7d" --max 5
+```
+
+On Windows, if your venv isn't activated, you can run:
+
+```bash
+.venv\Scripts\mygoog.exe --help
+```
+
 ### Reproducible installs (uv)
 
 This repo also supports a locked dependency set via `uv.lock`.
