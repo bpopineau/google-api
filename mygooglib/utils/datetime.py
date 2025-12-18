@@ -15,6 +15,13 @@ _DEFAULT_TZ_KEY = os.environ.get("MYGOOGLIB_DEFAULT_TZ", "America/New_York")
 try:
     DEFAULT_TZ = ZoneInfo(_DEFAULT_TZ_KEY)
 except ZoneInfoNotFoundError:
+    import warnings
+    warnings.warn(
+        f"Timezone '{_DEFAULT_TZ_KEY}' not found. Falling back to UTC. "
+        "Install 'tzdata' package for proper timezone support.",
+        UserWarning,
+        stacklevel=2
+    )
     DEFAULT_TZ = dt.timezone.utc
 
 

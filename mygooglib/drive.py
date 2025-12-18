@@ -11,6 +11,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.logging import get_logger
 from mygooglib.utils.retry import execute_with_retry_http_error
 
 # Google Workspace MIME types
@@ -250,7 +251,20 @@ def _update_file(
     local_path: Path,
     mime_type: str | None = None,
 ) -> str:
-    """Update an existing file's content (internal helper)."""
+    """Update an existing file's content (internal helper).
+    
+    Args:
+        drive: Drive API Resource
+        file_id: ID of the file to update
+        local_path: Path to the new file content
+        mime_type: Optional MIME type override
+        
+    Returns:
+        The file ID of the updated file
+        
+    Raises:
+        GoogleApiError: If the update fails
+    """
     detected_mime = (
         mime_type
         or mimetypes.guess_type(str(local_path))[0]
@@ -298,6 +312,7 @@ def sync_folder(
     updated = 0
     skipped = 0
     errors: list[str] = []
+    logger = get_logger("mygooglib.drive")
 
     from datetime import datetime, timezone
 
@@ -383,7 +398,10 @@ def sync_folder(
                     created += 1
 
             except Exception as e:
-                errors.append(f"{entry.relative_to(local_dir)}: {e}")
+                error_msg = f"{entry.relative_to(local_dir)}: {e}"
+                errors.append(error_msg)
+                # Log errors as they occur so users can monitor progress
+                logger.error("Sync error: %s", error_msg)
 
     _sync_dir(local_dir, drive_folder_id)
 
