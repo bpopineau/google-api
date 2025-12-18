@@ -8,6 +8,49 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
 
 ---
 
+## Phase 0: INITIALIZE
+**Goal**: Set up tracking to ensure no steps are missed.
+
+### 0.1 Pre-Flight Check
+   - `git status --short`
+   - **Gate**: Ensure the working directory is clean or you are on a safe feature branch. Do not mix new work with uncommitted changes.
+
+### 0.2 Create Task Artifact
+   - Create or update `task.md` with the following structure:
+     ```markdown
+     # Task: [Feature Name]
+     - [ ] Phase 1: ANALYZE
+         - [ ] Health Check (`/health_check`)
+         - [ ] Coverage Audit (`/coverage_audit`)
+         - [ ] Feature Proposals (`/propose_features`)
+     - [ ] Phase 2: PLAN
+         - [ ] Check Goals (`AUTOMATION_GOALS.md`)
+         - [ ] Present Analysis
+         - [ ] Create Implementation Plan
+     - [ ] Phase 3: BUILD
+         - [ ] Scaffold (Optional)
+         - [ ] Implement Core Logic
+         - [ ] Import Verification
+         - [ ] Write Unit Tests
+         - [ ] CLI Support (Optional)
+         - [ ] Lint Check
+     - [ ] Phase 4: VERIFY
+         - [ ] Unit Tests (`pytest`)
+         - [ ] Smoke Tests (`smoke_test.py`)
+         - [ ] Negative Testing (Failure modes)
+         - [ ] Manual Check
+     - [ ] Phase 5: DOCUMENT
+         - [ ] Docstrings
+         - [ ] Guides/README
+         - [ ] Walkthrough Artifact
+     - [ ] Phase 6: RELEASE (Optional)
+         - [ ] Release Prep
+         - [ ] Final Verification
+         - [ ] Push
+     ```
+
+---
+
 ## Phase 1: ANALYZE
 **Goal**: Understand project state and identify what to build.
 
@@ -36,7 +79,11 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
 ## Phase 2: PLAN
 **Goal**: Get user approval on what to build.
 
-### 2.1 Present Analysis
+### 2.1 Sanity Check
+   - Read `AUTOMATION_GOALS.md` and `docs/development/roadmap.md`.
+   - **Gate**: Ensure the proposed work aligns with long-term goals.
+
+### 2.2 Present Analysis
    - Use `notify_user` to present:
      - `coverage_report.md`
      - `feature_proposal.md`
@@ -69,7 +116,11 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
    - **Imports**: Add to `__all__` if public API.
    - **Important**: Also add methods to the corresponding `[Service]Client` class.
 
-### 3.3 Write Unit Tests
+### 3.3 Import Verification
+   - `python -c "import mygooglib; print('Imports OK')"`
+   - **Gate**: Must print "Imports OK". Catches syntax errors and circular imports early.
+
+### 3.4 Write Unit Tests
    - **Location**: `tests/test_[service].py`
    - **Pattern**: Follow existing test patterns. Add at least one test per new public method.
    - **Run**: `pytest tests/test_[service].py -v`
@@ -105,7 +156,14 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
    - `python scripts/smoke_test.py all`
    - **Gate**: All services must connect successfully.
 
-### 4.3 Manual CLI Verification
+### 4.3 Negative Testing
+   - **Action**: Intentionally try to break the new feature.
+     - Invalid IDs/Paths (e.g., `mygoog drive download "NonExistent"`).
+     - Missing arguments.
+     - Wrong types.
+   - **Gate**: Ensure the app fails gracefully (exit code 1, clear error message), not with a raw traceback.
+
+### 4.4 Manual CLI Verification
    - For each new CLI command:
      1. Run `mygoog [service] [command] --help` to verify registration.
      2. Execute the command with valid test data.
