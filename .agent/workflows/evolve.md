@@ -57,53 +57,72 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
 ## Phase 3: BUILD
 **Goal**: Implement the approved feature.
 
-### 3.1 Scaffold
+### 3.1 Scaffold (Optional)
 // turbo
    - `/scaffold_new_script`
    - **Create**: Prototype in `scripts/` or `examples/`.
+   - **When**: Exploring a new idea before committing to the library.
 
 ### 3.2 Implement Core Logic
    - **Location**: `mygooglib/[service].py`
    - **Pattern**: Follow existing methods in the same file.
    - **Imports**: Add to `__all__` if public API.
+   - **Important**: Also add methods to the corresponding `[Service]Client` class.
 
-### 3.3 Cross-Service Integration (If applicable)
+### 3.3 Write Unit Tests
+   - **Location**: `tests/test_[service].py`
+   - **Pattern**: Follow existing test patterns. Add at least one test per new public method.
+   - **Run**: `pytest tests/test_[service].py -v`
+
+### 3.4 Cross-Service Integration (If applicable)
 // turbo
    - `/cross_service_builder`
    - **When**: Feature combines multiple services.
 
-### 3.4 Add CLI Support (If applicable)
+### 3.5 Add CLI Support (If applicable)
    - **Location**: `mygooglib/cli/[service].py`
    - **Pattern**: Follow existing Typer commands.
-   - **Test**: `mygoog [service] [command] --help`
+   - **Verify**: `mygoog [service] [command] --help`
+   - **Import**: Update imports at the top of the CLI file for new library functions.
+
+### 3.6 Lint Check
+// turbo
+   - `ruff check mygooglib/ tests/`
+   - **Gate**: Must pass before proceeding to VERIFY.
 
 ---
 
 ## Phase 4: VERIFY
 **Goal**: Ensure quality before documentation.
 
-### 4.1 Development Checks
+### 4.1 Unit Tests
+// turbo
+   - `pytest tests/ -v`
+   - **Gate**: All unit tests must pass.
+
+### 4.2 Smoke Tests
+// turbo
+   - `python scripts/smoke_test.py all`
+   - **Gate**: All services must connect successfully.
+
+### 4.3 Manual CLI Verification
+   - For each new CLI command:
+     1. Run `mygoog [service] [command] --help` to verify registration.
+     2. Execute the command with valid test data.
+     3. Verify expected output or side effects.
+   - **Document**: Note any issues found; loop back to BUILD if needed.
+
+### 4.4 Development Checks (Optional)
 // turbo
    - `/development`
-   - **Runs**: Format, lint, unit tests.
+   - **Runs**: Format, lint, and full test suite.
 
-### 4.2 Full CI Simulation
+### 4.5 Full CI Simulation (Optional)
 // turbo
    - `/ci_local`
-   - **Runs**: Auth check, tests, smoke tests, CLI verification.
+   - **When**: Before merging to main or releasing.
 
-### 4.3 API Verification
-// turbo
-   - `/verify_installation`
-   - **Runs**: Smoke tests against real Google APIs.
-
-### 4.4 Add Missing Tests
-   - If new functionality lacks tests:
-// turbo
-   - `/bootstrap_tests`
-   - **Add**: `tests/test_[service].py::test_[new_method]`
-
-**Gate**: All tests must pass. Failures loop back to BUILD.
+**Gate**: All tests and verifications must pass. Failures loop back to BUILD.
 
 ---
 
@@ -114,14 +133,15 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
 // turbo
    - `/write_docstrings`
    - **Target**: New methods with Google-style docstrings.
+   - **Check**: All public functions have Args, Returns, and Raises sections.
 
 ### 5.2 Update Guides
 // turbo
    - `/update_docs`
    - **Update**:
-     - `docs/guides/usage.md` — add usage examples
-     - `README.md` — update if Quick Start affected
-     - `examples/` — add example script if helpful
+     - `docs/guides/usage.md` — add usage examples for new functionality.
+     - `README.md` — update if Quick Start or feature list affected.
+     - `examples/` — add example script if the feature is complex.
 
 ### 5.3 Update Goals
    - **File**: `AUTOMATION_GOALS.md`
@@ -131,26 +151,38 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
    - **File**: `docs/development/roadmap.md`
    - **Action**: Check off completed feature, add new ideas if discovered.
 
+### 5.5 Create Walkthrough Artifact
+   - **File**: `walkthrough.md` (in artifacts directory).
+   - **Contents**:
+     - Summary of changes made.
+     - Manual verification results.
+     - Any new CLI commands with example usage.
+
 ---
 
-## Phase 6: RELEASE
-**Goal**: Ship the feature.
+## Phase 6: RELEASE (Optional)
+**Goal**: Ship the feature. Skip this phase for work-in-progress or internal iterations.
 
 ### 6.1 Prepare Release
 // turbo
    - `/release_prep`
    - **Actions**:
-     - Bump version in `pyproject.toml`
-     - Update `CHANGELOG.md`
-     - Git commit and tag
+     - Bump version in `pyproject.toml` (if applicable).
+     - Update `CHANGELOG.md` with new features and fixes.
+     - Stage files: `git add -A`
 
 ### 6.2 Final Verification
 // turbo
    - `python scripts/smoke_test.py all`
-   - **Gate**: Must pass before push.
+   - **Gate**: Must pass before commit.
 
-### 6.3 Push to Origin
+### 6.3 Commit and Tag
+   - `git commit -m "feat: <description of changes>"`
+   - `git tag vX.Y.Z` (if a versioned release).
+
+### 6.4 Push to Origin
    - `git push origin main --tags`
+   - **Gate**: Only push if all tests pass and changes are approved.
 
 ---
 
@@ -168,11 +200,11 @@ This workflow orchestrates the entire mygooglib development lifecycle through 6 
 
 ## Workflow Calls Summary
 
-| Phase | Workflows Called |
-|-------|-----------------|
+| Phase | Workflows/Commands Called |
+|-------|---------------------------|
 | 1. ANALYZE | `/health_check`, `/coverage_audit`, `/propose_features`, `/ideate_innovations` |
-| 2. PLAN | *User interaction* |
-| 3. BUILD | `/scaffold_new_script`, `/cross_service_builder` |
-| 4. VERIFY | `/development`, `/ci_local`, `/verify_installation`, `/bootstrap_tests` |
-| 5. DOCUMENT | `/write_docstrings`, `/update_docs` |
-| 6. RELEASE | `/release_prep` |
+| 2. PLAN | *User interaction*, `implementation_plan.md` |
+| 3. BUILD | `/scaffold_new_script`, `/cross_service_builder`, `pytest`, `ruff check` |
+| 4. VERIFY | `pytest`, `smoke_test.py`, Manual CLI tests, `/development`, `/ci_local` |
+| 5. DOCUMENT | `/write_docstrings`, `/update_docs`, `walkthrough.md` |
+| 6. RELEASE | `/release_prep`, `smoke_test.py`, `git commit`, `git push` |
