@@ -51,6 +51,56 @@ def login_cmd(ctx: typer.Context) -> None:
     print_kv(state.console, "token", token_path)
 
 
+@app.command("refresh")
+def refresh_cmd(ctx: typer.Context) -> None:
+    """Force a token refresh without re-authenticating (no browser)."""
+    from google.auth.transport.requests import Request
+
+    state = CliState.from_ctx(ctx)
+    _, token_path = get_auth_paths()
+
+    creds = _load_token_only(token_path)
+    if creds is None:
+        state.console.print("[red]No token found. Run 'mygoog auth login' first.[/red]")
+        raise typer.Exit(code=1)
+
+    if not creds.refresh_token:
+        state.console.print(
+            "[red]Token has no refresh_token. Re-run 'mygoog auth login'.[/red]"
+        )
+        raise typer.Exit(code=1)
+
+    old_expiry = creds.expiry
+
+    try:
+        creds.refresh(Request())
+    except Exception as e:
+        state.console.print(f"[red]Refresh failed: {e}[/red]")
+        state.console.print(
+            "[yellow]Your token may be revoked. Delete token.json and run 'mygoog auth login'.[/yellow]"
+        )
+        raise typer.Exit(code=1)
+
+    token_path.write_text(creds.to_json(), encoding="utf-8")
+
+    if state.json:
+        state.console.print(
+            format_output(
+                {
+                    "refreshed": True,
+                    "old_expiry": old_expiry.isoformat() if old_expiry else None,
+                    "new_expiry": creds.expiry.isoformat() if creds.expiry else None,
+                },
+                json_mode=True,
+            )
+        )
+        return
+
+    print_success(state.console, "Token refreshed")
+    print_kv(state.console, "old_expiry", str(old_expiry))
+    print_kv(state.console, "new_expiry", str(creds.expiry))
+
+
 def _load_token_only(token_path) -> Credentials | None:
     if not token_path.exists():
         return None

@@ -1,35 +1,11 @@
 from __future__ import annotations
 
 import datetime as dt
-import os
-from pathlib import Path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-# Duplicated here to avoid cross-module import issues when running scripts directly.
-V0_1_SCOPES: list[str] = [
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/gmail.modify",
-    "https://www.googleapis.com/auth/calendar",
-    "https://www.googleapis.com/auth/tasks",
-]
-
-
-def _default_secrets_dir() -> Path:
-    local_app_data = os.environ.get("LOCALAPPDATA")
-    if local_app_data:
-        return Path(local_app_data) / "mygooglib"
-    return Path.home() / ".config" / "mygooglib"
-
-
-def _token_path() -> Path:
-    secrets_dir = _default_secrets_dir()
-    return Path(
-        os.environ.get("MYGOOGLIB_TOKEN_PATH", "") or (secrets_dir / "token.json")
-    )
+from mygooglib.auth import SCOPES, get_auth_paths
 
 
 def _fmt_dt(value: dt.datetime | None) -> str:
@@ -41,14 +17,14 @@ def _fmt_dt(value: dt.datetime | None) -> str:
 
 
 def main() -> int:
-    token_path = _token_path()
+    _, token_path = get_auth_paths()
     if not token_path.exists():
         raise FileNotFoundError(
             "token.json not found. Run scripts/oauth_setup.py first to generate it.\n"
             f"Expected at: {token_path}"
         )
 
-    creds = Credentials.from_authorized_user_file(str(token_path), scopes=V0_1_SCOPES)
+    creds = Credentials.from_authorized_user_file(str(token_path), scopes=SCOPES)
 
     print(f"Token file: {token_path}")
     print(f"Expired: {creds.expired}")
