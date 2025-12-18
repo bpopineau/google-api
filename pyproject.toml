@@ -30,6 +30,11 @@ data = [
     "pandas>=2.0",
 ]
 
+dashboard = [
+    "streamlit>=1.30",
+    "watchdog",
+]
+
 [project.scripts]
 mygoog = "mygooglib.cli:main"
 

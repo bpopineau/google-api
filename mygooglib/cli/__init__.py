@@ -22,6 +22,7 @@ from mygooglib.exceptions import GoogleApiError
 from . import auth as auth_cmd
 from . import calendar as calendar_cmd
 from . import contacts as contacts_cmd
+from . import dashboard as dashboard_cmd
 from . import docs as docs_cmd
 from . import drive as drive_cmd
 from . import gmail as gmail_cmd
@@ -47,6 +48,7 @@ app.add_typer(tasks_cmd.app, name="tasks")
 app.add_typer(docs_cmd.app, name="docs")
 app.add_typer(contacts_cmd.app, name="contacts")
 app.add_typer(workflows_cmd.app, name="workflows")
+app.add_typer(dashboard_cmd.app, name="dashboard")
 
 
 @app.callback()
