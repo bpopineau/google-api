@@ -621,6 +621,179 @@ def from_dataframe(
     )
 
 
+def batch_get(
+    sheets: Any,
+    spreadsheet_id: str,
+    ranges: list[str],
+    *,
+    drive: Any | None = None,
+    parent_id: str | None = None,
+    allow_multiple: bool = False,
+    major_dimension: str | None = None,
+    value_render_option: str | None = None,
+    date_time_render_option: str | None = None,
+    raw: bool = False,
+) -> dict[str, list[list[Any]]] | dict:
+    """Read multiple ranges from a spreadsheet in a single API call.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        ranges: List of A1 range strings (e.g., ["Sheet1!A1:B10", "Sheet2!C1:D5"])
+        drive: Drive API Resource (required if spreadsheet_id is a title)
+        parent_id: Optional Drive folder ID for title resolution
+        allow_multiple: Allow multiple title matches
+        major_dimension: "ROWS" or "COLUMNS" (optional)
+        value_render_option: "FORMATTED_VALUE", "UNFORMATTED_VALUE", "FORMULA"
+        date_time_render_option: "SERIAL_NUMBER" or "FORMATTED_STRING"
+        raw: If True, return the full API response dict
+
+    Returns:
+        Dict mapping range strings to their values (list-of-lists).
+        If raw=True, returns the full API response.
+    """
+    spreadsheet_real_id = (
+        resolve_spreadsheet(
+            drive,
+            spreadsheet_id,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+        if drive is not None
+        else spreadsheet_id
+    )
+
+    if (
+        drive is None
+        and not _SHEETS_URL_RE.search(spreadsheet_id)
+        and not re.fullmatch(r"[a-zA-Z0-9-_]{20,}", spreadsheet_id.strip())
+    ):
+        raise ValueError(
+            "Spreadsheet identifier looks like a title; pass drive=clients.drive."
+        )
+
+    try:
+        request = (
+            sheets.spreadsheets()
+            .values()
+            .batchGet(
+                spreadsheetId=spreadsheet_real_id,
+                ranges=ranges,
+                majorDimension=major_dimension,
+                valueRenderOption=value_render_option,
+                dateTimeRenderOption=date_time_render_option,
+            )
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+    except HttpError as e:
+        raise_for_http_error(e, context="Sheets batch_get")
+        raise
+
+    if raw:
+        return response
+
+    # Map each range to its values
+    result: dict[str, list[list[Any]]] = {}
+    for value_range in response.get("valueRanges", []):
+        range_key = value_range.get("range", "")
+        result[range_key] = value_range.get("values", [])
+    return result
+
+
+def batch_update(
+    sheets: Any,
+    spreadsheet_id: str,
+    updates: list[dict[str, Any]],
+    *,
+    drive: Any | None = None,
+    parent_id: str | None = None,
+    allow_multiple: bool = False,
+    value_input_option: str = "RAW",
+    include_values_in_response: bool = False,
+    response_value_render_option: str | None = None,
+    response_date_time_render_option: str | None = None,
+    raw: bool = False,
+) -> dict:
+    """Update multiple ranges in a spreadsheet in a single API call.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        updates: List of dicts with "range" and "values" keys.
+                 Example: [{"range": "A1:B2", "values": [[1, 2], [3, 4]]}]
+        drive: Drive API Resource (required if spreadsheet_id is a title)
+        parent_id: Optional Drive folder ID for title resolution
+        allow_multiple: Allow multiple title matches
+        value_input_option: "RAW" (default) or "USER_ENTERED"
+        include_values_in_response: If True, response includes written values
+        response_value_render_option: Optional render option for returned values
+        response_date_time_render_option: Optional datetime render option
+        raw: If True, return the full API response dict
+
+    Returns:
+        Summary dict with totalUpdatedRows, totalUpdatedCells, etc.
+        If raw=True, returns the full API response.
+    """
+    spreadsheet_real_id = (
+        resolve_spreadsheet(
+            drive,
+            spreadsheet_id,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+        if drive is not None
+        else spreadsheet_id
+    )
+
+    if (
+        drive is None
+        and not _SHEETS_URL_RE.search(spreadsheet_id)
+        and not re.fullmatch(r"[a-zA-Z0-9-_]{20,}", spreadsheet_id.strip())
+    ):
+        raise ValueError(
+            "Spreadsheet identifier looks like a title; pass drive=clients.drive."
+        )
+
+    # Build the data array for batchUpdate
+    data = []
+    for update in updates:
+        range_str = update.get("range")
+        values = update.get("values", [])
+        if not range_str:
+            raise ValueError("Each update must have a 'range' key")
+        data.append({"range": range_str, "values": [list(row) for row in values]})
+
+    body = {
+        "valueInputOption": value_input_option,
+        "data": data,
+        "includeValuesInResponse": include_values_in_response,
+        "responseValueRenderOption": response_value_render_option,
+        "responseDateTimeRenderOption": response_date_time_render_option,
+    }
+
+    try:
+        request = (
+            sheets.spreadsheets()
+            .values()
+            .batchUpdate(spreadsheetId=spreadsheet_real_id, body=body)
+        )
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Sheets batch_update")
+        raise
+
+    if raw:
+        return response
+
+    return {
+        "spreadsheetId": response.get("spreadsheetId"),
+        "totalUpdatedRows": response.get("totalUpdatedRows"),
+        "totalUpdatedColumns": response.get("totalUpdatedColumns"),
+        "totalUpdatedCells": response.get("totalUpdatedCells"),
+        "totalUpdatedSheets": response.get("totalUpdatedSheets"),
+    }
+
+
 class SheetsClient:
     """Simplified Google Sheets API wrapper focusing on common operations."""
 
@@ -806,4 +979,58 @@ class SheetsClient:
             start_cell=start_cell,
             include_header=include_header,
             include_index=include_index,
+        )
+
+    def batch_get(
+        self,
+        spreadsheet_id: str,
+        ranges: list[str],
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        major_dimension: str | None = None,
+        value_render_option: str | None = None,
+        date_time_render_option: str | None = None,
+        raw: bool = False,
+    ) -> dict[str, list[list[Any]]] | dict:
+        """Read multiple ranges from a spreadsheet in a single API call."""
+        return batch_get(
+            self.service,
+            spreadsheet_id,
+            ranges,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            major_dimension=major_dimension,
+            value_render_option=value_render_option,
+            date_time_render_option=date_time_render_option,
+            raw=raw,
+        )
+
+    def batch_update(
+        self,
+        spreadsheet_id: str,
+        updates: list[dict[str, Any]],
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        value_input_option: str = "RAW",
+        include_values_in_response: bool = False,
+        response_value_render_option: str | None = None,
+        response_date_time_render_option: str | None = None,
+        raw: bool = False,
+    ) -> dict:
+        """Update multiple ranges in a spreadsheet in a single API call."""
+        return batch_update(
+            self.service,
+            spreadsheet_id,
+            updates,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            value_input_option=value_input_option,
+            include_values_in_response=include_values_in_response,
+            response_value_render_option=response_value_render_option,
+            response_date_time_render_option=response_date_time_render_option,
+            raw=raw,
         )

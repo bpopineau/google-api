@@ -6,7 +6,13 @@ import typer
 from rich.table import Table
 
 from mygooglib import get_clients
-from mygooglib.contacts import list_contacts, search_contacts
+from mygooglib.contacts import (
+    create_contact,
+    delete_contact,
+    list_contacts,
+    search_contacts,
+    update_contact,
+)
 
 from .common import CliState, format_output
 
@@ -82,3 +88,79 @@ def search_cmd(
             c.get("resourceName") or "",
         )
     state.console.print(table)
+
+
+@app.command("add")
+def add_cmd(
+    ctx: typer.Context,
+    given_name: str = typer.Option(..., "--name", "-n", help="First name (required)."),
+    family_name: str = typer.Option(None, "--family", "-f", help="Last name."),
+    email: str = typer.Option(None, "--email", "-e", help="Email address."),
+    phone: str = typer.Option(None, "--phone", "-p", help="Phone number."),
+) -> None:
+    """Create a new contact."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    contact = create_contact(
+        clients.contacts.service,
+        given_name=given_name,
+        family_name=family_name,
+        email=email,
+        phone=phone,
+    )
+
+    if state.json:
+        state.console.print(format_output(contact, json_mode=True))
+    else:
+        state.console.print(f"[green]Created contact:[/green] {contact.get('name')}")
+        state.console.print(f"  Resource: {contact.get('resourceName')}")
+
+
+@app.command("update")
+def update_cmd(
+    ctx: typer.Context,
+    resource_name: str = typer.Argument(
+        ..., help="Resource name (e.g., 'people/c123...')."
+    ),
+    given_name: str = typer.Option(None, "--name", "-n", help="New first name."),
+    family_name: str = typer.Option(None, "--family", "-f", help="New last name."),
+    email: str = typer.Option(None, "--email", "-e", help="New email address."),
+    phone: str = typer.Option(None, "--phone", "-p", help="New phone number."),
+) -> None:
+    """Update an existing contact."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    contact = update_contact(
+        clients.contacts.service,
+        resource_name,
+        given_name=given_name,
+        family_name=family_name,
+        email=email,
+        phone=phone,
+    )
+
+    if state.json:
+        state.console.print(format_output(contact, json_mode=True))
+    else:
+        state.console.print(f"[green]Updated contact:[/green] {contact.get('name')}")
+
+
+@app.command("delete")
+def delete_cmd(
+    ctx: typer.Context,
+    resource_name: str = typer.Argument(
+        ..., help="Resource name (e.g., 'people/c123...')."
+    ),
+    confirm: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation."),
+) -> None:
+    """Delete a contact."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    if not confirm:
+        typer.confirm(f"Delete contact {resource_name}?", abort=True)
+
+    delete_contact(clients.contacts.service, resource_name)
+    state.console.print(f"[green]Deleted contact:[/green] {resource_name}")

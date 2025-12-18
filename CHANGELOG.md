@@ -1,5 +1,12 @@
 # Changelog
  
+## 0.4.0 — 2025-12-18
+
+### Added
+- **Contacts CRUD**: `create_contact`, `update_contact`, `delete_contact` functions + CLI commands (`mygoog contacts add/update/delete`).
+- **Sheets Batch Operations**: `batch_get` and `batch_update` for efficient multi-range operations, plus CLI (`mygoog sheets batch-get/batch-update`).
+- **Gmail Idempotency**: `send_email` now accepts optional `idempotency_key` parameter to prevent duplicate sends using the IdempotencyStore.
+
 ## 0.3.0 — 2025-12-18
 
 ### Added

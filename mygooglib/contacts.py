@@ -109,6 +109,137 @@ def _flatten_person(person: dict) -> dict:
     }
 
 
+def create_contact(
+    people_service: Any,
+    *,
+    given_name: str,
+    family_name: str | None = None,
+    email: str | None = None,
+    phone: str | None = None,
+) -> dict:
+    """Create a new contact.
+
+    Args:
+        people_service: People API Resource
+        given_name: First name (required)
+        family_name: Last name (optional)
+        email: Email address (optional)
+        phone: Phone number (optional)
+
+    Returns:
+        Created contact dict with resourceName.
+    """
+    person_body: dict[str, Any] = {
+        "names": [{"givenName": given_name, "familyName": family_name or ""}],
+    }
+    if email:
+        person_body["emailAddresses"] = [{"value": email}]
+    if phone:
+        person_body["phoneNumbers"] = [{"value": phone}]
+
+    try:
+        request = people_service.people().createContact(body=person_body)
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Contacts create")
+        raise
+
+    return _flatten_person(response)
+
+
+def update_contact(
+    people_service: Any,
+    resource_name: str,
+    *,
+    given_name: str | None = None,
+    family_name: str | None = None,
+    email: str | None = None,
+    phone: str | None = None,
+) -> dict:
+    """Update an existing contact.
+
+    Args:
+        people_service: People API Resource
+        resource_name: Contact resource name (e.g., 'people/c123...')
+        given_name: New first name (optional)
+        family_name: New last name (optional)
+        email: New email (optional)
+        phone: New phone (optional)
+
+    Returns:
+        Updated contact dict.
+
+    Note:
+        At least one field must be provided to update.
+    """
+    # First, get existing contact to retrieve etag
+    try:
+        get_request = people_service.people().get(
+            resourceName=resource_name,
+            personFields="names,emailAddresses,phoneNumbers",
+        )
+        existing = execute_with_retry_http_error(get_request, is_write=False)
+    except HttpError as e:
+        raise_for_http_error(e, context="Contacts update (get)")
+        raise
+
+    # Build update fields
+    update_person_fields: list[str] = []
+    person_body: dict[str, Any] = {"etag": existing.get("etag")}
+
+    if given_name is not None or family_name is not None:
+        names = existing.get("names", [{}])
+        name_entry = names[0] if names else {}
+        if given_name is not None:
+            name_entry["givenName"] = given_name
+        if family_name is not None:
+            name_entry["familyName"] = family_name
+        person_body["names"] = [name_entry]
+        update_person_fields.append("names")
+
+    if email is not None:
+        person_body["emailAddresses"] = [{"value": email}]
+        update_person_fields.append("emailAddresses")
+
+    if phone is not None:
+        person_body["phoneNumbers"] = [{"value": phone}]
+        update_person_fields.append("phoneNumbers")
+
+    if not update_person_fields:
+        raise ValueError("At least one field must be provided to update")
+
+    try:
+        request = people_service.people().updateContact(
+            resourceName=resource_name,
+            body=person_body,
+            updatePersonFields=",".join(update_person_fields),
+        )
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Contacts update")
+        raise
+
+    return _flatten_person(response)
+
+
+def delete_contact(
+    people_service: Any,
+    resource_name: str,
+) -> None:
+    """Delete a contact.
+
+    Args:
+        people_service: People API Resource
+        resource_name: Contact resource name (e.g., 'people/c123...')
+    """
+    try:
+        request = people_service.people().deleteContact(resourceName=resource_name)
+        execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Contacts delete")
+        raise
+
+
 class ContactsClient:
     """Simplified Google Contacts (People API) wrapper."""
 
@@ -131,3 +262,43 @@ class ContactsClient:
     def get_contact(self, resource_name: str) -> dict:
         """Get a specific contact."""
         return get_contact_by_resource_name(self.service, resource_name)
+
+    def create_contact(
+        self,
+        *,
+        given_name: str,
+        family_name: str | None = None,
+        email: str | None = None,
+        phone: str | None = None,
+    ) -> dict:
+        """Create a new contact."""
+        return create_contact(
+            self.service,
+            given_name=given_name,
+            family_name=family_name,
+            email=email,
+            phone=phone,
+        )
+
+    def update_contact(
+        self,
+        resource_name: str,
+        *,
+        given_name: str | None = None,
+        family_name: str | None = None,
+        email: str | None = None,
+        phone: str | None = None,
+    ) -> dict:
+        """Update an existing contact."""
+        return update_contact(
+            self.service,
+            resource_name,
+            given_name=given_name,
+            family_name=family_name,
+            email=email,
+            phone=phone,
+        )
+
+    def delete_contact(self, resource_name: str) -> None:
+        """Delete a contact."""
+        delete_contact(self.service, resource_name)

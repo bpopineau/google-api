@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import webbrowser
+from pathlib import Path
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -9,6 +11,8 @@ from rich.table import Table
 from mygooglib import get_clients
 from mygooglib.sheets import (
     append_row,
+    batch_get,
+    batch_update,
     get_range,
     get_sheets,
     to_dataframe,
@@ -310,3 +314,89 @@ def to_df_cmd(
     else:
         # Default behavior: Print CSV to stdout
         print(df.to_csv(index=False))
+
+
+@app.command("batch-get")
+def batch_get_cmd(
+    ctx: typer.Context,
+    identifier: str = typer.Argument(..., help="Spreadsheet ID, title, or URL."),
+    ranges: list[str] = typer.Option(
+        ..., "--range", "-r", help="A1 ranges to fetch (repeat for multiple)."
+    ),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Optional Drive folder ID to scope title searches."
+    ),
+) -> None:
+    """Read multiple ranges from a spreadsheet in one API call."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    result = batch_get(
+        clients.sheets.service,
+        identifier,
+        ranges,
+        drive=clients.drive.service,
+        parent_id=parent_id,
+    )
+
+    if state.json:
+        state.console.print(format_output(result, json_mode=True))
+        return
+
+    for range_key, values in result.items():
+        table = Table(title=f"Range: {range_key}")
+        table.add_column("row")
+        for row in values:
+            table.add_row(str(row))
+        state.console.print(table)
+
+
+@app.command("batch-update")
+def batch_update_cmd(
+    ctx: typer.Context,
+    identifier: str = typer.Argument(..., help="Spreadsheet ID, title, or URL."),
+    updates_file: Path = typer.Option(
+        ...,
+        "--file",
+        "-f",
+        help='JSON file with updates. Format: [{"range": ..., "values": ...}]',
+    ),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Optional Drive folder ID to scope title searches."
+    ),
+    user_entered: bool = typer.Option(
+        False, "--user-entered", help="Use USER_ENTERED input option."
+    ),
+) -> None:
+    """Update multiple ranges in a spreadsheet from a JSON file."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    if not updates_file.exists():
+        state.console.print(f"[red]Error:[/red] File not found: {updates_file}")
+        raise typer.Exit(1)
+
+    with open(updates_file, encoding="utf-8") as f:
+        updates = json.load(f)
+
+    if not isinstance(updates, list):
+        state.console.print("[red]Error:[/red] JSON must be a list of updates.")
+        raise typer.Exit(1)
+
+    result = batch_update(
+        clients.sheets.service,
+        identifier,
+        updates,
+        drive=clients.drive.service,
+        parent_id=parent_id,
+        value_input_option="USER_ENTERED" if user_entered else "RAW",
+    )
+
+    if state.json:
+        state.console.print(format_output(result, json_mode=True))
+        return
+
+    print_success(state.console, "Batch update complete")
+    for k, v in result.items():
+        if v is not None:
+            print_kv(state.console, k, v)

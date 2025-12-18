@@ -62,7 +62,8 @@ def send_email(
     bcc: str | Sequence[str] | None = None,
     user_id: str = "me",
     raw: bool = False,
-) -> str | dict:
+    idempotency_key: str | None = None,
+) -> str | dict | None:
     """Send a plain-text email with optional file attachments.
 
     Args:
@@ -75,10 +76,23 @@ def send_email(
             bcc: Optional BCC email(s)
             user_id: Gmail userId (default "me")
             raw: If True, return full API response dict
+            idempotency_key: Optional unique key to prevent duplicate sends.
+                             If provided and the key was already used, the function
+                             returns None instead of sending.
 
     Returns:
             Message ID string by default, or full response if raw=True.
+            Returns None if idempotency_key was already processed.
     """
+    # Check idempotency if key provided
+    if idempotency_key:
+        from mygooglib.utils.idempotency import IdempotencyStore
+
+        store = IdempotencyStore()
+        if store.check(idempotency_key):
+            # Already processed, skip sending
+            return None
+
     msg = EmailMessage()
     msg["To"] = _as_address_list(to)
     msg["Subject"] = subject
@@ -107,6 +121,13 @@ def send_email(
     except HttpError as e:
         raise_for_http_error(e, context="Gmail send_email")
         raise
+
+    # Record successful send if idempotency key was provided
+    if idempotency_key:
+        import json
+
+        metadata = json.dumps({"message_id": response.get("id")})
+        store.add(idempotency_key, metadata=metadata)
 
     return response if raw else response.get("id")
 
@@ -404,7 +425,8 @@ class GmailClient:
         bcc: str | Sequence[str] | None = None,
         user_id: str = "me",
         raw: bool = False,
-    ) -> str | dict:
+        idempotency_key: str | None = None,
+    ) -> str | dict | None:
         """Send a plain-text email with optional file attachments."""
         return send_email(
             self.service,
@@ -416,6 +438,7 @@ class GmailClient:
             bcc=bcc,
             user_id=user_id,
             raw=raw,
+            idempotency_key=idempotency_key,
         )
 
     def search_messages(
