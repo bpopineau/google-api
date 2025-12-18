@@ -78,10 +78,19 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
 
     if creds and creds.expired and creds.refresh_token:
         logger.info("Refreshing OAuth token (token path: %s)", token_path)
-        creds.refresh(Request())
-        token_path.write_text(creds.to_json(), encoding="utf-8")
-        logger.info("Saved refreshed token to %s", token_path)
-        return creds
+        try:
+            creds.refresh(Request())
+            token_path.write_text(creds.to_json(), encoding="utf-8")
+            logger.info("Saved refreshed token to %s", token_path)
+            return creds
+        except Exception as e:
+            # Token refresh can fail due to network issues, revoked tokens, or expired refresh tokens
+            logger.error("Failed to refresh OAuth token: %s", e)
+            raise RuntimeError(
+                f"OAuth token refresh failed: {e}. "
+                "Your refresh token may be expired or revoked. "
+                "Delete token.json and re-run scripts/oauth_setup.py to re-authenticate."
+            ) from e
 
     # Need fresh authorization
     if not creds_path.exists():
