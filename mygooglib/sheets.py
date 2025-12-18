@@ -15,6 +15,11 @@ from googleapiclient.errors import HttpError
 from mygooglib.exceptions import raise_for_http_error
 from mygooglib.utils.retry import execute_with_retry_http_error
 
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
 GOOGLE_SHEET_MIME = "application/vnd.google-apps.spreadsheet"
 
 
@@ -521,6 +526,101 @@ def get_sheets(
     return results
 
 
+def to_dataframe(
+    sheets: Any,
+    spreadsheet_id: str,
+    a1_range: str,
+    *,
+    drive: Any | None = None,
+    header: bool = True,
+) -> "pd.DataFrame":
+    """Read a range into a Pandas DataFrame.
+
+    Requires 'pandas' to be installed.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        a1_range: A1 range string
+        drive: Optional Drive API Resource for title resolution
+        header: If True, use the first row as the header
+
+    Returns:
+        A pandas DataFrame.
+
+    Raises:
+        ImportError: If pandas is not installed.
+    """
+    if pd is None:
+        raise ImportError("Pandas is required for this feature. Install 'pandas'.")
+
+    values = get_range(sheets, spreadsheet_id, a1_range, drive=drive)
+    if not values:
+        return pd.DataFrame()
+
+    if header:
+        return pd.DataFrame(values[1:], columns=values[0])
+    return pd.DataFrame(values)
+
+
+def from_dataframe(
+    sheets: Any,
+    spreadsheet_id: str,
+    sheet_name: str,
+    df: "pd.DataFrame",
+    *,
+    drive: Any | None = None,
+    start_cell: str = "A1",
+    include_header: bool = True,
+    include_index: bool = False,
+    resize: bool = False,
+) -> dict | None:
+    """Write a Pandas DataFrame to a sheet.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        sheet_name: Tab name to write to
+        df: The DataFrame to write
+        drive: Optional Drive API Resource
+        start_cell: Top-left cell (default 'A1')
+        include_header: Whether to write column names
+        include_index: Whether to write the index
+        resize: If True, clear the sheet and resize it to fit (not implemented in v0.3)
+
+    Returns:
+        Result of update_range.
+    """
+    if pd is None:
+        raise ImportError("Pandas is required for this feature. Install 'pandas'.")
+
+    # Convert to list of lists, handling NaNs as empty strings (JSON compliant)
+    values = df.fillna("").reset_index(drop=not include_index).values.tolist()
+
+    if include_header:
+        cols = list(df.columns)
+        if include_index:
+            # If index is included, we need a name for the index column(s)
+            index_names = list(df.index.names)
+            # If simple unnamed index, just empty string
+            index_names = [n if n else "" for n in index_names]
+            cols = index_names + cols
+        values.insert(0, cols)
+
+    # Construct target range
+    safe_sheet = _quote_sheet_name(sheet_name)
+    target_range = f"{safe_sheet}!{start_cell}"
+
+    return update_range(
+        sheets,
+        spreadsheet_id,
+        target_range,
+        values,
+        drive=drive,
+        value_input_option="USER_ENTERED",  # Usually want implicit conversion
+    )
+
+
 class SheetsClient:
     """Simplified Google Sheets API wrapper focusing on common operations."""
 
@@ -668,4 +768,42 @@ class SheetsClient:
             parent_id=parent_id,
             allow_multiple=allow_multiple,
             raw=raw,
+        )
+
+    def to_dataframe(
+        self,
+        spreadsheet_id: str,
+        a1_range: str,
+        *,
+        header: bool = True,
+    ) -> "pd.DataFrame":
+        """Read a range into a Pandas DataFrame."""
+        return to_dataframe(
+            self.service,
+            spreadsheet_id,
+            a1_range,
+            drive=self.drive,
+            header=header,
+        )
+
+    def from_dataframe(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        df: "pd.DataFrame",
+        *,
+        start_cell: str = "A1",
+        include_header: bool = True,
+        include_index: bool = False,
+    ) -> dict | None:
+        """Write a Pandas DataFrame to a sheet."""
+        return from_dataframe(
+            self.service,
+            spreadsheet_id,
+            sheet_name,
+            df,
+            drive=self.drive,
+            start_cell=start_cell,
+            include_header=include_header,
+            include_index=include_index,
         )

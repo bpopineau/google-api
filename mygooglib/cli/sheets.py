@@ -7,7 +7,13 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
 from mygooglib import get_clients
-from mygooglib.sheets import append_row, get_range, get_sheets, update_range
+from mygooglib.sheets import (
+    append_row,
+    get_range,
+    get_sheets,
+    to_dataframe,
+    update_range,
+)
 
 from .common import CliState, format_output, print_kv, print_success, prompt_selection
 
@@ -264,3 +270,43 @@ def open_cmd(
 
     state.console.print(f"Opening: {url}")
     webbrowser.open(url)
+
+
+@app.command("to-df")
+def to_df_cmd(
+    ctx: typer.Context,
+    identifier: str = typer.Argument(..., help="Spreadsheet ID, title, or URL."),
+    a1_range: str = typer.Argument(..., help='A1 range, e.g. "Sheet1!A1:C10".'),
+    parent_id: str | None = typer.Option(
+        None, "--parent-id", help="Optional Drive folder ID."
+    ),
+    header: bool = typer.Option(True, help="Use first row as header."),
+) -> None:
+    """Read a range into a Pandas DataFrame and print as CSV.
+
+    Requires 'pandas' to be installed.
+    """
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    try:
+        df = to_dataframe(
+            clients.sheets.service,
+            identifier,
+            a1_range,
+            drive=clients.drive.service,
+            header=header,
+        )
+    except ImportError:
+        state.console.print("[red]Error:[/red] 'pandas' not installed.")
+        state.console.print("Run: pip install '.[data]'")
+        raise typer.Exit(1)
+
+    if state.json:
+        # JSON output for DataFrame
+        import json
+
+        state.console.print(json.dumps(df.to_dict(orient="records")))
+    else:
+        # Default behavior: Print CSV to stdout
+        print(df.to_csv(index=False))

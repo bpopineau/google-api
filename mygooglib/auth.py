@@ -20,6 +20,8 @@ SCOPES: list[str] = [
     "https://www.googleapis.com/auth/gmail.modify",
     "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/tasks",
+    # Added in v0.3 for Contacts integration:
+    "https://www.googleapis.com/auth/contacts.readonly",
 ]
 
 

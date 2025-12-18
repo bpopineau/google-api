@@ -1,5 +1,12 @@
 # Changelog
  
+## 0.3.0 — 2025-12-18
+
+### Added
+- **Pandas DataFrames for Sheets**: `to_dataframe()` and `from_dataframe()` helpers, plus `mygoog sheets to-df` CLI command.
+- **Idempotency Store**: `mygooglib.utils.idempotency.IdempotencyStore` (sqlite-based) and `@idempotent` decorator to prevent duplicate script execution.
+- **Contacts API**: New `ContactsClient` (People API) wrapper for listing and searching Google Contacts.
+
 ## 0.2.0 — 2025-12-18
 
 ### Added

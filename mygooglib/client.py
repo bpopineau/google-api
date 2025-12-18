@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 
 from mygooglib.auth import get_creds
 from mygooglib.calendar import CalendarClient
+from mygooglib.contacts import ContactsClient
 from mygooglib.docs import DocsClient
 from mygooglib.drive import DriveClient
 from mygooglib.gmail import GmailClient
@@ -30,6 +31,7 @@ class Clients:
     calendar: CalendarClient
     tasks: TasksClient
     gmail: GmailClient
+    contacts: ContactsClient
 
 
 _DEFAULT_CLIENTS: Clients | None = None
@@ -71,6 +73,7 @@ def get_clients(
     gmail_service = build("gmail", "v1", credentials=creds)
     calendar_service = build("calendar", "v3", credentials=creds)
     tasks_service = build("tasks", "v1", credentials=creds)
+    people_service = build("people", "v1", credentials=creds)
 
     clients = Clients(
         drive=DriveClient(drive_service),
@@ -79,6 +82,7 @@ def get_clients(
         calendar=CalendarClient(calendar_service),
         tasks=TasksClient(tasks_service),
         gmail=GmailClient(gmail_service),
+        contacts=ContactsClient(people_service),
     )
 
     if use_cache and is_default_creds:

@@ -21,6 +21,7 @@ from mygooglib.exceptions import GoogleApiError
 
 from . import auth as auth_cmd
 from . import calendar as calendar_cmd
+from . import contacts as contacts_cmd
 from . import docs as docs_cmd
 from . import drive as drive_cmd
 from . import gmail as gmail_cmd
@@ -42,7 +43,9 @@ app.add_typer(sheets_cmd.app, name="sheets")
 app.add_typer(gmail_cmd.app, name="gmail")
 app.add_typer(calendar_cmd.app, name="calendar")
 app.add_typer(tasks_cmd.app, name="tasks")
+app.add_typer(tasks_cmd.app, name="tasks")
 app.add_typer(docs_cmd.app, name="docs")
+app.add_typer(contacts_cmd.app, name="contacts")
 app.add_typer(workflows_cmd.app, name="workflows")
 
 
@@ -124,6 +127,7 @@ def clients_cmd(ctx: typer.Context) -> None:
         "calendar": bool(getattr(clients, "calendar", None)),
         "tasks": bool(getattr(clients, "tasks", None)),
         "docs": bool(getattr(clients, "docs", None)),
+        "contacts": bool(getattr(clients, "contacts", None)),
     }
     state.console.print(format_output(output, json_mode=state.json))
 
