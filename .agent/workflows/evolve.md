@@ -35,22 +35,32 @@ For EVERY sub-task:
    - If work spawns sub-items, add them to `task.md`
    
 3. **AFTER completing a task**:
-   - Verify the work is actually done
+   - **Prove It**: Verify observable evidence exists (e.g., "Terminal shows 'exit code 0'", "File exists at path"). Do NOT assume success based on silence.
    - Mark the task as `[x]` (complete)
    - Read `task.md` to identify the NEXT uncompleted task
 
-### Rule 4: Gate Verification
+### Rule 4: Gate Verification (The Loop)
 At each **Gate** checkpoint:
-1. Read `task.md` 
-2. Verify ALL prior items in the phase are `[x]`
-3. If any are `[ ]` or `[/]`, complete them FIRST
-4. Only proceed when gate conditions are met
+1. Run the verification command.
+2. **IF PASS**:
+   - Mark items `[x]` and proceed.
+3. **IF FAIL**:
+   - DO NOT mark `[x]`.
+   - Add a sub-item: `[ ] Fix <specific error>`.
+   - Fix the issue.
+   - RECURSE: Go back to Step 1 (Run verification).
+   - Only proceed when the check passes cleanly.
 
 ### Rule 5: Phase Transitions
 When moving from Phase N to Phase N+1:
 1. Verify ALL items in Phase N are `[x]`
 2. Mark Phase N itself as `[x]`
 3. Read `implementation_plan.md` (if in BUILD/VERIFY) to cross-check ALL planned work
+
+### Rule 6: The UI Mirror Rule
+When you update `task.md`, you MUST immediately call `task_boundary`:
+- Mark `[/]` in file -> Call `task_boundary` with `TaskStatus` matching the item.
+- Mark `[x]` in file -> Call `task_boundary` with `TaskSummary` indicating completion.
 
 ---
 
@@ -63,7 +73,9 @@ When moving from Phase N to Phase N+1:
 ```powershell
 git status --short
 ```
-- **Gate**: Working directory is clean OR you are on a safe feature branch.
+- **Gate**:
+  - **IF CLEAN**: Mark `[x]` and proceed.
+  - **IF DIRTY**: Stop. Commit changes or stash them. Recurse.
 
 ### 0.2 Create Task Artifact
 - **BEFORE**: Confirm no existing `task.md` conflicts
@@ -117,7 +129,9 @@ git status --short
 - **BEFORE**: Mark `Health Check` as `[/]` in `task.md`
 // turbo
 - Run `/health_check` workflow
-- **Gate**: All checks must pass
+- **Gate**:
+  - **IF PASS**: Mark `[x]` and proceed.
+  - **IF FAIL**: Stop. Add sub-task `[ ] Fix health check`. Fix it. Recurse.
 - **AFTER**: Mark `Health Check` as `[x]`
 
 ### 1.2 Coverage Audit
@@ -143,13 +157,17 @@ git status --short
 ### 2.1 Check Goals
 - **BEFORE**: Mark `Check Goals` as `[/]` in `task.md`
 - Read `AUTOMATION_GOALS.md` and `docs/development/roadmap.md`
-- **Gate**: Proposed work must align with documented goals
+- **Gate**:
+  - **IF ALIGNED**: Mark `[x]`.
+  - **IF MISALIGNED**: Stop. Discuss with user. Update goals or plan. Recurse.
 - **AFTER**: Mark `Check Goals` as `[x]`
 
 ### 2.2 Present Analysis
 - **BEFORE**: Mark `Present Analysis` as `[/]` in `task.md`
 - Use `notify_user` to present findings and get approval
-- **Gate**: User must explicitly approve feature(s) to implement
+- **Gate**:
+  - **IF APPROVED**: Mark `[x]` and proceed.
+  - **IF CHANGES REQUESTED**: Stay in Phase 2. Update proposal. Recurse.
 - **AFTER**: Mark `Present Analysis` as `[x]`
 
 ### 2.3 Create Implementation Plan
@@ -204,7 +222,9 @@ git status --short
 ```powershell
 .\.venv\Scripts\Activate.ps1; python -c "from mygooglib import get_clients; print('Import OK')"
 ```
-- **Gate**: Must print "Import OK"
+- **Gate**:
+  - **IF "Import OK"**: Mark `[x]`.
+  - **IF ERROR**: Stop. Fix circular imports/syntax. Recurse.
 - **AFTER**: Mark `Import Verification` as `[x]`
 
 ### 3.4 Write Unit Tests
@@ -231,7 +251,9 @@ git status --short
 ```powershell
 .\.venv\Scripts\Activate.ps1; ruff check mygooglib/ tests/
 ```
-- **Gate**: Must pass
+- **Gate**:
+  - **IF PASS**: Mark `[x]`.
+  - **IF FAIL**: Stop. Fix lint errors. Recurse.
 - **AFTER**: Mark `Lint Check` as `[x]`, mark Phase 3 as `[x]`
 
 ### BUILD Phase Exit Gate
@@ -253,7 +275,9 @@ git status --short
 ```powershell
 .\.venv\Scripts\Activate.ps1; pytest tests/ -v
 ```
-- **Gate**: ALL tests must pass
+- **Gate**:
+  - **IF PASS**: Mark `[x]`.
+  - **IF FAIL**: Stop. Fix code or tests. Recurse.
 - **AFTER**: Mark `Unit Tests` as `[x]`
 
 ### 4.2 Smoke Tests
@@ -262,13 +286,17 @@ git status --short
 ```powershell
 .\.venv\Scripts\Activate.ps1; python scripts/smoke_test.py all
 ```
-- **Gate**: All services must connect
+- **Gate**:
+  - **IF CONNECT**: Mark `[x]`.
+  - **IF FAIL**: Stop. Debug service connection. Recurse.
 - **AFTER**: Mark `Smoke Tests` as `[x]`
 
 ### 4.3 Negative Testing
 - **BEFORE**: Mark `Negative Testing` as `[/]`
 - Test failure modes: invalid IDs, missing args, wrong types
-- **Gate**: Errors are graceful, not raw tracebacks
+- **Gate**:
+  - **IF GRACEFUL**: Mark `[x]`.
+  - **IF TRACEBACK**: Stop. Add exception handling. Recurse.
 - **AFTER**: Mark `Negative Testing` as `[x]`
 
 ### 4.4 Manual Check
@@ -320,13 +348,18 @@ git status --short
 ```powershell
 .\.venv\Scripts\Activate.ps1; python scripts/smoke_test.py all
 ```
-- **Gate**: Must pass before commit
+- **Gate**:
+  - **IF PASS**: Mark `[x]`.
+  - **IF FAIL**: STOP. Do not commit. Fix issues. Recurse.
 - **AFTER**: Mark `Final Verification` as `[x]`
 
 ### 6.3 Push
 - **BEFORE**: Mark `Push` as `[/]`
 - Commit: `git commit -m "feat: <description>"`
 - Push: `git push`
+- **Gate**:
+  - **IF SUCCESS**: Mark `[x]`.
+  - **IF REJECTED**: Pull latest changes. Resolve conflicts. Recurse.
 - **AFTER**: Mark `Push` as `[x]`, mark Phase 6 as `[x]`
 
 ---
@@ -357,4 +390,3 @@ Select-String -Path "task.md" -Pattern "\[/\]" | Measure-Object
 # Count complete items
 Select-String -Path "task.md" -Pattern "\[x\]" | Measure-Object
 ```
-
