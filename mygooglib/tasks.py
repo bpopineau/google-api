@@ -139,6 +139,28 @@ def list_tasks(
     return all_items
 
 
+def complete_task(
+    tasks: Any,
+    task_id: str,
+    *,
+    tasklist_id: str = "@default",
+    raw: bool = False,
+) -> dict | None:
+    """Mark a task as completed."""
+    try:
+        # We must first get the task to have its current state,
+        # then update status to 'completed'.
+        # Actually, patch is better.
+        body = {"status": "completed"}
+        request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Tasks complete_task")
+        raise
+
+    return response if raw else None
+
+
 def delete_task(
     tasks: Any,
     task_id: str,

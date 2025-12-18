@@ -70,12 +70,13 @@ def prompt_selection(
     items: list[dict],
     *,
     label_key: str = "title",
-    id_key: str = "id",
+    id_key: str | None = "id",
     prompt_text: str = "Select item number (or 'q' to quit)",
-) -> str | None:
+) -> Any | None:
     """Standardized interactive selection prompt.
 
-    Returns the value of id_key for the selected item, or None if quit.
+    Returns the value of id_key for the selected item, or the whole dict if id_key is None.
+    Returns None if quit.
     """
     if not items:
         return None
@@ -88,7 +89,9 @@ def prompt_selection(
         try:
             idx = int(choice) - 1
             if 0 <= idx < len(items):
-                return str(items[idx].get(id_key))
+                if id_key:
+                    return items[idx].get(id_key)
+                return items[idx]
             else:
                 console.print("[red]Invalid selection.[/red]")
         except ValueError:

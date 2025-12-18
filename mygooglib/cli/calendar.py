@@ -54,6 +54,10 @@ def list_cmd(
             progress_callback=update_progress,
         )
 
+    # Ensure results is a list for prompt_selection
+    if not isinstance(results, list):
+        results = results.get("items", [])
+
     if state.json:
         state.console.print(format_output(results, json_mode=True))
         return
@@ -81,7 +85,7 @@ def list_cmd(
 
     if interactive and results:
         selected = prompt_selection(
-            state.console, results, label_key="summary", id_key="id"
+            state.console, results, label_key="summary", id_key=None
         )
         if selected:
             action = typer.prompt(

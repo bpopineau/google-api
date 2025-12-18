@@ -35,6 +35,10 @@ def list_lists_cmd(
 
     results = list_tasklists(clients.tasks.service, max_results=max_results)
 
+    # Ensure results is a list
+    if not isinstance(results, list):
+        results = results.get("items", [])
+
     if state.json:
         state.console.print(format_output(results, json_mode=True))
         return
@@ -58,7 +62,7 @@ def list_lists_cmd(
 
     if interactive and results:
         selected = prompt_selection(
-            state.console, results, label_key="title", id_key="id"
+            state.console, results, label_key="title", id_key=None
         )
         if selected:
             action = typer.prompt(
@@ -105,6 +109,10 @@ def list_cmd(
             progress_callback=update_progress,
         )
 
+    # Ensure results is a list
+    if not isinstance(results, list):
+        results = results.get("items", [])
+
     if state.json:
         state.console.print(format_output(results, json_mode=True))
         return
@@ -134,7 +142,7 @@ def list_cmd(
 
     if interactive and results:
         selected = prompt_selection(
-            state.console, results, label_key="title", id_key="id"
+            state.console, results, label_key="title", id_key=None
         )
         if selected:
             action = typer.prompt(
@@ -238,6 +246,10 @@ def complete_cmd(
         tasks = list_tasks(
             clients.tasks.service, tasklist_id=tasklist_id, show_completed=False
         )
+        # Ensure tasks is a list
+        if not isinstance(tasks, list):
+            tasks = tasks.get("items", [])
+
         if not tasks:
             state.console.print("No pending tasks found.")
             return
@@ -251,21 +263,8 @@ def complete_cmd(
             table.add_row(str(i), t.get("title"), t.get("id"))
 
         state.console.print(table)
-        choice = Prompt.ask(
-            "Select task number to complete (or 'q' to quit)", default="q"
-        )
-        if choice.lower() == "q":
-            return
-
-        try:
-            idx = int(choice) - 1
-            if 0 <= idx < len(tasks):
-                task_id = tasks[idx]["id"]
-            else:
-                state.console.print("[red]Invalid selection.[/red]")
-                return
-        except ValueError:
-            state.console.print("[red]Invalid input.[/red]")
+        task_id = prompt_selection(state.console, tasks, label_key="title", id_key="id")
+        if not task_id:
             return
 
     complete_task(clients.tasks.service, task_id, tasklist_id=tasklist_id)
