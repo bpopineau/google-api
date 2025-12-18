@@ -94,7 +94,7 @@ git status --short
 - [ ] Phase 2: PLAN
     - [ ] Check Goals (`AUTOMATION_GOALS.md`)
     - [ ] Present Analysis
-    - [ ] Create Implementation Plan
+    - [ ] Create Implementation Plan (`/plan_feature`)
 - [ ] Phase 3: BUILD
     - [ ] Scaffold (Optional)
     - [ ] Implement Core Logic
@@ -102,6 +102,7 @@ git status --short
     - [ ] Write Unit Tests
     - [ ] CLI Support (Optional)
     - [ ] Lint Check
+    - [ ] Code Quality Audit (`/code_quality_audit`)
 - [ ] Phase 4: VERIFY
     - [ ] Unit Tests (`pytest`)
     - [ ] Smoke Tests (`smoke_test.py`)
@@ -172,11 +173,10 @@ git status --short
 
 ### 2.3 Create Implementation Plan
 - **BEFORE**: Mark `Create Implementation Plan` as `[/]` in `task.md`
-- Create `implementation_plan.md` with:
-  - **ALL files to modify/create** (numbered list)
-  - **ALL method signatures** 
-  - **ALL CLI commands**
-  - **ALL test files and test cases**
+- Run `/plan_feature` workflow
+- **Gate**:
+  - **IF APPROVED**: Proceed.
+  - **IF AMBIGUOUS**: Stop. Refine plan. Recurse.
 - **AFTER**: Mark `Create Implementation Plan` as `[x]`, mark Phase 2 as `[x]`
 
 ---
@@ -254,7 +254,15 @@ git status --short
 - **Gate**:
   - **IF PASS**: Mark `[x]`.
   - **IF FAIL**: Stop. Fix lint errors. Recurse.
-- **AFTER**: Mark `Lint Check` as `[x]`, mark Phase 3 as `[x]`
+- **AFTER**: Mark `Lint Check` as `[x]`
+
+### 3.7 Code Quality Audit (The Garbage Collector)
+- **BEFORE**: Mark `Code Quality Audit` as `[/]`
+- Run `/code_quality_audit` workflow
+- **Gate**:
+  - **IF CLEAN**: Mark `[x]`.
+  - **IF SLOPPY (debug/TODOs)**: Stop. Clean up. Recurse.
+- **AFTER**: Mark `Code Quality Audit` as `[x]`, mark Phase 3 as `[x]`
 
 ### BUILD Phase Exit Gate
 **BEFORE leaving BUILD phase:**
