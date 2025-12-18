@@ -1,4 +1,12 @@
+# Design Principles & Engineering Strategy
+
+> [!NOTE]
+> This document was originally `LIBRARY_STRATEGY.md`. It serves as the foundational design philosophy for `mygooglib`, detailing the "why" and "how" behind the library's architecture and abstractions.
+
+---
+
 # Building a Personal Google APIs Python Library (Drive, Sheets, Docs, Calendar, Tasks, Gmail)
+
 
 ## Introduction
 
