@@ -9,6 +9,7 @@ from typing import Any
 import typer
 from rich.console import Console
 from rich.panel import Panel
+from rich.prompt import Prompt
 from rich.text import Text
 
 
@@ -62,3 +63,33 @@ def print_success(console: Console, message: str) -> None:
 
 def print_kv(console: Console, key: str, value: Any) -> None:
     console.print(Text(f"{key}: ", style="bold") + Text(str(value)))
+
+
+def prompt_selection(
+    console: Console,
+    items: list[dict],
+    *,
+    label_key: str = "title",
+    id_key: str = "id",
+    prompt_text: str = "Select item number (or 'q' to quit)",
+) -> str | None:
+    """Standardized interactive selection prompt.
+
+    Returns the value of id_key for the selected item, or None if quit.
+    """
+    if not items:
+        return None
+
+    while True:
+        choice = Prompt.ask(prompt_text, default="q")
+        if choice.lower() == "q":
+            return None
+
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(items):
+                return str(items[idx].get(id_key))
+            else:
+                console.print("[red]Invalid selection.[/red]")
+        except ValueError:
+            console.print("[red]Invalid input.[/red]")

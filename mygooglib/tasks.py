@@ -89,6 +89,7 @@ def list_tasks(
     show_hidden: bool = False,
     max_results: int = 100,
     raw: bool = False,
+    progress_callback: Any | None = None,
 ) -> list[dict] | dict:
     """List tasks in a task list.
 
@@ -99,45 +100,56 @@ def list_tasks(
         show_hidden: Include hidden tasks
         max_results: Maximum number of tasks to return
         raw: If True, return full API response dict
+        progress_callback: Optional callback(count) for progress tracking.
 
     Returns:
         List of task dicts by default, or full response if raw=True.
     """
+    all_items = []
+    page_token = None
+
     try:
-        request = tasks.tasks().list(
-            tasklist=tasklist_id,
-            showCompleted=show_completed,
-            showHidden=show_hidden,
-            maxResults=max_results,
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
+        while True:
+            request = tasks.tasks().list(
+                tasklist=tasklist_id,
+                showCompleted=show_completed,
+                showHidden=show_hidden,
+                maxResults=min(max_results - len(all_items), 100) if max_results else 100,
+                pageToken=page_token,
+            )
+            response = execute_with_retry_http_error(request, is_write=False)
+            items = response.get("items", [])
+            all_items.extend(items)
+            
+            if progress_callback:
+                progress_callback(len(items))
+
+            page_token = response.get("nextPageToken")
+            if not page_token or (max_results and len(all_items) >= max_results):
+                break
+
     except HttpError as e:
         raise_for_http_error(e, context="Tasks list_tasks")
         raise
 
-    return response if raw else response.get("items", [])
+    if raw:
+        return {"items": all_items}
+    return all_items
 
 
-def complete_task(
+def delete_task(
     tasks: Any,
     task_id: str,
     *,
     tasklist_id: str = "@default",
-    raw: bool = False,
-) -> dict | None:
-    """Mark a task as completed."""
+) -> None:
+    """Delete a task from a task list."""
     try:
-        # We must first get the task to have its current state,
-        # then update status to 'completed'.
-        # Actually, patch is better.
-        body = {"status": "completed"}
-        request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
-        response = execute_with_retry_http_error(request, is_write=True)
+        request = tasks.tasks().delete(tasklist=tasklist_id, task=task_id)
+        execute_with_retry_http_error(request, is_write=True)
     except HttpError as e:
-        raise_for_http_error(e, context="Tasks complete_task")
+        raise_for_http_error(e, context="Tasks delete_task")
         raise
-
-    return response if raw else None
 
 
 class TasksClient:
@@ -180,6 +192,7 @@ class TasksClient:
         show_hidden: bool = False,
         max_results: int = 100,
         raw: bool = False,
+        progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """List tasks in a task list."""
         return list_tasks(
@@ -189,6 +202,7 @@ class TasksClient:
             show_hidden=show_hidden,
             max_results=max_results,
             raw=raw,
+            progress_callback=progress_callback,
         )
 
     def complete_task(
@@ -205,3 +219,12 @@ class TasksClient:
             tasklist_id=tasklist_id,
             raw=raw,
         )
+
+    def delete_task(
+        self,
+        task_id: str,
+        *,
+        tasklist_id: str = "@default",
+    ) -> None:
+        """Delete a task from a task list."""
+        return delete_task(self.service, task_id, tasklist_id=tasklist_id)

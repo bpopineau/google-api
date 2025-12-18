@@ -3,13 +3,21 @@ from __future__ import annotations
 from pathlib import Path
 
 import typer
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Prompt
 from rich.table import Table
 
 from mygooglib import get_clients
-from mygooglib.gmail import get_message, mark_read, search_messages, send_email
+from mygooglib.gmail import (
+    archive_message,
+    get_message,
+    mark_read,
+    search_messages,
+    send_email,
+    trash_message,
+)
 
-from .common import CliState, format_output, print_kv, print_success
+from .common import CliState, format_output, print_kv, print_success, prompt_selection
 
 app = typer.Typer(help="Gmail commands.", no_args_is_help=True)
 
@@ -82,16 +90,33 @@ def search_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
-    results = search_messages(
-        clients.gmail.service,
-        query,
-        max_results=max_results,
-        include_spam_trash=include_spam_trash,
-    )
-
     if state.json:
+        results = search_messages(
+            clients.gmail.service,
+            query,
+            max_results=max_results,
+            include_spam_trash=include_spam_trash,
+        )
         state.console.print(format_output(results, json_mode=True))
         return
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=state.console,
+    ) as progress:
+        task = progress.add_task("Searching...", total=max_results)
+
+        def _cb(current, total):
+            progress.update(task, completed=current, total=total)
+
+        results = search_messages(
+            clients.gmail.service,
+            query,
+            max_results=max_results,
+            include_spam_trash=include_spam_trash,
+            progress_callback=_cb,
+        )
 
     table = Table(title=f"Messages ({len(results)})")
     if interactive:
@@ -115,20 +140,21 @@ def search_cmd(
     state.console.print(table)
 
     if interactive and results:
-        while True:
-            choice = Prompt.ask(
-                "Select message number to view (or 'q' to quit)", default="q"
+        selected_id = prompt_selection(
+            state.console, results, label_key="subject", id_key="id"
+        )
+        if selected_id:
+            action = typer.prompt(
+                "Action: [v]iew, [m]ark read, [t]rash, [a]rchive, [q]uit", default="v"
             )
-            if choice.lower() == "q":
-                break
-            try:
-                idx = int(choice) - 1
-                if 0 <= idx < len(results):
-                    view_cmd(ctx, results[idx]["id"])
-                else:
-                    state.console.print("[red]Invalid selection.[/red]")
-            except ValueError:
-                state.console.print("[red]Invalid input.[/red]")
+            if action == "v":
+                view_cmd(ctx, selected_id)
+            elif action == "m":
+                mark_read_cmd(ctx, selected_id)
+            elif action == "t":
+                trash_cmd(ctx, selected_id)
+            elif action == "a":
+                archive_cmd(ctx, selected_id)
 
 
 @app.command("mark-read")
@@ -148,6 +174,46 @@ def mark_read_cmd(
         return
 
     print_success(state.console, "Marked read")
+    print_kv(state.console, "id", message_id)
+
+
+@app.command("trash")
+def trash_cmd(
+    ctx: typer.Context,
+    message_id: str = typer.Argument(..., help="Message ID"),
+) -> None:
+    """Move a message to trash."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    _ = trash_message(clients.gmail.service, message_id)
+
+    if state.json:
+        state.console.print(
+            format_output({"id": message_id, "trashed": True}, json_mode=True)
+        )
+        return
+
+    print_success(state.console, "Moved to trash")
+    print_kv(state.console, "id", message_id)
+
+
+@app.command("archive")
+def archive_cmd(
+    ctx: typer.Context,
+    message_id: str = typer.Argument(..., help="Message ID"),
+) -> None:
+    """Archive a message (remove from INBOX)."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    _ = archive_message(clients.gmail.service, message_id)
+
+    if state.json:
+        state.console.print(
+            format_output({"id": message_id, "archived": True}, json_mode=True)
+        )
+        return
+
+    print_success(state.console, "Archived")
     print_kv(state.console, "id", message_id)
 
 

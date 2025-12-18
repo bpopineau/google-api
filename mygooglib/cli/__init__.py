@@ -97,6 +97,19 @@ def _global_options(
         install_rich_traceback(show_locals=False, suppress=[typer])
 
 
+@app.command("version")
+def version_cmd(ctx: typer.Context) -> None:
+    """Print the library version."""
+    state = CliState.from_ctx(ctx)
+    # In a real package, we'd use importlib.metadata.version("mygooglib")
+    # For this local dev setup, we'll just hardcode it or read from pyproject.toml
+    version = "0.1.0"
+    if state.json:
+        state.console.print(format_output({"version": version}, json_mode=True))
+    else:
+        state.console.print(f"mygooglib v{version}")
+
+
 @app.command("clients")
 def clients_cmd(ctx: typer.Context) -> None:
     """Build clients and print which services are available."""

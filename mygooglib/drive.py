@@ -152,6 +152,7 @@ def upload_file(
     name: str | None = None,
     mime_type: str | None = None,
     raw: bool = False,
+    progress_callback: Any | None = None,
 ) -> str | dict:
     """Upload a local file to Drive.
 
@@ -161,6 +162,7 @@ def upload_file(
         parent_id: Destination folder ID (None = root)
         name: Name in Drive (None = use local filename)
         mime_type: Override MIME type (None = auto-detect)
+        progress_callback: Optional callable(bytes_sent, total_bytes)
 
     Returns:
         The uploaded file's ID by default. If raw=True, returns the full API response.
@@ -182,7 +184,17 @@ def upload_file(
 
     try:
         request = drive.files().create(body=metadata, media_body=media, fields="id")
-        result = execute_with_retry_http_error(request, is_write=True)
+        
+        if progress_callback:
+            response = None
+            while response is None:
+                status, response = request.next_chunk()
+                if status:
+                    progress_callback(status.resumable_progress, status.total_size)
+            result = response
+        else:
+            result = execute_with_retry_http_error(request, is_write=True)
+            
         return result if raw else result["id"]
     except HttpError as e:
         raise_for_http_error(e, context="Drive upload_file")
@@ -195,6 +207,7 @@ def download_file(
     dest_path: str | os.PathLike,
     *,
     export_mime_type: str | None = None,
+    progress_callback: Any | None = None,
 ) -> Path:
     """Download a file from Drive.
 
@@ -205,6 +218,7 @@ def download_file(
         export_mime_type: For Google Docs/Sheets/Slides, export as this type
             (e.g., 'application/pdf', 'text/csv'). If None and file is a
             Google Workspace file, raises an error.
+        progress_callback: Optional callable(bytes_received, total_bytes)
 
     Returns:
         Path to the downloaded file.
@@ -214,9 +228,10 @@ def download_file(
 
     try:
         # Get file metadata to check if it's a Google Workspace file
-        meta_request = drive.files().get(fileId=file_id, fields="mimeType, name")
+        meta_request = drive.files().get(fileId=file_id, fields="mimeType, name, size")
         meta = execute_with_retry_http_error(meta_request, is_write=False)
         file_mime = meta.get("mimeType", "")
+        total_size = int(meta.get("size", 0))
 
         is_workspace_file = file_mime.startswith("application/vnd.google-apps.")
 
@@ -236,12 +251,39 @@ def download_file(
             downloader = MediaIoBaseDownload(f, request)
             done = False
             while not done:
-                _, done = downloader.next_chunk()
+                status, done = downloader.next_chunk()
+                if progress_callback and status:
+                    # For exports, total_size might be 0 or unknown from metadata
+                    # but status.total_size might be available.
+                    progress_callback(status.resumable_progress, status.total_size or total_size)
 
     except HttpError as e:
         raise_for_http_error(e, context="Drive download_file")
 
     return dest
+
+
+def delete_file(
+    drive: Any,
+    file_id: str,
+    *,
+    permanent: bool = False,
+) -> None:
+    """Delete a file or move it to trash.
+
+    Args:
+        drive: Drive API Resource
+        file_id: ID of file to delete
+        permanent: If True, delete permanently. If False (default), move to trash.
+    """
+    try:
+        if permanent:
+            request = drive.files().delete(fileId=file_id)
+        else:
+            request = drive.files().update(fileId=file_id, body={"trashed": True})
+        execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Drive delete_file")
 
 
 def _update_file(
@@ -274,6 +316,7 @@ def sync_folder(
     *,
     recursive: bool = True,
     dry_run: bool = False,
+    progress_callback: Any | None = None,
 ) -> dict:
     """Sync a local folder to a Drive folder.
 
@@ -286,6 +329,7 @@ def sync_folder(
         drive_folder_id: Target Drive folder ID
         recursive: If True (default), sync subfolders recursively.
         dry_run: If True, don't actually perform any changes.
+        progress_callback: Optional callable(current_count, total_count, item_name)
 
     Returns:
         Summary dict: {created: int, updated: int, skipped: int, errors: list[str]}
@@ -300,6 +344,14 @@ def sync_folder(
     errors: list[str] = []
 
     from datetime import datetime, timezone
+
+    # Pre-scan to count total items for progress bar
+    total_items = 0
+    if progress_callback:
+        for _ in local_dir.rglob("*") if recursive else local_dir.iterdir():
+            total_items += 1
+
+    current_item_idx = 0
 
     def _ensure_remote_folder(parent_id: str, name: str) -> str:
         nonlocal created
@@ -322,7 +374,7 @@ def sync_folder(
         return folder_id
 
     def _sync_dir(local_current: Path, remote_parent_id: str) -> None:
-        nonlocal created, updated, skipped, errors
+        nonlocal created, updated, skipped, errors, current_item_idx
 
         # Get existing items in this Drive folder.
         remote_items = list_files(drive, parent_id=remote_parent_id)
@@ -338,6 +390,10 @@ def sync_folder(
                 remote_files_by_name.setdefault(name, item)
 
         for entry in local_current.iterdir():
+            current_item_idx += 1
+            if progress_callback:
+                progress_callback(current_item_idx, total_items, entry.name)
+
             try:
                 if entry.is_dir():
                     if not recursive:
@@ -462,6 +518,7 @@ class DriveClient:
         name: str | None = None,
         mime_type: str | None = None,
         raw: bool = False,
+        progress_callback: Any | None = None,
     ) -> str | dict:
         """Upload a local file to Drive."""
         return upload_file(
@@ -471,6 +528,7 @@ class DriveClient:
             name=name,
             mime_type=mime_type,
             raw=raw,
+            progress_callback=progress_callback,
         )
 
     def download_file(
@@ -479,6 +537,7 @@ class DriveClient:
         dest_path: str | os.PathLike,
         *,
         export_mime_type: str | None = None,
+        progress_callback: Any | None = None,
     ) -> Path:
         """Download a file from Drive."""
         return download_file(
@@ -486,6 +545,20 @@ class DriveClient:
             file_id,
             dest_path,
             export_mime_type=export_mime_type,
+            progress_callback=progress_callback,
+        )
+
+    def delete_file(
+        self,
+        file_id: str,
+        *,
+        permanent: bool = False,
+    ) -> None:
+        """Delete a file or move it to trash."""
+        return delete_file(
+            self.service,
+            file_id,
+            permanent=permanent,
         )
 
     def sync_folder(
@@ -495,6 +568,7 @@ class DriveClient:
         *,
         recursive: bool = True,
         dry_run: bool = False,
+        progress_callback: Any | None = None,
     ) -> dict:
         """Sync a local folder to a Drive folder."""
         return sync_folder(
@@ -503,4 +577,5 @@ class DriveClient:
             drive_folder_id,
             recursive=recursive,
             dry_run=dry_run,
+            progress_callback=progress_callback,
         )

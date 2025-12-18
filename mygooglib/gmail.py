@@ -113,6 +113,7 @@ def search_messages(
     max_results: int = 50,
     include_spam_trash: bool = False,
     raw: bool = False,
+    progress_callback: Any | None = None,
 ) -> list[dict] | dict:
     """Search Gmail and return lightweight message dicts.
 
@@ -123,6 +124,7 @@ def search_messages(
             max_results: Max messages to return (pagination handled)
             include_spam_trash: Include spam and trash
             raw: If True, return the raw list() response for the first page
+            progress_callback: Optional callable(current_count, total_count)
 
     Returns:
             By default, list of dicts with keys: id, threadId, subject, sender, from, to, date, snippet.
@@ -156,6 +158,10 @@ def search_messages(
             if not message_refs:
                 break
 
+            # We don't know the total count of messages matching the query easily
+            # without fetching all pages of list().
+            # But we can report progress against max_results.
+            
             for ref in message_refs:
                 msg_id = ref.get("id")
                 if not msg_id:
@@ -186,6 +192,10 @@ def search_messages(
                         "snippet": meta.get("snippet"),
                     }
                 )
+                
+                if progress_callback:
+                    progress_callback(len(collected), max_results)
+                    
                 if len(collected) >= max_results:
                     break
 
@@ -225,6 +235,48 @@ def mark_read(
         raise_for_http_error(e, context="Gmail mark_read")
         raise
 
+    return response if raw else None
+
+
+def trash_message(
+    gmail: Any,
+    message_id: str,
+    *,
+    user_id: str = "me",
+    raw: bool = False,
+) -> dict | None:
+    """Move a message to trash."""
+    try:
+        request = gmail.users().messages().trash(userId=user_id, id=message_id)
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Gmail trash_message")
+        raise
+    return response if raw else None
+
+
+def archive_message(
+    gmail: Any,
+    message_id: str,
+    *,
+    user_id: str = "me",
+    raw: bool = False,
+) -> dict | None:
+    """Archive a message by removing the INBOX label."""
+    try:
+        request = (
+            gmail.users()
+            .messages()
+            .modify(
+                userId=user_id,
+                id=message_id,
+                body={"removeLabelIds": ["INBOX"]},
+            )
+        )
+        response = execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Gmail archive_message")
+        raise
     return response if raw else None
 
 
@@ -325,6 +377,7 @@ class GmailClient:
         max_results: int = 50,
         include_spam_trash: bool = False,
         raw: bool = False,
+        progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """Search Gmail and return lightweight message dicts."""
         return search_messages(
@@ -334,6 +387,7 @@ class GmailClient:
             max_results=max_results,
             include_spam_trash=include_spam_trash,
             raw=raw,
+            progress_callback=progress_callback,
         )
 
     def mark_read(
@@ -345,6 +399,36 @@ class GmailClient:
     ) -> dict | None:
         """Mark a message as read by removing the UNREAD label."""
         return mark_read(
+            self.service,
+            message_id,
+            user_id=user_id,
+            raw=raw,
+        )
+
+    def trash_message(
+        self,
+        message_id: str,
+        *,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> dict | None:
+        """Move a message to trash."""
+        return trash_message(
+            self.service,
+            message_id,
+            user_id=user_id,
+            raw=raw,
+        )
+
+    def archive_message(
+        self,
+        message_id: str,
+        *,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> dict | None:
+        """Archive a message by removing the INBOX label."""
+        return archive_message(
             self.service,
             message_id,
             user_id=user_id,

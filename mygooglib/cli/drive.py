@@ -1,13 +1,23 @@
 from __future__ import annotations
 
+import webbrowser
 from pathlib import Path
 
 import typer
+from rich.progress import (
+    BarColumn,
+    DownloadColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+    TransferSpeedColumn,
+)
 from rich.table import Table
 
 from mygooglib import get_clients
 from mygooglib.drive import (
     create_folder,
+    delete_file,
     download_file,
     find_by_name,
     list_files,
@@ -15,7 +25,7 @@ from mygooglib.drive import (
     upload_file,
 )
 
-from .common import CliState, format_output, print_kv, print_success
+from .common import CliState, format_output, print_kv, print_success, prompt_selection
 
 app = typer.Typer(help="Google Drive commands.", no_args_is_help=True)
 
@@ -34,6 +44,9 @@ def list_cmd(
     ),
     trashed: bool = typer.Option(False, "--trashed", help="Include trashed files."),
     page_size: int = typer.Option(100, "--page-size", min=1, max=1000),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Interactively select a file for actions."
+    ),
 ) -> None:
     """List Drive files (paginates)."""
     state = CliState.from_ctx(ctx)
@@ -53,20 +66,45 @@ def list_cmd(
         return
 
     table = Table(title=f"Drive files ({len(results)})")
+    if interactive:
+        table.add_column("#", justify="right")
     table.add_column("name", overflow="fold")
     table.add_column("id", overflow="fold")
     table.add_column("mimeType", overflow="fold")
     table.add_column("modifiedTime")
 
-    for item in results:
-        table.add_row(
+    for i, item in enumerate(results, 1):
+        row = [
             str(item.get("name") or ""),
             str(item.get("id") or ""),
             str(item.get("mimeType") or ""),
             str(item.get("modifiedTime") or ""),
-        )
+        ]
+        if interactive:
+            row.insert(0, str(i))
+        table.add_row(*row)
 
     state.console.print(table)
+
+    if interactive and results:
+        selected_id = prompt_selection(
+            state.console, results, label_key="name", id_key="id"
+        )
+        if selected_id:
+            # Offer actions for the selected file
+            action = typer.prompt(
+                "Action: [v]iew metadata, [o]pen in browser, [d]ownload, [delete], [q]uit",
+                default="v",
+            )
+            if action == "v":
+                find_cmd(ctx, selected_id)  # find_cmd can take ID too if we adjust it
+            elif action == "o":
+                open_cmd(ctx, selected_id)
+            elif action == "d":
+                dest = typer.prompt("Destination path", default=f"./{selected_id}")
+                download_cmd(ctx, selected_id, Path(dest))
+            elif action == "delete":
+                delete_cmd(ctx, selected_id)
 
 
 @app.command("find")
@@ -133,13 +171,34 @@ def upload_cmd(
     """Upload a local file to Drive."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    file_id = upload_file(
-        clients.drive.service, local_path, parent_id=parent_id, name=name
-    )
 
     if state.json:
+        file_id = upload_file(
+            clients.drive.service, local_path, parent_id=parent_id, name=name
+        )
         state.console.print(format_output({"id": file_id}, json_mode=True))
         return
+
+    with Progress(
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+        console=state.console,
+    ) as progress:
+        task = progress.add_task(f"Uploading {local_path.name}", total=local_path.stat().st_size)
+
+        def _cb(sent, total):
+            progress.update(task, completed=sent, total=total)
+
+        file_id = upload_file(
+            clients.drive.service,
+            local_path,
+            parent_id=parent_id,
+            name=name,
+            progress_callback=_cb,
+        )
 
     print_success(state.console, "Uploaded")
     print_kv(state.console, "id", file_id)
@@ -159,13 +218,34 @@ def download_cmd(
     """Download a Drive file (export for Google Workspace files)."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    out_path = download_file(
-        clients.drive.service, file_id, dest_path, export_mime_type=export_mime_type
-    )
 
     if state.json:
+        out_path = download_file(
+            clients.drive.service, file_id, dest_path, export_mime_type=export_mime_type
+        )
         state.console.print(format_output({"path": str(out_path)}, json_mode=True))
         return
+
+    with Progress(
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+        console=state.console,
+    ) as progress:
+        task = progress.add_task(f"Downloading {file_id}", total=None)
+
+        def _cb(received, total):
+            progress.update(task, completed=received, total=total)
+
+        out_path = download_file(
+            clients.drive.service,
+            file_id,
+            dest_path,
+            export_mime_type=export_mime_type,
+            progress_callback=_cb,
+        )
 
     print_success(state.console, "Downloaded")
     print_kv(state.console, "path", out_path)
@@ -186,17 +266,38 @@ def sync_cmd(
     """Sync a local folder to a Drive folder (safe: no deletes)."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    summary = sync_folder(
-        clients.drive.service,
-        local_path,
-        drive_folder_id,
-        recursive=recursive,
-        dry_run=dry_run,
-    )
 
     if state.json:
+        summary = sync_folder(
+            clients.drive.service,
+            local_path,
+            drive_folder_id,
+            recursive=recursive,
+            dry_run=dry_run,
+        )
         state.console.print(format_output(summary, json_mode=True))
         return
+
+    with Progress(
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TextColumn("({task.completed}/{task.total})"),
+        console=state.console,
+    ) as progress:
+        task = progress.add_task("Syncing...", total=None)
+
+        def _cb(current, total, item_name):
+            progress.update(task, completed=current, total=total, description=f"Syncing: {item_name}")
+
+        summary = sync_folder(
+            clients.drive.service,
+            local_path,
+            drive_folder_id,
+            recursive=recursive,
+            dry_run=dry_run,
+            progress_callback=_cb,
+        )
 
     if dry_run:
         state.console.print("[bold yellow]DRY RUN - No changes made[/bold yellow]")
@@ -209,3 +310,51 @@ def sync_cmd(
         state.err_console.print(f"errors: {len(errors)}")
         for err in errors:
             state.err_console.print(f"- {err}")
+
+
+@app.command("delete")
+def delete_cmd(
+    ctx: typer.Context,
+    file_id: str = typer.Argument(..., help="Drive file ID."),
+    permanent: bool = typer.Option(
+        False, "--permanent", help="Delete permanently instead of moving to trash."
+    ),
+) -> None:
+    """Delete a file or move it to trash."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    delete_file(clients.drive.service, file_id, permanent=permanent)
+
+    if state.json:
+        state.console.print(
+            format_output({"id": file_id, "deleted": True, "permanent": permanent}, json_mode=True)
+        )
+        return
+
+    print_success(state.console, "Deleted" if permanent else "Moved to trash")
+    print_kv(state.console, "id", file_id)
+
+
+@app.command("open")
+def open_cmd(
+    ctx: typer.Context,
+    file_id: str = typer.Argument(..., help="Drive file ID."),
+) -> None:
+    """Open a Drive file in the default web browser."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+    
+    # Get webViewLink
+    meta = clients.drive.service.files().get(fileId=file_id, fields="webViewLink").execute()
+    link = meta.get("webViewLink")
+    
+    if not link:
+        state.console.print(f"[red]Could not find webViewLink for file {file_id}[/red]")
+        raise typer.Exit(1)
+
+    if state.json:
+        state.console.print(format_output({"id": file_id, "url": link}, json_mode=True))
+        return
+
+    state.console.print(f"Opening: {link}")
+    webbrowser.open(link)

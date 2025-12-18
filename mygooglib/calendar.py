@@ -95,6 +95,7 @@ def list_events(
     time_max: dt.datetime | None = None,
     max_results: int = 100,
     raw: bool = False,
+    progress_callback: Any | None = None,
 ) -> list[dict] | dict:
     """List events from a calendar.
 
@@ -105,25 +106,58 @@ def list_events(
         time_max: Upper bound (exclusive) for an event's start time.
         max_results: Maximum number of events to return.
         raw: If True, return full API response dict.
+        progress_callback: Optional callback(count) for progress tracking.
 
     Returns:
         List of event dicts by default, or full response if raw=True.
     """
+    all_items = []
+    page_token = None
+
     try:
-        request = calendar.events().list(
-            calendarId=calendar_id,
-            timeMin=to_rfc3339(time_min) if time_min else None,
-            timeMax=to_rfc3339(time_max) if time_max else None,
-            maxResults=max_results,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
+        while True:
+            request = calendar.events().list(
+                calendarId=calendar_id,
+                timeMin=to_rfc3339(time_min) if time_min else None,
+                timeMax=to_rfc3339(time_max) if time_max else None,
+                maxResults=min(max_results - len(all_items), 2500) if max_results else 2500,
+                singleEvents=True,
+                orderBy="startTime",
+                pageToken=page_token,
+            )
+            response = execute_with_retry_http_error(request, is_write=False)
+            items = response.get("items", [])
+            all_items.extend(items)
+            
+            if progress_callback:
+                progress_callback(len(items))
+
+            page_token = response.get("nextPageToken")
+            if not page_token or (max_results and len(all_items) >= max_results):
+                break
+
     except HttpError as e:
         raise_for_http_error(e, context="Calendar list_events")
         raise
 
-    return response if raw else response.get("items", [])
+    if raw:
+        return {"items": all_items}
+    return all_items
+
+
+def delete_event(
+    calendar: Any,
+    event_id: str,
+    *,
+    calendar_id: str = "primary",
+) -> None:
+    """Delete an event from a Google Calendar."""
+    try:
+        request = calendar.events().delete(calendarId=calendar_id, eventId=event_id)
+        execute_with_retry_http_error(request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Calendar delete_event")
+        raise
 
 
 class CalendarClient:
@@ -166,6 +200,7 @@ class CalendarClient:
         time_max: dt.datetime | None = None,
         max_results: int = 100,
         raw: bool = False,
+        progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """List events from a calendar."""
         return list_events(
@@ -175,4 +210,14 @@ class CalendarClient:
             time_max=time_max,
             max_results=max_results,
             raw=raw,
+            progress_callback=progress_callback,
         )
+
+    def delete_event(
+        self,
+        event_id: str,
+        *,
+        calendar_id: str = "primary",
+    ) -> None:
+        """Delete an event from a Google Calendar."""
+        return delete_event(self.service, event_id, calendar_id=calendar_id)
