@@ -1,28 +1,47 @@
 ---
-description: Meticulously update documentation to ensure accuracy and consistency
+description: Meticulously update mygooglib documentation to ensure accuracy
 ---
 
-1. Audit Changes
-   - **Action**: Review recent code changes (`git diff main...HEAD` or `git log -p`).
-   - **Goal**: Identify modified public APIs, changed signatures, or new features.
+1. Audit Recent Code Changes
+   - `git log -p -10 --oneline mygooglib/`
+   - **Look for**: New methods, changed signatures, removed functions.
 
-2. Verify API Reference
-   - **Check**: Do docstrings match the actual implementation?
-   - **Action**: Run `python -m pydoc mygooglib.module_name` for changed modules to see the rendered output.
-   - **Update**: Update `docs/reference/*.md` if manual, or ensure docstrings are pristine.
+2. Verify API Reference Matches Code
+   - **Check docstrings render correctly**:
+     - `python -m pydoc mygooglib.drive`
+     - `python -m pydoc mygooglib.sheets`
+     - `python -m pydoc mygooglib.gmail`
+     - `python -m pydoc mygooglib.calendar`
+     - `python -m pydoc mygooglib.tasks`
+     - `python -m pydoc mygooglib.docs`
+   - **Update**: `docs/reference/design_principles.md` if architecture changed.
 
-3. Update Guides and Examples
-   - **Check**: Do the `examples/` scripts still run?
-   - **Action**: Run relevant scripts in `examples/` or `scripts/` to verify they don't crash.
-   - **Update**: Update `docs/guides/*.md` to reflect new best practices or workflows.
+3. Update Guides
+   - **File**: `docs/guides/usage.md`
+     - Verify all code examples still work.
+     - Add examples for new methods.
+   - **File**: `docs/guides/configuration.md`
+     - Verify OAuth scopes are accurate.
+     - Check environment variable names.
 
-4. maintain Consistency
-   - **Check**: Does `README.md` still accurately reflect the "Quick Start"?
-   - **Check**: Is `AUTOMATION_GOALS.md` up to date with what's actually built?
-   - **Action**: specialized checks:
-     - `ruff check docs/` (if configured for docs)
-     - spell check (manual or tool)
+4. Verify Examples Run
+// turbo
+   - `python examples/drive_list_files.py`
+   - `python examples/sheets_read_by_title.py`
+   - `python examples/gmail_send_email.py` (careful: sends real email!)
+   - **Fix or update**: Any broken examples.
 
-5. Final Review
-   - **Action**: Read the changed docs as a new user.
-   - **Question**: "If I only read this, would I be able to use the feature correctly?"
+5. Maintain Consistency
+   - **README.md**: Does Quick Start still work?
+   - **AUTOMATION_GOALS.md**: Is Must/Nice/Later accurate?
+   - **CHANGELOG.md**: Is latest version documented?
+   - `docs/development/roadmap.md`: Update progress checkboxes.
+
+6. Check CLI Documentation
+   - `mygoog --help` — verify top-level help is clear.
+   - `mygoog drive --help`, `mygoog sheets --help`, etc.
+   - Update docs if CLI interface changed.
+
+7. Final Review
+   - Read `README.md` as a new user.
+   - **Question**: "Can someone use mygooglib from just the README?"

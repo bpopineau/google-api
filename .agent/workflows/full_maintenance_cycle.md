@@ -1,23 +1,32 @@
 ---
-description: Perform a full clean, upgrade, and verification cycle
+description: Perform a full clean, upgrade, and verification cycle for mygooglib
 ---
 
 1. Update Dependencies
 // turbo
-   - `/update_deps`
-   - **Goal**: Get the latest libraries.
+   - `uv lock --upgrade`
+   - `uv sync`
+   - **Goal**: Get latest versions of google-api-python-client, google-auth, etc.
 
 2. Deep Clean
 // turbo
    - `/clean_reset`
-   - **Goal**: Ensure no stale artifacts interfere with the upgrade.
+   - **Goal**: Remove stale `__pycache__`, `.egg-info`, etc.
 
-3. Verify Everything
+3. Reinstall
+// turbo
+   - `pip install -e ".[dev,cli]"`
+
+4. Verify Everything
 // turbo
    - `/ci_local`
-   - **Goal**: Run the full suite (Auth check + Unit tests + Integration writes).
+   - **Must pass**: Linting, tests, smoke tests, CLI.
 
-4. Synchronize Documentation
+5. Synchronize Documentation
 // turbo
    - `/update_docs`
-   - **Goal**: Ensure docs match the upgraded environment.
+   - **Check**: Do examples still run with upgraded dependencies?
+
+6. Update Roadmap (if applicable)
+   - If dependencies enable new features, update `docs/development/roadmap.md`.
+   - Consider adding new feature ideas from `AUTOMATION_GOALS.md` Section 6.

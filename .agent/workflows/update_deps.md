@@ -1,5 +1,5 @@
 ---
-description: Update project dependencies using uv
+description: Update mygooglib dependencies using uv
 ---
 
 1. Update lockfile
@@ -8,6 +8,19 @@ description: Update project dependencies using uv
 2. Sync environment
    - `uv sync`
 
-3. Verify Health
+3. Verify Core Dependencies
 // turbo
-   - `/development`
+   - `pip show google-api-python-client google-auth google-auth-oauthlib`
+
+4. Run Tests
+// turbo
+   - `pytest`
+   - `python scripts/smoke_test.py all`
+
+5. Check for Breaking Changes
+   - Review changelogs for major dependencies:
+     - [google-api-python-client](https://github.com/googleapis/google-api-python-client/releases)
+     - [google-auth](https://github.com/googleapis/google-auth-library-python/releases)
+
+6. (Optional) Security Audit
+   - `pip install pip-audit && pip-audit`

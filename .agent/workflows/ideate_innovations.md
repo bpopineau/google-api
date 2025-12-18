@@ -1,36 +1,56 @@
 ---
-description: Generate and propose creative, outside-the-box feature ideas
+description: Generate creative, outside-the-box feature ideas for mygooglib
 ---
 
-1. Explore Possibilities
-   - Review the list of available Google APIs (Drive, Sheets, Gmail, Calendar, Tasks).
-   - **Thought Experiment**: "If I had a magic wand and these APIs, what would be the coolest thing I could automate?"
-   - **Focus**: Look for cross-service synergies (e.g., "Email to Sheet to Calendar"), "Delighters" (unexpected conveniences), or AI augmentations (if applicable).
+1. Review Current Capabilities
+   - **Services**: Drive, Sheets, Gmail, Docs, Calendar, Tasks.
+   - **Key workflows from AUTOMATION_GOALS.md**:
+     - W1: Drive sync (`sync_folder`)
+     - W2: Sheets tracker (`get_range`, `append_row`)
+     - W3: Docs templating (`render_template`)
+     - W4: Calendar events (`add_event`)
+     - W5: Tasks capture (`add_task`)
+     - W6: Gmail send (`send_email`)
 
-2. Generate Ideas
-   - List at least 5 "wild" ideas. Do not filter for feasibility yet.
-   - Example Stimuli:
-     - "How can we visualize Drive usage in Sheets?"
-     - "Can we make a 'Morning Briefing' Doc generated from Calendar and Tasks?"
-     - "Can I email a command to my system to trigger a backup?"
+2. Thought Experiments
+   - **Cross-service synergies**:
+     - "Sheets → Calendar": Auto-create events from a spreadsheet schedule.
+     - "Gmail → Sheets": Log incoming emails to a tracking spreadsheet.
+     - "Tasks → Docs": Generate a weekly task summary document.
+     - "Calendar → Gmail": Email daily agenda each morning.
+   - **Delighters**:
+     - "Morning Briefing Doc" generated from Calendar + Tasks + Weather API.
+     - "Email a command" to trigger backups or reports.
+     - "Natural language date parsing" for task due dates.
+   - **AI augmentation**:
+     - Summarize email threads before logging to Sheets.
+     - Auto-categorize uploaded Drive files.
 
-3. Refine and Select
-   - Pick the top 3 ideas that are:
-     - **Novel**: Not just a standard CRUD operation.
-     - **Valuable**: Solves a real (or unarticulated) problem.
-     - **Feasible**: Possible with the current authentication scopes (or minor additions).
+3. Generate 5+ Wild Ideas
+   - List ideas without filtering for feasibility.
+   - Push beyond "just another CRUD wrapper."
 
-4. Create Proposal Artifact
-   - **Action**: Create a new artifact file `creative_proposals.md` for User Review.
+4. Refine Top 3 Ideas
+   - **Criteria**:
+     - Novel: Not just another API wrapper method.
+     - Valuable: Saves time or enables new workflows.
+     - Feasible: Possible with current OAuth scopes.
+
+5. Create Proposal Artifact
+   - **File**: `creative_proposals.md`
    - **Template**:
      ```markdown
      # Creative Proposal: [Name]
+
      **The Spark**: [What inspired this?]
      **The Magic**: [What does the user experience?]
-     **How it Works**: [High-level technical sketch]
-     **Why it's "Outside the Box"**: [Differentiation]
+     **How it Works**:
+       - Services: [Drive, Sheets, Gmail, etc.]
+       - New methods: `mygooglib.[service].[method]()`
+       - CLI: `mygoog [command]`
+     **Why it's "Outside the Box"**: [What makes this special?]
      ```
 
-5. Request Approval
+6. Request Approval
    - Use `notify_user` to present `creative_proposals.md`.
-   - **Constraint**: Do NOT start implementation until specifically approved.
+   - **Constraint**: Do NOT implement until explicitly approved.

@@ -1,28 +1,44 @@
 ---
-description: systematically refactor code with safety checks
+description: Systematically refactor mygooglib code with safety checks
 ---
 
 1. Verify Baseline
 // turbo
-   - `/development`
-   - **Constraint**: Do not proceed if tests fail. Fix the baseline first.
+   - `pytest`
+   - `python scripts/smoke_test.py all`
+   - **Constraint**: Do NOT proceed if tests or smoke tests fail.
 
-2. Scope and Plan
-   - **Action**: Identify the specific target (function, class, module).
-   - **Thought Process**:
-     - "What is the Code Smell?" (Duplication, Long Method, Feature Envy, etc.)
-     - "What is the Target State?" (Extracted function, moved class, etc.)
-   - **Safety**: Is this an API-breaking change? If so, plan for backwards compatibility (deprecation warning).
+2. Create Safety Checkpoint
+   - `git add -A && git commit -m "checkpoint: before refactor"`
 
-3. Execute Refactor
-   - **Action**: Apply the changes incrementally.
-   - **Tip**: Use `replace_file_content` for small chunks or `multi_replace_file_content` for larger structural changes.
+3. Scope and Plan
+   - **Identify target**: Function/class/module in `mygooglib/`.
+   - **Common refactor targets**:
+     - `mygooglib/drive.py` — 19KB, largest module
+     - `mygooglib/sheets.py` — 22KB, complex A1 logic
+     - `mygooglib/gmail.py` — 15KB, MIME handling
+   - **Code smells to look for**:
+     - Duplicated patterns across services
+     - Long methods (extract to `mygooglib/utils/`)
+     - Magic strings/numbers (extract to constants)
+   - **Breaking changes**: If modifying public API (functions in `__all__`), add deprecation warning.
 
-4. Verify Changes
+4. Execute Refactor
+   - **Incremental**: Change one method/class at a time.
+   - **Test frequently**: Run `pytest` after each logical chunk.
+
+5. Verify Changes
 // turbo
-   - `/development`
-   - **Logic**: valid refactoring shouldn't change behavior. Tests must pass.
+   - `ruff format . && ruff check . --fix`
+   - `pytest`
+   - `python scripts/smoke_test.py all`
+   - **Logic**: Refactoring shouldn't change behavior.
 
-5. Cleanup
-   - **Action**: Remove old code, unused imports, or temporary shims.
-   - **Action**: Update type hints and docstrings if the signature changed slightly (though it shouldn't for pure refactors).
+6. Update Documentation
+   - If signature changed, update `docs/guides/usage.md`.
+   - If internal architecture changed, update `docs/reference/design_principles.md`.
+   - Run `/write_docstrings` if docstrings need updating.
+
+7. Cleanup
+   - Remove unused imports (`ruff check . --select F401`).
+   - Delete temporary scaffolding.

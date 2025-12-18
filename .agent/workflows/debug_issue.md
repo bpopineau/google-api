@@ -1,33 +1,42 @@
 ---
-description: Systematically identify, reproduce, and fix software issues
+description: Systematically identify, reproduce, and fix mygooglib issues
 ---
 
 1. Reproduce the Issue
-   - **Action**: Create a minimal reproduction script (repro.py) or a new test case.
-   - **Goal**: See the failure happen reliably. "If it's not red, you can't make it green."
-   - **Tools**:
-     - `python scripts/smoke_test.py` (if it's a general breakage)
-     - `pytest tests/test_specific_case.py` (if it's a specific logic bug)
+   - **Action**: Create `scripts/repro.py` with minimal reproduction code:
+     ```python
+     from mygooglib import get_clients
+     clients = get_clients()
+     # Reproduce the failing operation here
+     ```
+   - **Alt**: Create a test in `tests/test_[module].py` to capture the failure.
+   - **Reference**: Use `python scripts/smoke_test.py [command]` if it's a known operation.
 
 2. Analyze and Locate
-   - **Action**: Read the traceback carefully.
-   - **Action**: Use `grep` to find where the error message originates.
-   - **Action**: Add temporary `print()` debugging or use `logging`.
-   - **Question**: "What is the state of the system right before the crash?"
+   - **Read traceback**: Check for errors from `mygooglib/` modules.
+   - **Search codebase**: `Select-String -Path "mygooglib\*.py" -Pattern "error_message" -Recurse`
+   - **Check utils**: Look at `mygooglib/utils/` for retry/logging issues.
+   - **Debugger**: `python -m pdb scripts/repro.py` for step-through debugging.
+   - **Key modules**:
+     - `mygooglib/auth.py` — credential/token issues
+     - `mygooglib/exceptions.py` — custom exceptions
+     - `mygooglib/drive.py`, `sheets.py`, `gmail.py`, etc. — service-specific
 
 3. Implement the Fix
-   - **Action**: Modify the code to handle the edge case or correct the logic.
-   - **Constraint**: Make the smallest change possible to fix the issue.
+   - **Constraint**: Make the smallest change possible.
+   - **Location**: Most likely in `mygooglib/[service].py` or `mygooglib/utils/`.
+   - **Style**: Follow existing patterns (check similar methods in same file).
 
 4. Verify the Fix
-   - **Action**: Run the reproduction script/test from Step 1.
-   - **Success**: It should now pass (exit code 0).
+   - **Run repro**: `python scripts/repro.py` should now succeed.
+   - **Or run test**: `pytest tests/test_[module].py::test_specific_case -v`
 
 5. Regression Check
 // turbo
-   - `/development`
-   - **Goal**: Ensure the fix didn't break anything else.
+   - `ruff format . && ruff check . --fix`
+   - `pytest`
+   - `python scripts/smoke_test.py all`
 
 6. Cleanup
-   - **Action**: Remove temporary `repro.py` (or promote it to a real test).
-   - **Action**: Remove debugging print statements.
+   - Delete `scripts/repro.py` or promote to `tests/test_[module].py`.
+   - Remove debug prints; consider adding to `logging` if valuable long-term.
