@@ -21,10 +21,10 @@ from mygooglib.utils.retry import execute_with_retry_http_error
 
 def _as_address_list(value: str | Sequence[str] | None) -> str | None:
     """Convert email address(es) to comma-separated string (internal helper).
-    
+
     Args:
         value: Single email address, list of addresses, or None
-        
+
     Returns:
         Comma-separated string of addresses, or None
     """
@@ -37,10 +37,10 @@ def _as_address_list(value: str | Sequence[str] | None) -> str | None:
 
 def _guess_mime(path: Path) -> tuple[str, str]:
     """Guess MIME type from file path (internal helper).
-    
+
     Args:
         path: Path to the file
-        
+
     Returns:
         Tuple of (maintype, subtype) for MIME type, e.g. ('application', 'pdf')
     """
@@ -113,10 +113,10 @@ def send_email(
 
 def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]:
     """Convert Gmail API headers list to a normalized dict (internal helper).
-    
+
     Args:
         headers: List of header dicts from Gmail API (each with 'name' and 'value' keys)
-        
+
     Returns:
         Dict mapping lowercase header names to values
     """
@@ -182,15 +182,21 @@ def search_messages(
             if not message_refs:
                 break
 
-            # We don't know the total count of messages matching the query easily
-            # without fetching all pages of list().
-            # But we can report progress against max_results.
+            # Batch fetch metadata for this page of results to reduce round-trips.
+            batch = gmail.new_batch_http_request()
+            batch_results: dict[str, dict] = {}
+
+            def _callback(
+                request_id: str, response: dict, exception: Exception | None
+            ) -> None:
+                if not exception:
+                    batch_results[request_id] = response
 
             for ref in message_refs:
                 msg_id = ref.get("id")
                 if not msg_id:
                     continue
-                get_request = (
+                batch.add(
                     gmail.users()
                     .messages()
                     .get(
@@ -198,9 +204,28 @@ def search_messages(
                         id=msg_id,
                         format="metadata",
                         metadataHeaders=["From", "To", "Subject", "Date"],
-                    )
+                    ),
+                    callback=_callback,
+                    request_id=msg_id,
                 )
-                meta = execute_with_retry_http_error(get_request, is_write=False)
+
+            # Wrap batch in a simple object with .execute() for retry helper.
+            class _BatchWrapper:
+                def __init__(self, b: Any):
+                    self.b = b
+
+                def execute(self) -> Any:
+                    return self.b.execute()
+
+            execute_with_retry_http_error(_BatchWrapper(batch), is_write=False)
+
+            # Process batch results in order.
+            for ref in message_refs:
+                msg_id = ref.get("id")
+                meta = batch_results.get(msg_id or "")
+                if not meta:
+                    continue
+
                 payload = meta.get("payload") or {}
                 headers = _headers_to_dict(payload.get("headers"))
                 sender = headers.get("from")

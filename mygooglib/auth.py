@@ -12,6 +12,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from mygooglib.utils.logging import get_logger
 
 # v0.1 scopes: Drive, Sheets, Gmail send/modify, Calendar, Tasks
+# Note: These are broad. For production, consider narrower scopes like 'drive.file'.
 SCOPES: list[str] = [
     "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/spreadsheets",
@@ -80,6 +81,7 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
         logger.info("Refreshing OAuth token (token path: %s)", token_path)
         try:
             creds.refresh(Request())
+            token_path.parent.mkdir(parents=True, exist_ok=True)
             token_path.write_text(creds.to_json(), encoding="utf-8")
             logger.info("Saved refreshed token to %s", token_path)
             return creds

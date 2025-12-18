@@ -36,7 +36,10 @@ _DEFAULT_CLIENTS: Clients | None = None
 
 
 def get_clients(
-    creds: "Credentials | None" = None, *, use_cache: bool = True
+    creds: "Credentials | None" = None,
+    *,
+    use_cache: bool = True,
+    scopes: list[str] | None = None,
 ) -> Clients:
     """Build and return all Google API service objects.
 
@@ -44,6 +47,7 @@ def get_clients(
         creds: Optional pre-loaded credentials. If None, calls get_creds().
         use_cache: If True (default) and creds is None, cache and reuse the
             built service objects within the current Python process.
+        scopes: Optional list of scopes to request if creds is None.
 
     Returns:
         Clients dataclass with .drive, .sheets, .gmail, etc.
@@ -59,7 +63,7 @@ def get_clients(
         return _DEFAULT_CLIENTS
 
     if creds is None:
-        creds = get_creds()
+        creds = get_creds(scopes=scopes)
 
     drive_service = build("drive", "v3", credentials=creds)
     sheets_service = build("sheets", "v4", credentials=creds)
