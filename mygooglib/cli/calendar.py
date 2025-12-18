@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-
 import webbrowser
 
 import typer
@@ -110,7 +109,9 @@ def delete_cmd(
     delete_event(clients.calendar.service, event_id, calendar_id=calendar_id)
 
     if state.json:
-        state.console.print(format_output({"id": event_id, "status": "deleted"}, json_mode=True))
+        state.console.print(
+            format_output({"id": event_id, "status": "deleted"}, json_mode=True)
+        )
         return
 
     print_success(state.console, f"Event {event_id} deleted")
@@ -124,11 +125,11 @@ def open_cmd(
 ) -> None:
     """Open Google Calendar in the browser."""
     state = CliState.from_ctx(ctx)
-    
+
     if event_id:
-        # Google Calendar event URLs are a bit tricky (base64 encoded), 
+        # Google Calendar event URLs are a bit tricky (base64 encoded),
         # but we can use the eid parameter if we have it.
-        # For simplicity, we'll just open the calendar if no ID, 
+        # For simplicity, we'll just open the calendar if no ID,
         # or try to construct a search URL if we have an ID.
         url = f"https://calendar.google.com/calendar/u/0/r/eventedit/{event_id}"
     else:

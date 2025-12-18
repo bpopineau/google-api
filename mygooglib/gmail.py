@@ -161,7 +161,7 @@ def search_messages(
             # We don't know the total count of messages matching the query easily
             # without fetching all pages of list().
             # But we can report progress against max_results.
-            
+
             for ref in message_refs:
                 msg_id = ref.get("id")
                 if not msg_id:
@@ -192,10 +192,10 @@ def search_messages(
                         "snippet": meta.get("snippet"),
                     }
                 )
-                
+
                 if progress_callback:
                     progress_callback(len(collected), max_results)
-                    
+
                 if len(collected) >= max_results:
                     break
 

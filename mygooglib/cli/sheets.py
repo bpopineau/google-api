@@ -62,7 +62,12 @@ def get_cmd(
             task = progress.add_task("Reading range...", total=None)
 
             def _cb(current, total):
-                progress.update(task, completed=current, total=total, description=f"Reading: {current}/{total}")
+                progress.update(
+                    task,
+                    completed=current,
+                    total=total,
+                    description=f"Reading: {current}/{total}",
+                )
 
             values = get_range(
                 clients.sheets.service,
@@ -244,14 +249,17 @@ def open_cmd(
     """Open a spreadsheet in the default web browser."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    
+
     from mygooglib.sheets import resolve_spreadsheet
+
     spreadsheet_id = resolve_spreadsheet(clients.drive.service, identifier)
-    
+
     url = f"https://docs.google.com/spreadsheets/d/{spreadsheet_id}/edit"
-    
+
     if state.json:
-        state.console.print(format_output({"id": spreadsheet_id, "url": url}, json_mode=True))
+        state.console.print(
+            format_output({"id": spreadsheet_id, "url": url}, json_mode=True)
+        )
         return
 
     state.console.print(f"Opening: {url}")

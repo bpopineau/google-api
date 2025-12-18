@@ -187,7 +187,9 @@ def upload_cmd(
         TimeRemainingColumn(),
         console=state.console,
     ) as progress:
-        task = progress.add_task(f"Uploading {local_path.name}", total=local_path.stat().st_size)
+        task = progress.add_task(
+            f"Uploading {local_path.name}", total=local_path.stat().st_size
+        )
 
         def _cb(sent, total):
             progress.update(task, completed=sent, total=total)
@@ -288,7 +290,12 @@ def sync_cmd(
         task = progress.add_task("Syncing...", total=None)
 
         def _cb(current, total, item_name):
-            progress.update(task, completed=current, total=total, description=f"Syncing: {item_name}")
+            progress.update(
+                task,
+                completed=current,
+                total=total,
+                description=f"Syncing: {item_name}",
+            )
 
         summary = sync_folder(
             clients.drive.service,
@@ -327,7 +334,9 @@ def delete_cmd(
 
     if state.json:
         state.console.print(
-            format_output({"id": file_id, "deleted": True, "permanent": permanent}, json_mode=True)
+            format_output(
+                {"id": file_id, "deleted": True, "permanent": permanent}, json_mode=True
+            )
         )
         return
 
@@ -343,11 +352,15 @@ def open_cmd(
     """Open a Drive file in the default web browser."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    
+
     # Get webViewLink
-    meta = clients.drive.service.files().get(fileId=file_id, fields="webViewLink").execute()
+    meta = (
+        clients.drive.service.files()
+        .get(fileId=file_id, fields="webViewLink")
+        .execute()
+    )
     link = meta.get("webViewLink")
-    
+
     if not link:
         state.console.print(f"[red]Could not find webViewLink for file {file_id}[/red]")
         raise typer.Exit(1)

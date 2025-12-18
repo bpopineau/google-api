@@ -184,7 +184,7 @@ def upload_file(
 
     try:
         request = drive.files().create(body=metadata, media_body=media, fields="id")
-        
+
         if progress_callback:
             response = None
             while response is None:
@@ -194,7 +194,7 @@ def upload_file(
             result = response
         else:
             result = execute_with_retry_http_error(request, is_write=True)
-            
+
         return result if raw else result["id"]
     except HttpError as e:
         raise_for_http_error(e, context="Drive upload_file")
@@ -255,7 +255,9 @@ def download_file(
                 if progress_callback and status:
                     # For exports, total_size might be 0 or unknown from metadata
                     # but status.total_size might be available.
-                    progress_callback(status.resumable_progress, status.total_size or total_size)
+                    progress_callback(
+                        status.resumable_progress, status.total_size or total_size
+                    )
 
     except HttpError as e:
         raise_for_http_error(e, context="Drive download_file")

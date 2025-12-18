@@ -114,13 +114,15 @@ def list_tasks(
                 tasklist=tasklist_id,
                 showCompleted=show_completed,
                 showHidden=show_hidden,
-                maxResults=min(max_results - len(all_items), 100) if max_results else 100,
+                maxResults=min(max_results - len(all_items), 100)
+                if max_results
+                else 100,
                 pageToken=page_token,
             )
             response = execute_with_retry_http_error(request, is_write=False)
             items = response.get("items", [])
             all_items.extend(items)
-            
+
             if progress_callback:
                 progress_callback(len(items))
 

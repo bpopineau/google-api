@@ -120,7 +120,9 @@ def list_events(
                 calendarId=calendar_id,
                 timeMin=to_rfc3339(time_min) if time_min else None,
                 timeMax=to_rfc3339(time_max) if time_max else None,
-                maxResults=min(max_results - len(all_items), 2500) if max_results else 2500,
+                maxResults=min(max_results - len(all_items), 2500)
+                if max_results
+                else 2500,
                 singleEvents=True,
                 orderBy="startTime",
                 pageToken=page_token,
@@ -128,7 +130,7 @@ def list_events(
             response = execute_with_retry_http_error(request, is_write=False)
             items = response.get("items", [])
             all_items.extend(items)
-            
+
             if progress_callback:
                 progress_callback(len(items))
 

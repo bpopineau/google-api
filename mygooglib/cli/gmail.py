@@ -4,7 +4,6 @@ from pathlib import Path
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Prompt
 from rich.table import Table
 
 from mygooglib import get_clients

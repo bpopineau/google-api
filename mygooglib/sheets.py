@@ -214,24 +214,26 @@ def get_range(
     from mygooglib.utils.a1 import a1_to_range, range_to_a1
 
     sheet_name, start_row, start_col, end_row, end_col = a1_to_range(a1_range)
-    
+
     # If end_row or end_col is None, we don't know the total size easily without fetching metadata.
     # For simplicity in v0.1, we'll only chunk if both are provided.
     if end_row is None or end_col is None:
         # Fallback to non-chunked
         return get_range(
-            sheets, spreadsheet_real_id, a1_range,
+            sheets,
+            spreadsheet_real_id,
+            a1_range,
             major_dimension=major_dimension,
             value_render_option=value_render_option,
             date_time_render_option=date_time_render_option,
-            raw=raw
+            raw=raw,
         )
 
     all_values: list[list[Any]] = []
-    
+
     is_rows = (major_dimension or "ROWS") == "ROWS"
     total = (end_row - start_row + 1) if is_rows else (end_col - start_col + 1)
-    
+
     for i in range(0, total, chunk_size):
         if is_rows:
             c_start_row = start_row + i
@@ -241,23 +243,27 @@ def get_range(
             c_start_col = start_col + i
             c_end_col = min(start_col + i + chunk_size - 1, end_col)
             c_start_row, c_end_row = start_row, end_row
-            
-        chunk_a1 = range_to_a1(sheet_name, c_start_row, c_start_col, c_end_row, c_end_col)
-        
+
+        chunk_a1 = range_to_a1(
+            sheet_name, c_start_row, c_start_col, c_end_row, c_end_col
+        )
+
         chunk_values = get_range(
-            sheets, spreadsheet_real_id, chunk_a1,
+            sheets,
+            spreadsheet_real_id,
+            chunk_a1,
             major_dimension=major_dimension,
             value_render_option=value_render_option,
             date_time_render_option=date_time_render_option,
         )
-        
+
         if is_rows:
             all_values.extend(chunk_values)
         else:
             # If COLUMNS, we need to merge carefully if we want a single list-of-lists.
             # But usually get_range returns list of columns.
             all_values.extend(chunk_values)
-            
+
         if progress_callback:
             progress_callback(len(all_values), total)
 

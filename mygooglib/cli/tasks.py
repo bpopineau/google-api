@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-
 import webbrowser
 
 import typer
@@ -163,7 +162,9 @@ def delete_cmd(
     delete_task(clients.tasks.service, task_id, tasklist_id=tasklist_id)
 
     if state.json:
-        state.console.print(format_output({"id": task_id, "status": "deleted"}, json_mode=True))
+        state.console.print(
+            format_output({"id": task_id, "status": "deleted"}, json_mode=True)
+        )
         return
 
     print_success(state.console, f"Task {task_id} deleted")
@@ -176,8 +177,8 @@ def open_cmd(
 ) -> None:
     """Open Google Tasks in the browser."""
     state = CliState.from_ctx(ctx)
-    
-    # Tasks doesn't have a great direct URL for specific lists, 
+
+    # Tasks doesn't have a great direct URL for specific lists,
     # but we can open the side panel in Gmail or Calendar.
     # The most direct "full screen" tasks is actually via Canvas or a specific URL.
     url = "https://tasks.google.com/embed/list/~default"
