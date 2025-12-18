@@ -20,6 +20,14 @@ from mygooglib.utils.retry import execute_with_retry_http_error
 
 
 def _as_address_list(value: str | Sequence[str] | None) -> str | None:
+    """Convert email address(es) to comma-separated string (internal helper).
+    
+    Args:
+        value: Single email address, list of addresses, or None
+        
+    Returns:
+        Comma-separated string of addresses, or None
+    """
     if value is None:
         return None
     if isinstance(value, str):
@@ -28,6 +36,14 @@ def _as_address_list(value: str | Sequence[str] | None) -> str | None:
 
 
 def _guess_mime(path: Path) -> tuple[str, str]:
+    """Guess MIME type from file path (internal helper).
+    
+    Args:
+        path: Path to the file
+        
+    Returns:
+        Tuple of (maintype, subtype) for MIME type, e.g. ('application', 'pdf')
+    """
     mime = mimetypes.guess_type(str(path))[0] or "application/octet-stream"
     if "/" not in mime:
         return "application", "octet-stream"
@@ -96,6 +112,14 @@ def send_email(
 
 
 def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]:
+    """Convert Gmail API headers list to a normalized dict (internal helper).
+    
+    Args:
+        headers: List of header dicts from Gmail API (each with 'name' and 'value' keys)
+        
+    Returns:
+        Dict mapping lowercase header names to values
+    """
     result: dict[str, str] = {}
     for header in headers or []:
         name = (header.get("name") or "").strip()

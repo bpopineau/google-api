@@ -86,6 +86,29 @@ def execute_with_retry_http_error(
         for writes, because retrying writes can cause duplicate side effects
         (e.g., sending an email twice or appending a row twice) if the server
         processed the request but the client timed out.
+        
+    WARNING:
+        If you override 'attempts' for write operations (is_write=True), be aware
+        that failed requests might have been processed by the server even if the
+        client didn't receive a response. This can lead to duplicate operations:
+        - Emails sent multiple times
+        - Rows appended multiple times
+        - Files uploaded multiple times
+        Only increase write retries if your operation is truly idempotent.
+        
+    Args:
+        request: The API request object to execute
+        is_write: Whether this is a write operation (affects default retry behavior)
+        attempts: Number of attempts (overrides env-based defaults)
+        initial_backoff_s: Initial backoff time in seconds
+        max_backoff_s: Maximum backoff time in seconds
+        retry_statuses: HTTP status codes to retry (default: 429, 500, 502, 503, 504)
+        
+    Returns:
+        The API response from request.execute()
+        
+    Raises:
+        HttpError: If all retry attempts are exhausted or status is not retryable
     """
 
     retry_enabled = _env_bool("MYGOOGLIB_RETRY_ENABLED", True)
