@@ -2,38 +2,57 @@
 description: Quick project health verification before any work
 ---
 
+# /health_check
+
+**Goal**: Verify the environment is ready for work.
+
+## ⚠️ Task Management
+- **Rule**: If run as part of `/evolve`, ensure `task.md` item "Health Check" is marked `[/]` BEFORE starting.
+
+---
+
 1. Verify Git State
 // turbo
    - `git status --short`
-   - **Clean**: Should show minimal or expected changes.
-   - `git log -1 --oneline`
-   - **Branch**: Confirm you're on the expected branch.
+   - **Gate**:
+     - **IF CLEAN**: Proceed.
+     - **IF DIRTY**: Stop. Commit or stash changes. Recurse.
 
 2. Verify Dependencies
 // turbo
    - `pip install -e ".[dev,cli]"`
-   - **Success**: No errors during installation.
+   - **Gate**:
+     - **IF SUCCESS**: Proceed.
+     - **IF FAIL**: Stop. Fix pip/network issues. Recurse.
 
 3. Verify Core Import
 // turbo
    - `python -c "from mygooglib import get_clients; print('Import OK')"`
-   - **Success**: Prints "Import OK" without errors.
+   - **Gate**:
+     - **IF "Import OK"**: Proceed.
+     - **IF ERROR**: Stop. Fix syntax/environment. Recurse.
 
 4. Verify Authentication
 // turbo
    - `python scripts/check_token_refresh.py`
-   - **Success**: Token refreshes without browser prompt.
-   - **Failure**: Run `/setup_auth` to fix.
+   - **Gate**:
+     - **IF SUCCESS**: Proceed.
+     - **IF FAIL**: Run `/setup_auth`. Recurse.
 
 5. Quick Smoke Test
 // turbo
    - `python scripts/smoke_test.py all`
-   - **Tests**: Drive, Sheets, Gmail, Calendar, Tasks connectivity.
-   - **Success**: All services return data without errors.
+   - **Gate**:
+     - **IF PASS**: Proceed.
+     - **IF FAIL**: Stop. Debug specific service error. Recurse.
 
 6. Verify CLI
 // turbo
    - `mygoog --help`
-   - **Success**: Shows available commands.
+   - **Gate**:
+     - **IF SHOWS HELP**: proceeding.
+     - **IF ERROR**: Stop. Fix entry point. Recurse.
 
-**Result**: If all steps pass, project is healthy and ready for development.
+---
+
+**Result**: If all gates passed, mark "Health Check" as `[x]` in `task.md`.

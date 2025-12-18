@@ -2,45 +2,47 @@
 description: Analyze mygooglib and propose high-value new features
 ---
 
+# /propose_features
+
+**Goal**: Prioritize next steps based on data.
+
+## ⚠️ Task Management
+- **Rule**: If run as part of `/evolve`, ensure `task.md` item "Feature Proposals" is marked `[/]` BEFORE starting.
+
+---
+
 1. Review Project Vision and Goals
-   - Read `AUTOMATION_GOALS.md` — defines the 6 core workflows (W1-W6):
-     - W1: Drive folder backup (`sync_folder`)
-     - W2: Sheets tracker (`get_range`, `append_row`)
-     - W3: Docs templating (`render_template`)
-     - W4: Calendar events (`add_event`)
-     - W5: Tasks capture (`add_task`)
-     - W6: Gmail send (`send_email`)
-   - Read `docs/development/roadmap.md` — tracks progress and future ideas.
+   - Read `AUTOMATION_GOALS.md` definitions.
+   - Read `docs/development/roadmap.md` status.
 
-2. Identify TODOs in the codebase
+2. Identify TODOs
    - `Select-String -Path "mygooglib\*.py" -Pattern "TODO" -Recurse`
-   - `Select-String -Path "mygooglib\cli\*.py" -Pattern "TODO" -Recurse`
-   - **Look for**: Low-hanging fruit or critical fixes.
+   - **Context**: Fixes often trump new features.
 
-3. Analyze API coverage gaps
-   - Compare implemented methods against `AUTOMATION_GOALS.md` Section 3 (Core actions).
-   - **Key gaps to check**:
-     - Docs: Is `render_template` fully working?
-     - Drive: Is `sync_folder` recursive?
-     - Sheets: Batch operations?
+3. Analyze API Coverage
+   - Read `coverage_report.md` (Output from `/coverage_audit`).
+   - **Gate**:
+     - **IF EXISTS**: Proceed.
+     - **IF MISSING**: Run `/coverage_audit` first. Recurse.
 
-4. Review roadmap future ideas
-   - `docs/development/roadmap.md` Section 2 lists:
-     - Pandas integration
-     - Batch operations
-     - Google Contacts support
-     - Drive path resolution
-
-5. Create Feature Proposal Artifact
-   - **File**: Create `feature_proposal.md` artifact with top 3 recommendations.
+4. Create Feature Proposal Artifact
+   - **File**: `feature_proposal.md`.
    - **Template**:
      ```markdown
      # Feature Proposal: [Title]
      **Workflow Impact**: [Which W1-W6 workflow does this enhance?]
-     **Value**: [Time saved, new capability, or pain removed]
-     **Effort**: [Low/Medium/High]
+     **Value**: [Time saved, new capability]
      **Implementation**:
        - File: `mygooglib/[module].py`
        - Method: `[method_name](...)`
-       - CLI: `mygoog [command] [subcommand]`
      ```
+
+5. Verify Artifact
+   - **Prove It**: Check file exists `feature_proposal.md`.
+   - **Gate**:
+     - **IF EXISTS**: Proceed.
+     - **IF MISSING**: Stop. Re-create artifact. Recurse.
+
+---
+
+**Result**: If artifact exists, mark "Feature Proposals" as `[x]` in `task.md`.

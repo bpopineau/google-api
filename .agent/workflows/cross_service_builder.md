@@ -2,69 +2,50 @@
 description: Guide for building features that combine multiple mygooglib services
 ---
 
-1. Identify the Integration Pattern
-   - **Source → Target patterns already in mygooglib**:
-     - `examples/sheets_to_gmail_summary.py` — Sheets → Gmail
-   - **Common patterns from AUTOMATION_GOALS.md**:
-     - Sheets → Calendar: Create events from spreadsheet schedule
-     - Gmail → Sheets: Log emails to tracking spreadsheet
-     - Tasks → Docs: Generate task summary document
-     - Calendar → Gmail: Email daily agenda
+# /cross_service_builder
+
+**Goal**: Build integration features systematically.
+
+## ⚠️ Task Management
+- **Rule**: Add sub-items to `task.md` for each stage of the build.
+
+---
+
+1. Identify Pattern & Update Task
+   - **Source**: `sheets`, `gmail`, etc.
+   - **Target**: `calendar`, `docs`, etc.
+   - **Action**: Add to `task.md`:
+     - `[ ] Design Data Flow`
+     - `[ ] Stage 1: Read Source`
+     - `[ ] Stage 2: Transform`
+     - `[ ] Stage 3: Write Target`
 
 2. Design Data Flow
-   - **Define clearly**:
-     ```
-     [Source Service] → [Transform Logic] → [Target Service]
-     ```
-   - **Example**: Sheets → Calendar
-     ```
-     sheets.get_range("Schedule", "A2:D100")
-       → Parse rows into event dicts
-       → calendar.add_event(summary, start, end) for each
-     ```
+   - Sketch mapping: `Source Field A` -> `Target Field B`.
+   - **Gate**:
+     - **IF MAPPED**: Mark `Design Data Flow` as `[x]`.
+     - **IF UNCLEAR**: Stop. Check API docs. Recurse.
 
-3. Implement in Stages
-   - **Stage 1**: Read from source
-     ```python
-     clients = get_clients()
-     rows = clients.sheets.get_range(spreadsheet_id, range_)
-     ```
-   - **Stage 2**: Transform data
-     ```python
-     events = []
-     for row in rows:
-         events.append({
-             "summary": row[0],
-             "start": parse_datetime(row[1]),
-             "end": parse_datetime(row[2]),
-         })
-     ```
-   - **Stage 3**: Write to target
-     ```python
-     for event in events:
-         clients.calendar.add_event(**event)
-     ```
+3. Implement Stage 1 (Read Source)
+   - Verify reading works in isolation.
+   - **Prove It**: `print(rows)` shows data.
+   - **Action**: Mark `[x]` after verification.
 
-4. Create Example Script
-   - **Location**: `examples/[source]_to_[target].py`
-   - **Naming**: Use service names (e.g., `sheets_to_calendar.py`)
-   - **Pattern**: Follow `examples/sheets_to_gmail_summary.py`
+4. Implement Stage 2 (Transform Logic)
+   - Write pure python logic (dict -> dict).
+   - **Prove It**: Unit test transformation logic.
+   - **Action**: Mark `[x]` after verification.
 
-5. Add as Workflow Method (Optional)
-   - **If reusable**, add to `mygooglib/workflows.py` (new module):
-     ```python
-     def sheets_to_calendar(spreadsheet_id: str, range_: str, calendar_id: str = "primary"):
-         """Create calendar events from a spreadsheet schedule."""
-     ```
+5. Implement Stage 3 (Write Target)
+   - Verify writing works with test data.
+   - **Gate**:
+     - **IF SUCCESS**: Mark `[x]`.
+     - **IF API ERROR**: Stop. Debug permissions/payload. Recurse.
 
-6. Add CLI Command (Optional)
-   - **File**: `mygooglib/cli/workflows.py` (new)
-   - **Command**: `mygoog workflow sheets-to-calendar --spreadsheet "ID" --range "A2:D100"`
+6. Finalize & Document
+   - Create reusable function in `mygooglib/workflows.py` (optional).
+   - Update `docs/guides/usage.md`.
 
-7. Document
-   - Add to `docs/guides/usage.md` under "Cross-Service Workflows".
-   - Add to `AUTOMATION_GOALS.md` Section 6 as completed.
+---
 
-8. Test
-   - Create `tests/test_workflows.py` with mocked clients.
-   - Run with real data: `python examples/[source]_to_[target].py`
+**Result**: Ensure all sub-tasks in `task.md` are `[x]`.
