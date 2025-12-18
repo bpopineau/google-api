@@ -28,8 +28,8 @@ file_id = upload_file(clients.drive, "./report.pdf")
 # List files matching a query
 files = list_files(clients.drive, query="name contains 'report'")
 
-# Sync a local folder to a Drive folder (upload/update only)
-summary = sync_folder(clients.drive, r"C:\path\to\folder", "<FOLDER_ID>")
+# Sync a local folder to a Drive folder (supports paths or IDs)
+summary = sync_folder(clients.drive, r"C:\path\to\folder", "Backups/2025")
 ```
 
 ---
@@ -84,6 +84,27 @@ results = search_messages(clients.gmail, "newer_than:7d", max_results=5)
 # Mark a message as read
 if results:
     mark_read(clients.gmail, results[0]["id"])
+```
+
+---
+
+## 4. Cross-Service Workflows
+
+Workflows combine multiple services to automate complex tasks.
+
+### Sheets to Calendar
+
+Import events from a spreadsheet. The sheet should have columns for Summary, Start, End/Duration, and Description.
+
+```python
+from mygooglib.workflows import import_events_from_sheets
+
+result = import_events_from_sheets(
+    clients,
+    spreadsheet_id="Marketing Events",
+    range_name="Events!A2:D50"
+)
+print(f"Created {result['created']} events.")
 ```
 
 ---

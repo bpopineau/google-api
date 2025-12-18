@@ -26,6 +26,7 @@ from . import drive as drive_cmd
 from . import gmail as gmail_cmd
 from . import sheets as sheets_cmd
 from . import tasks as tasks_cmd
+from . import workflows as workflows_cmd
 from .common import CliState, configure_environment, format_output, print_error
 
 app = typer.Typer(
@@ -42,6 +43,7 @@ app.add_typer(gmail_cmd.app, name="gmail")
 app.add_typer(calendar_cmd.app, name="calendar")
 app.add_typer(tasks_cmd.app, name="tasks")
 app.add_typer(docs_cmd.app, name="docs")
+app.add_typer(workflows_cmd.app, name="workflows")
 
 
 @app.callback()
@@ -103,7 +105,7 @@ def version_cmd(ctx: typer.Context) -> None:
     state = CliState.from_ctx(ctx)
     # In a real package, we'd use importlib.metadata.version("mygooglib")
     # For this local dev setup, we'll just hardcode it or read from pyproject.toml
-    version = "0.1.0"
+    version = "0.2.0"
     if state.json:
         state.console.print(format_output({"version": version}, json_mode=True))
     else:

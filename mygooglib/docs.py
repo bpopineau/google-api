@@ -188,6 +188,63 @@ def export_pdf(
     return download_file(drive, doc_id, dest_path, export_mime_type="application/pdf")
 
 
+def find_replace(
+    docs: Any,
+    doc_id: str,
+    replacements: dict[str, str],
+    *,
+    match_case: bool = True,
+) -> int:
+    """Perform multiple find-and-replace operations in a document.
+
+    Args:
+        docs: Docs API Resource
+        doc_id: Document ID
+        replacements: Dictionary of search -> replace strings
+        match_case: Whether to match case sensitive (default True)
+
+    Returns:
+        Number of occurrences replaced (total across all keys).
+    """
+    if not replacements:
+        return 0
+
+    requests = []
+    for search_term, replace_term in replacements.items():
+        requests.append(
+            {
+                "replaceAllText": {
+                    "containsText": {
+                        "text": search_term,
+                        "matchCase": match_case,
+                    },
+                    "replaceText": str(replace_term),
+                }
+            }
+        )
+
+    try:
+        update_request = docs.documents().batchUpdate(
+            documentId=doc_id, body={"requests": requests}
+        )
+        response = execute_with_retry_http_error(update_request, is_write=True)
+
+        total_replaced = 0
+        for reply in response.get("replies", []):
+            if "replaceAllText" in reply:
+                total_replaced += reply["replaceAllText"].get("occurrencesChanged", 0)
+        return total_replaced
+
+    except HttpError as e:
+        raise_for_http_error(e, context="Docs find_replace")
+        raise
+    except Exception as e:
+        # Check for empty response or other oddities
+        if "replies" not in str(e):
+            raise
+        return 0
+
+
 class DocsClient:
     """Simplified Google Docs API wrapper focusing on common operations."""
 
@@ -235,3 +292,13 @@ class DocsClient:
     def append_text(self, doc_id: str, text: str) -> None:
         """Append text to the end of a document."""
         return append_text(self.service, doc_id, text)
+
+    def find_replace(
+        self,
+        doc_id: str,
+        replacements: dict[str, str],
+        *,
+        match_case: bool = True,
+    ) -> int:
+        """Perform multiple find-and-replace operations in a document."""
+        return find_replace(self.service, doc_id, replacements, match_case=match_case)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import webbrowser
 from pathlib import Path
 
@@ -33,15 +34,19 @@ app = typer.Typer(help="Google Drive commands.", no_args_is_help=True)
 
 def _resolve_id(identifier: str) -> str:
     """Helper to resolve a Drive ID or Path to an ID."""
-    # Heuristic: IDs are long and alphanumeric. Paths have /.
-    # If it's short and has no /, or matches ID pattern, treat as ID.
-    if "/" in identifier:
-        clients = get_clients()
-        meta = resolve_path(clients.drive.service, identifier)
-        if meta:
-            return meta["id"]
-        raise typer.BadParameter(f"Could not resolve path: {identifier}")
-    return identifier
+    # Heuristic: Drive IDs are usually ~33 chars and alphanumeric (+ underscore/hyphen).
+    # Human names/paths often have spaces, dots, or slashes, or are shorter.
+    if re.match(r"^[a-zA-Z0-9_-]{25,}$", identifier):
+        return identifier
+
+    # Try resolving as path
+    clients = get_clients()
+    meta = resolve_path(clients.drive.service, identifier)
+    if meta:
+        return meta["id"]
+
+    # Raise error if we can't resolve and it doesn't look like an ID
+    raise typer.BadParameter(f"Could not resolve path or name: {identifier}")
 
 
 @app.command("list")

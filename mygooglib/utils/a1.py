@@ -7,10 +7,10 @@ import re
 
 def col_to_a1(col: int) -> str:
     """Convert 1-indexed column number to A1 letter(s). 1 -> 'A', 27 -> 'AA'.
-    
+
     Args:
         col: Column number (1-indexed). Must be between 1 and 18278 (max Sheets columns: ZZZ).
-        
+
     Raises:
         ValueError: If col is out of valid range.
     """
@@ -18,7 +18,9 @@ def col_to_a1(col: int) -> str:
         raise ValueError("Column must be >= 1")
     # Google Sheets maximum is column ZZZ (18278)
     if col > 18278:
-        raise ValueError("Column must be <= 18278 (ZZZ is the maximum in Google Sheets)")
+        raise ValueError(
+            "Column must be <= 18278 (ZZZ is the maximum in Google Sheets)"
+        )
     result = []
     while col:
         col, rem = divmod(col - 1, 26)

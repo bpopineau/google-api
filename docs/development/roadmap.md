@@ -30,8 +30,9 @@ This document tracks the progress of `mygooglib` and outlines future development
 
 ### Step 11-15 — Advanced & Maintenance
 - [x] **Patterns**: Retries, backoff, factories.
-- [x] **Cleanup**: Documentation reorganization (In Progress).
+- [x] **Cleanup**: Documentation reorganization.
 - [x] **CLI**: Full Typer-based interface with rich formatting.
+- [x] **v0.2 Release**: Health improvements, Path Resolution, Workflows.
 
 ---
 
@@ -50,8 +51,9 @@ These are potential enhancements for future versions:
 - **Docs v2**: Loops, tables, and rich template rendering.
 
 ### Ergonomics
-- **Drive Path Resolution**: Use paths like `"Reports/2025"` instead of IDs.
+- [x] **Drive Path Resolution**: Use paths like `"Reports/2025"` instead of IDs.
 - **Automated Gmail Attachments**: High-level query-based attachment saving.
 
 ### Workflows
-- **Cross-Service recipes**: High-level multi-service integrations (e.g., `sync_tasks_to_calendar`).
+- [x] **Cross-Service recipes**: High-level multi-service integrations (e.g., `sync_tasks_to_calendar`).
+- **Recurrent Tasks**: Triggering workflows based on calendar events or schedules.

@@ -168,6 +168,13 @@ def resolve_path(
     if not parts:
         return None
 
+    # Skip 'root' if it's the first part and we're starting from root
+    if parts[0].lower() == "root" and parent_id == "root":
+        parts = parts[1:]
+        if not parts:
+            # If path was just 'root', return root metadata (minimal)
+            return {"id": "root", "name": "root", "mimeType": FOLDER_MIME_TYPE}
+
     current_parent = parent_id
     current_meta = None
 

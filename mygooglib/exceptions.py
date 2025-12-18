@@ -62,6 +62,7 @@ def raise_for_http_error(http_error: Exception, *, context: str | None = None) -
     if status in (401, 403):
         hint = (
             "Check that your token has the required scopes and that the resource is shared with the authorized account. "
+            "Ensure the relevant API (e.g., Calendar, Tasks) is enabled in the Google Cloud Console. "
             "If you changed scopes recently, delete token.json and rerun scripts/oauth_setup.py."
         )
         raise AuthError(

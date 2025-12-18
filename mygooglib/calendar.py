@@ -12,7 +12,7 @@ from typing import Any
 from googleapiclient.errors import HttpError
 
 from mygooglib.exceptions import raise_for_http_error
-from mygooglib.utils.datetime import to_rfc3339
+from mygooglib.utils.datetime import from_rfc3339, to_rfc3339
 from mygooglib.utils.retry import execute_with_retry_http_error
 
 
@@ -44,6 +44,11 @@ def add_event(
     Returns:
         Event ID string by default, or full response if raw=True.
     """
+    if isinstance(start, str):
+        start = from_rfc3339(start)
+    if isinstance(end, str):
+        end = from_rfc3339(end)
+
     is_all_day = not isinstance(start, dt.datetime)
 
     if end is None:
@@ -111,7 +116,7 @@ def list_events(
     Returns:
         List of event dicts by default, or full response if raw=True.
     """
-    all_items = []
+    all_items: list[dict] = []
     page_token = None
 
     try:

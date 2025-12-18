@@ -125,16 +125,16 @@ def open_by_title(
 
 def _quote_sheet_name(sheet_name: str) -> str:
     """Quote a sheet name for use in A1 notation (internal helper).
-    
+
     A1 notation requires single quotes when the sheet name contains spaces or special characters.
     Embedded single quotes must be escaped by doubling them.
-    
+
     Args:
         sheet_name: The raw sheet name
-        
+
     Returns:
         The properly quoted sheet name for A1 notation
-        
+
     Examples:
         'Sheet1' -> 'Sheet1'
         'My Sheet' -> "'My Sheet'"
