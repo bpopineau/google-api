@@ -11,6 +11,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
 from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.logging import get_logger
 from mygooglib.utils.retry import execute_with_retry_http_error
 
 # Google Workspace MIME types
@@ -311,6 +312,7 @@ def sync_folder(
     updated = 0
     skipped = 0
     errors: list[str] = []
+    logger = get_logger("mygooglib.drive")
 
     from datetime import datetime, timezone
 
@@ -399,8 +401,6 @@ def sync_folder(
                 error_msg = f"{entry.relative_to(local_dir)}: {e}"
                 errors.append(error_msg)
                 # Log errors as they occur so users can monitor progress
-                from mygooglib.utils.logging import get_logger
-                logger = get_logger("mygooglib.drive")
                 logger.error("Sync error: %s", error_msg)
 
     _sync_dir(local_dir, drive_folder_id)
