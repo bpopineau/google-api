@@ -59,6 +59,11 @@ def get_clients(
     # Opt-in debug logging via env vars.
     configure_from_env()
 
+    # Prevent indefinite hangs on network/auth issues
+    import socket
+
+    socket.setdefaulttimeout(60)
+
     is_default_creds = creds is None
 
     if is_default_creds and use_cache and _DEFAULT_CLIENTS is not None:
