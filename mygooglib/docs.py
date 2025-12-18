@@ -16,6 +16,89 @@ from mygooglib.exceptions import raise_for_http_error
 from mygooglib.utils.retry import execute_with_retry_http_error
 
 
+def create(docs: Any, title: str) -> str:
+    """Create a new empty document.
+
+    Args:
+        docs: Docs API Resource from get_clients().docs
+        title: Title for the new document
+
+    Returns:
+        The new document's ID.
+    """
+    try:
+        request = docs.documents().create(body={"title": title})
+        response = execute_with_retry_http_error(request, is_write=True)
+        return response["documentId"]
+    except HttpError as e:
+        raise_for_http_error(e, context="Docs create")
+        raise
+
+
+def get_text(docs: Any, doc_id: str) -> str:
+    """Get all plain text from a document.
+
+    Args:
+        docs: Docs API Resource
+        doc_id: Document ID
+
+    Returns:
+        Full plain text content of the document.
+    """
+    try:
+        request = docs.documents().get(documentId=doc_id)
+        response = execute_with_retry_http_error(request, is_write=False)
+
+        content = response.get("body", {}).get("content", [])
+        text_parts = []
+        for element in content:
+            if "paragraph" in element:
+                for part in element["paragraph"]["elements"]:
+                    if "textRun" in part:
+                        text_parts.append(part["textRun"]["content"])
+        return "".join(text_parts)
+    except HttpError as e:
+        raise_for_http_error(e, context="Docs get_text")
+        raise
+
+
+def append_text(docs: Any, doc_id: str, text: str) -> None:
+    """Append text to the end of a document.
+
+    Args:
+        docs: Docs API Resource
+        doc_id: Document ID
+        text: Text to append
+    """
+    try:
+        # Fetch current content to find the end index
+        request = docs.documents().get(documentId=doc_id, fields="body/content")
+        response = execute_with_retry_http_error(request, is_write=False)
+        content = response.get("body", {}).get("content", [])
+
+        # The last element's endIndex (minus 1 for the trailing newline) is usually the end.
+        if not content:
+            end_index = 1
+        else:
+            end_index = content[-1]["endIndex"] - 1
+
+        requests = [
+            {
+                "insertText": {
+                    "location": {"index": max(1, end_index)},
+                    "text": text,
+                }
+            }
+        ]
+        update_request = docs.documents().batchUpdate(
+            documentId=doc_id, body={"requests": requests}
+        )
+        execute_with_retry_http_error(update_request, is_write=True)
+    except HttpError as e:
+        raise_for_http_error(e, context="Docs append_text")
+        raise
+
+
 def render_template(
     docs: Any,
     template_id: str,
@@ -140,3 +223,15 @@ class DocsClient:
         if self.drive is None:
             raise ValueError("drive=clients.drive is required to export PDF.")
         return export_pdf(self.drive, doc_id, dest_path)
+
+    def create(self, title: str) -> str:
+        """Create a new empty document."""
+        return create(self.service, title)
+
+    def get_text(self, doc_id: str) -> str:
+        """Get all plain text from a document."""
+        return get_text(self.service, doc_id)
+
+    def append_text(self, doc_id: str, text: str) -> None:
+        """Append text to the end of a document."""
+        return append_text(self.service, doc_id, text)

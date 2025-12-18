@@ -7,7 +7,7 @@ name = "mygooglib"
 version = "0.1.0"
 description = "Personal Google APIs wrapper library"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "google-api-python-client>=2.100",
     "google-auth>=2.20",

@@ -145,6 +145,58 @@ def create_folder(
         raise  # unreachable but satisfies type checker
 
 
+def resolve_path(
+    drive: Any,
+    path: str,
+    *,
+    parent_id: str = "root",
+) -> dict | None:
+    """Resolve a human-readable path string to Drive file metadata.
+
+    Supports forward-slash separated paths like 'Folder/Subfolder/File.txt'.
+    Traverses the hierarchy from top to bottom.
+
+    Args:
+        drive: Drive API Resource
+        path: Path string to resolve
+        parent_id: Root folder ID to start from (default 'root')
+
+    Returns:
+        File metadata dict for the final path component, or None if not found.
+    """
+    parts = [p.strip() for p in path.split("/") if p.strip()]
+    if not parts:
+        return None
+
+    current_parent = parent_id
+    current_meta = None
+
+    for i, part in enumerate(parts):
+        # Search for this part in the current parent
+        # If it's the last part, we don't restrict mime_type to folder.
+        # Otherwise, we expect it to be a folder (mostly).
+        escaped_part = part.replace("'", "\\'")
+        results = list_files(
+            drive,
+            query=f"name = '{escaped_part}'",
+            parent_id=current_parent,
+            trashed=False,
+        )
+
+        if not results:
+            return None
+
+        # Take the first match
+        current_meta = results[0]
+        current_parent = current_meta["id"]
+
+        # If we have more parts to resolve, the current one MUST be a folder.
+        if i < len(parts) - 1 and current_meta["mimeType"] != FOLDER_MIME_TYPE:
+            return None
+
+    return current_meta
+
+
 def upload_file(
     drive: Any,
     local_path: str | os.PathLike,
@@ -296,16 +348,16 @@ def _update_file(
     mime_type: str | None = None,
 ) -> str:
     """Update an existing file's content (internal helper).
-    
+
     Args:
         drive: Drive API Resource
         file_id: ID of the file to update
         local_path: Path to the new file content
         mime_type: Optional MIME type override
-        
+
     Returns:
         The file ID of the updated file
-        
+
     Raises:
         GoogleApiError: If the update fails
     """
@@ -599,3 +651,12 @@ class DriveClient:
             dry_run=dry_run,
             progress_callback=progress_callback,
         )
+
+    def resolve_path(
+        self,
+        path: str,
+        *,
+        parent_id: str = "root",
+    ) -> dict | None:
+        """Resolve a human-readable path string to Drive file metadata."""
+        return resolve_path(self.service, path, parent_id=parent_id)

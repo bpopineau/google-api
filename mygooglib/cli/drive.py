@@ -21,6 +21,7 @@ from mygooglib.drive import (
     download_file,
     find_by_name,
     list_files,
+    resolve_path,
     sync_folder,
     upload_file,
 )
@@ -28,6 +29,19 @@ from mygooglib.drive import (
 from .common import CliState, format_output, print_kv, print_success, prompt_selection
 
 app = typer.Typer(help="Google Drive commands.", no_args_is_help=True)
+
+
+def _resolve_id(identifier: str) -> str:
+    """Helper to resolve a Drive ID or Path to an ID."""
+    # Heuristic: IDs are long and alphanumeric. Paths have /.
+    # If it's short and has no /, or matches ID pattern, treat as ID.
+    if "/" in identifier:
+        clients = get_clients()
+        meta = resolve_path(clients.drive.service, identifier)
+        if meta:
+            return meta["id"]
+        raise typer.BadParameter(f"Could not resolve path: {identifier}")
+    return identifier
 
 
 @app.command("list")
@@ -52,10 +66,12 @@ def list_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
+    real_parent_id = _resolve_id(parent_id) if parent_id else None
+
     results = list_files(
         clients.drive.service,
         query=query,
-        parent_id=parent_id,
+        parent_id=real_parent_id,
         mime_type=mime_type,
         trashed=trashed,
         page_size=page_size,
@@ -121,8 +137,9 @@ def find_cmd(
     """Find a file by exact name."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
+    real_parent_id = _resolve_id(parent_id) if parent_id else None
     result = find_by_name(
-        clients.drive.service, name, parent_id=parent_id, mime_type=mime_type
+        clients.drive.service, name, parent_id=real_parent_id, mime_type=mime_type
     )
 
     if state.json:
@@ -172,9 +189,11 @@ def upload_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
+    real_parent_id = _resolve_id(parent_id) if parent_id else None
+
     if state.json:
         file_id = upload_file(
-            clients.drive.service, local_path, parent_id=parent_id, name=name
+            clients.drive.service, local_path, parent_id=real_parent_id, name=name
         )
         state.console.print(format_output({"id": file_id}, json_mode=True))
         return
@@ -197,7 +216,7 @@ def upload_cmd(
         file_id = upload_file(
             clients.drive.service,
             local_path,
-            parent_id=parent_id,
+            parent_id=real_parent_id,
             name=name,
             progress_callback=_cb,
         )
@@ -221,9 +240,14 @@ def download_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
+    real_file_id = _resolve_id(file_id)
+
     if state.json:
         out_path = download_file(
-            clients.drive.service, file_id, dest_path, export_mime_type=export_mime_type
+            clients.drive.service,
+            real_file_id,
+            dest_path,
+            export_mime_type=export_mime_type,
         )
         state.console.print(format_output({"path": str(out_path)}, json_mode=True))
         return
@@ -243,7 +267,7 @@ def download_cmd(
 
         out_path = download_file(
             clients.drive.service,
-            file_id,
+            real_file_id,
             dest_path,
             export_mime_type=export_mime_type,
             progress_callback=_cb,
@@ -269,11 +293,13 @@ def sync_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
+    real_folder_id = _resolve_id(drive_folder_id)
+
     if state.json:
         summary = sync_folder(
             clients.drive.service,
             local_path,
-            drive_folder_id,
+            real_folder_id,
             recursive=recursive,
             dry_run=dry_run,
         )
@@ -300,7 +326,7 @@ def sync_cmd(
         summary = sync_folder(
             clients.drive.service,
             local_path,
-            drive_folder_id,
+            real_folder_id,
             recursive=recursive,
             dry_run=dry_run,
             progress_callback=_cb,
@@ -330,18 +356,21 @@ def delete_cmd(
     """Delete a file or move it to trash."""
     state = CliState.from_ctx(ctx)
     clients = get_clients()
-    delete_file(clients.drive.service, file_id, permanent=permanent)
+
+    real_file_id = _resolve_id(file_id)
+    delete_file(clients.drive.service, real_file_id, permanent=permanent)
 
     if state.json:
         state.console.print(
             format_output(
-                {"id": file_id, "deleted": True, "permanent": permanent}, json_mode=True
+                {"id": real_file_id, "deleted": True, "permanent": permanent},
+                json_mode=True,
             )
         )
         return
 
     print_success(state.console, "Deleted" if permanent else "Moved to trash")
-    print_kv(state.console, "id", file_id)
+    print_kv(state.console, "id", real_file_id)
 
 
 @app.command("open")
@@ -353,10 +382,12 @@ def open_cmd(
     state = CliState.from_ctx(ctx)
     clients = get_clients()
 
+    real_file_id = _resolve_id(file_id)
+
     # Get webViewLink
     meta = (
         clients.drive.service.files()
-        .get(fileId=file_id, fields="webViewLink")
+        .get(fileId=real_file_id, fields="webViewLink")
         .execute()
     )
     link = meta.get("webViewLink")

@@ -6,11 +6,69 @@ from pathlib import Path
 import typer
 
 from mygooglib import get_clients
-from mygooglib.docs import export_pdf, render_template
+from mygooglib.docs import append_text, create, export_pdf, get_text, render_template
 
 from .common import CliState, format_output, print_kv, print_success
 
 app = typer.Typer(help="Google Docs commands.", no_args_is_help=True)
+
+
+@app.command("create")
+def create_cmd(
+    ctx: typer.Context,
+    title: str = typer.Argument(..., help="Title for the new document."),
+) -> None:
+    """Create a new empty document."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    doc_id = create(clients.docs.service, title)
+
+    if state.json:
+        state.console.print(format_output({"id": doc_id}, json_mode=True))
+        return
+
+    print_success(state.console, "Document created")
+    print_kv(state.console, "id", doc_id)
+
+
+@app.command("get-text")
+def get_text_cmd(
+    ctx: typer.Context,
+    doc_id: str = typer.Argument(..., help="Document ID."),
+) -> None:
+    """Get plain text content of a document."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    text = get_text(clients.docs.service, doc_id)
+
+    if state.json:
+        state.console.print(format_output({"text": text}, json_mode=True))
+        return
+
+    state.console.print(text)
+
+
+@app.command("append")
+def append_cmd(
+    ctx: typer.Context,
+    doc_id: str = typer.Argument(..., help="Document ID."),
+    text: str = typer.Argument(..., help="Text to append."),
+) -> None:
+    """Append text to a document."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    append_text(clients.docs.service, doc_id, text)
+
+    if state.json:
+        state.console.print(
+            format_output({"id": doc_id, "appended": True}, json_mode=True)
+        )
+        return
+
+    print_success(state.console, "Text appended")
 
 
 @app.command("render")
