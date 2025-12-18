@@ -5,15 +5,7 @@ from pathlib import Path
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-# v0.1 Must workflows: Drive sync, Sheets read/write, Gmail send/search/mark_read, Calendar, Tasks
-V0_1_SCOPES: list[str] = [
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/gmail.send",
-    "https://www.googleapis.com/auth/gmail.modify",
-    "https://www.googleapis.com/auth/calendar",
-    "https://www.googleapis.com/auth/tasks",
-]
+from mygooglib.auth import SCOPES
 
 
 def _default_secrets_dir() -> Path:
@@ -49,9 +41,7 @@ def main() -> int:
 
     token_path.parent.mkdir(parents=True, exist_ok=True)
 
-    flow = InstalledAppFlow.from_client_secrets_file(
-        str(creds_path), scopes=V0_1_SCOPES
-    )
+    flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), scopes=SCOPES)
     creds = flow.run_local_server(port=0)
 
     token_path.write_text(creds.to_json(), encoding="utf-8")
@@ -59,7 +49,7 @@ def main() -> int:
     print("Saved token:")
     print(f"  {token_path}")
     print("Scopes granted:")
-    for scope in V0_1_SCOPES:
+    for scope in SCOPES:
         print(f"  - {scope}")
 
     return 0
