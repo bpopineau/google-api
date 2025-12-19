@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QComboBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -32,9 +33,9 @@ class TasksPage(QWidget):
         self.clients = clients
         self._workers: list[ApiWorker] = []
         self._tasks: list[dict] = []
-        self._task_list_id: str | None = None
+        self._task_list_id: str = "@default"
         self._setup_ui()
-        self._load_tasks()
+        self._load_task_lists()
 
     def _setup_ui(self) -> None:
         """Build the tasks page layout."""
@@ -46,6 +47,19 @@ class TasksPage(QWidget):
         header = QLabel("✅ Tasks")
         header.setStyleSheet("font-size: 28px; font-weight: bold;")
         layout.addWidget(header)
+
+        # Task list selector row
+        list_row = QHBoxLayout()
+        list_lbl = QLabel("📝 List:")
+        list_lbl.setStyleSheet("font-weight: 600;")
+        list_row.addWidget(list_lbl)
+
+        self.list_combo = QComboBox()
+        self.list_combo.setMinimumWidth(200)
+        self.list_combo.currentIndexChanged.connect(self._on_list_changed)
+        list_row.addWidget(self.list_combo)
+        list_row.addStretch()
+        layout.addLayout(list_row)
 
         # Quick add row
         add_row = QHBoxLayout()
@@ -87,12 +101,50 @@ class TasksPage(QWidget):
 
         layout.addLayout(toggle_row)
 
+    def _load_task_lists(self) -> None:
+        """Load available task lists."""
+        self.status.setText("Loading lists...")
+
+        def fetch():
+            return self.clients.tasks.list_tasklists()
+
+        worker = ApiWorker(fetch)
+        worker.finished.connect(self._on_task_lists_loaded)
+        worker.error.connect(self._on_error)
+        self._workers.append(worker)
+        worker.start()
+
+    def _on_task_lists_loaded(self, lists: list[dict]) -> None:
+        """Populate the task list dropdown."""
+        self.list_combo.blockSignals(True)
+        self.list_combo.clear()
+
+        for task_list in lists:
+            name = task_list.get("title", "Untitled")
+            list_id = task_list.get("id", "")
+            self.list_combo.addItem(name, list_id)
+
+        self.list_combo.blockSignals(False)
+
+        # Set default and load tasks
+        if lists:
+            self._task_list_id = lists[0].get("id", "@default")
+        self._load_tasks()
+
+    def _on_list_changed(self, index: int) -> None:
+        """Handle task list selection change."""
+        list_id = self.list_combo.currentData()
+        if list_id:
+            self._task_list_id = list_id
+            self._load_tasks()
+
     def _load_tasks(self) -> None:
         """Load tasks from API."""
         self.status.setText("Loading...")
 
         def fetch():
             return self.clients.tasks.list_tasks(
+                tasklist_id=self._task_list_id,
                 show_completed=self.show_completed,
                 max_results=100,
             )

@@ -149,6 +149,51 @@ def delete_task(
     execute_with_retry_http_error(request, is_write=True)
 
 
+@api_call("Tasks update_task", is_write=True)
+def update_task(
+    tasks: Any,
+    task_id: str,
+    *,
+    tasklist_id: str = "@default",
+    title: str | None = None,
+    notes: str | None = None,
+    status: str | None = None,
+    due: dt.datetime | dt.date | None = None,
+    raw: bool = False,
+) -> dict | None:
+    """Update a task's properties.
+
+    Args:
+        tasks: Tasks API Resource
+        task_id: ID of the task to update
+        tasklist_id: Task list ID (default "@default")
+        title: New title (optional)
+        notes: New notes (optional)
+        status: New status - "needsAction" or "completed" (optional)
+        due: New due date/datetime (optional)
+        raw: If True, return full API response dict
+
+    Returns:
+        Updated task dict if raw=True, else None.
+    """
+    body: dict[str, Any] = {}
+    if title is not None:
+        body["title"] = title
+    if notes is not None:
+        body["notes"] = notes
+    if status is not None:
+        body["status"] = status
+    if due is not None:
+        body["due"] = to_rfc3339(due)
+
+    if not body:
+        return None  # Nothing to update
+
+    request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
+    response = execute_with_retry_http_error(request, is_write=True)
+    return response if raw else None
+
+
 class TasksClient(BaseClient):
     """Simplified Google Tasks API wrapper focusing on common operations."""
 
@@ -221,3 +266,26 @@ class TasksClient(BaseClient):
     ) -> None:
         """Delete a task from a task list."""
         return delete_task(self.service, task_id, tasklist_id=tasklist_id)
+
+    def update_task(
+        self,
+        task_id: str,
+        *,
+        tasklist_id: str = "@default",
+        title: str | None = None,
+        notes: str | None = None,
+        status: str | None = None,
+        due: dt.datetime | dt.date | None = None,
+        raw: bool = False,
+    ) -> dict | None:
+        """Update a task's properties."""
+        return update_task(
+            self.service,
+            task_id,
+            tasklist_id=tasklist_id,
+            title=title,
+            notes=notes,
+            status=status,
+            due=due,
+            raw=raw,
+        )

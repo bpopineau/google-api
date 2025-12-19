@@ -145,6 +145,37 @@ def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]
     return result
 
 
+@api_call("Gmail list_labels", is_write=False)
+def list_labels(
+    gmail: Any,
+    *,
+    user_id: str = "me",
+    raw: bool = False,
+) -> list[dict] | dict:
+    """List all labels in the user's mailbox.
+
+    Args:
+        gmail: Gmail API Resource
+        user_id: Gmail userId (default "me")
+        raw: If True, return full API response dict
+
+    Returns:
+        List of label dicts with id, name, type, etc.
+    """
+    request = gmail.users().labels().list(userId=user_id)
+    response = execute_with_retry_http_error(request, is_write=False)
+    if raw:
+        return response
+    labels = response.get("labels", [])
+    # Sort: system labels first, then user labels alphabetically
+    system = [lbl for lbl in labels if lbl.get("type") == "system"]
+    user = sorted(
+        [lbl for lbl in labels if lbl.get("type") == "user"],
+        key=lambda x: x.get("name", "").lower(),
+    )
+    return system + user
+
+
 @api_call("Gmail search_messages", is_write=False)
 def search_messages(
     gmail: Any,
@@ -657,4 +688,17 @@ class GmailClient(BaseClient):
             max_messages=max_messages,
             filename_filter=filename_filter,
             progress_callback=progress_callback,
+        )
+
+    def list_labels(
+        self,
+        *,
+        user_id: str = "me",
+        raw: bool = False,
+    ) -> list[dict] | dict:
+        """List all labels in the user's mailbox."""
+        return list_labels(
+            self.service,
+            user_id=user_id,
+            raw=raw,
         )

@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Implement Local File Metadata Sync to Google Sheets
+## [~] Track: Implement Local File Metadata Sync to Google Sheets
 *Link: [./conductor/tracks/metadata_sync_20251219/](./conductor/tracks/metadata_sync_20251219/)*

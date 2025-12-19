@@ -2,20 +2,28 @@
 
 from __future__ import annotations
 
-# Color palette - dark theme
+# Color palette - Modern Neutral with better contrast
 COLORS = {
-    "bg_primary": "#1a1a2e",
-    "bg_secondary": "#16213e",
-    "bg_tertiary": "#0f3460",
-    "accent": "#e94560",
-    "accent_hover": "#ff6b6b",
-    "text_primary": "#ffffff",
-    "text_secondary": "#a0a0a0",
-    "text_muted": "#6a6a6a",
-    "border": "#2a2a4a",
-    "success": "#4ade80",
-    "warning": "#fbbf24",
-    "error": "#ef4444",
+    # Backgrounds (higher contrast)
+    "bg_primary": "#0a0c10",  # Main background (darker)
+    "bg_secondary": "#161b22",  # Cards, sidebar
+    "bg_tertiary": "#2d333b",  # Hover states, headers (lighter for contrast)
+    "bg_elevated": "#3d444d",  # Elevated surfaces, dropdowns
+    # Accent colors (muted green - professional)
+    "accent": "#238636",  # Primary green (GitHub green)
+    "accent_hover": "#2ea043",  # Lighter green on hover
+    "accent_muted": "#196c2e",  # Darker green for pressed states
+    # Text (brighter for better contrast)
+    "text_primary": "#f0f6fc",  # Main text (bright white)
+    "text_secondary": "#9198a1",  # Secondary text
+    "text_muted": "#6e7681",  # Muted/disabled text
+    # Borders
+    "border": "#3d444d",  # Default border (more visible)
+    "border_muted": "#2d333b",  # Subtle border
+    # Status colors
+    "success": "#3fb950",  # Green
+    "warning": "#d29922",  # Amber
+    "error": "#f85149",  # Red
 }
 
 # Main application stylesheet
@@ -96,7 +104,7 @@ QPushButton:hover {{
 }}
 
 QPushButton:pressed {{
-    background-color: {COLORS["accent"]};
+    background-color: {COLORS["accent_muted"]};
 }}
 
 QPushButton:disabled {{

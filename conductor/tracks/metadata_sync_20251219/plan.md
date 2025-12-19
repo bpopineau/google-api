@@ -7,7 +7,7 @@
 - [x] Task: Extend `mygooglib.sheets` with `batch_write` capability. [d2c1968]
     - [x] Subtask: Write integration tests for `batch_write` using a mock or test Sheet.
     - [x] Subtask: Implement `batch_write` method to accept a list of headers and rows.
-- [ ] Task: Conductor - User Manual Verification 'Backend Foundation' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Backend Foundation' (Protocol in workflow.md)
 
 ## Phase 2: GUI Implementation - Activity Dashboard
 - [ ] Task: Create `ActivityModel` and `ActivityWidget` in `mygooglib.gui.widgets`.

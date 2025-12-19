@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMenu,
@@ -61,6 +62,10 @@ class DrivePage(QWidget):
         search_btn = QPushButton("🔍 Search")
         search_btn.clicked.connect(self._on_search)
         toolbar.addWidget(search_btn)
+
+        new_folder_btn = QPushButton("📁 New Folder")
+        new_folder_btn.clicked.connect(self._on_new_folder)
+        toolbar.addWidget(new_folder_btn)
 
         upload_btn = QPushButton("⬆️ Upload")
         upload_btn.clicked.connect(self._on_upload)
@@ -250,4 +255,39 @@ class DrivePage(QWidget):
         """Handle delete completion."""
         self.status.setText(f"Deleted: {name}")
         # Auto-refresh to remove the deleted file from view
+        self._load_root()
+
+    def _on_new_folder(self) -> None:
+        """Create a new folder."""
+        # Get selected folder as parent, or use root
+        parent_id = "root"
+        current_item = self.tree.currentItem()
+        if current_item:
+            item_type = current_item.data(0, Qt.ItemDataRole.UserRole + 1)
+            if item_type == "folder":
+                parent_id = current_item.data(0, Qt.ItemDataRole.UserRole)
+
+        # Ask for folder name
+        folder_name, ok = QInputDialog.getText(
+            self, "New Folder", "Enter folder name:", text="New Folder"
+        )
+
+        if not ok or not folder_name.strip():
+            return
+
+        folder_name = folder_name.strip()
+        self.status.setText(f"Creating folder '{folder_name}'...")
+
+        def create():
+            return self.clients.drive.create_folder(folder_name, parent_id=parent_id)
+
+        worker = ApiWorker(create)
+        worker.finished.connect(lambda _: self._on_folder_created(folder_name))
+        worker.error.connect(self._on_error)
+        self._workers.append(worker)
+        worker.start()
+
+    def _on_folder_created(self, name: str) -> None:
+        """Handle folder creation completion."""
+        self.status.setText(f"Created folder: {name}")
         self._load_root()
