@@ -4,8 +4,8 @@
 - **Package**: `mygooglib/` — personal-use Python library wrapping Google Drive/Sheets/Docs/Calendar/Tasks/Gmail.
 - Authoritative requirements:
   - [AUTOMATION_GOALS.md](../AUTOMATION_GOALS.md) (workflows, v0.1 scope, API surface, I/O contracts)
-  - [TODO.md](../TODO.md) (implementation checklist)
-  - [LIBRARY_STRATEGY.md](../LIBRARY_STRATEGY.md) (background + patterns)
+  - [roadmap.md](../docs/development/roadmap.md) (implementation checklist and progress tracking)
+  - [design_principles.md](../docs/reference/design_principles.md) (background + patterns)
 
 ## Package layout
 ```
@@ -14,10 +14,16 @@ mygooglib/
   auth.py          # credential loading + OAuth flow
   client.py        # Clients dataclass + get_clients() factory
   exceptions.py    # GoogleApiError hierarchy + raise_for_http_error()
-  drive.py         # (stub) upload_file, download_file, sync_folder, ...
-  sheets.py        # (stub) get_range, update_range, append_row
-  gmail.py         # (stub) send_email, search_messages, mark_read
-  docs.py / calendar.py / tasks.py  # stubs for later
+  drive.py         # upload_file, download_file, sync_folder, path resolution
+  sheets.py        # get_range, update_range, append_row, spreadsheet resolution
+  gmail.py         # send_email, search_messages, mark_read, attachments
+  docs.py          # create, insert_text, get_text, render_template, export_pdf
+  calendar.py      # add_event, list_events, update/delete events
+  tasks.py         # list_tasklists, add_task, list_tasks, complete_task
+  contacts.py      # basic contact operations
+  workflows.py     # cross-service automation helpers
+  cli/             # Typer-based CLI interface
+  dashboard/       # Streamlit dashboard (optional)
   utils/
     a1.py          # col_to_a1, a1_to_col, range_to_a1
     datetime.py    # to_rfc3339, from_rfc3339, DEFAULT_TZ
@@ -60,3 +66,64 @@ clients.gmail   # raw Resource for Gmail v1
 ## Secrets & local config
 - Never commit `credentials.json` / `token.json` (treat as local secrets); keep paths configurable (env var or a local config file).
 - Do not print tokens/secret material in logs or error messages.
+
+## Development workflow
+### Installation
+```bash
+# Install package in editable mode
+pip install -e .
+
+# Install with dev dependencies
+pip install -e ".[dev]"
+
+# Install with CLI support
+pip install -e ".[cli]"
+```
+
+### Testing
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=mygooglib
+
+# Run smoke tests (read-only)
+python scripts/smoke_test.py all
+
+# Run smoke tests including writes
+python scripts/smoke_test.py all --write
+```
+
+### Linting
+```bash
+# Format and lint with ruff
+ruff check .
+ruff format .
+```
+
+### CLI Usage
+```bash
+# See available commands
+mygoog --help
+
+# Example: List Drive files
+mygoog drive list
+
+# Example: Read from Sheets
+mygoog sheets get --identifier "SHEET_ID" --range "Sheet1!A1:B10"
+```
+
+## Key documentation
+- **[AUTOMATION_GOALS.md](../AUTOMATION_GOALS.md)**: Workflows, v0.1 scope, API surface, I/O contracts
+- **[design_principles.md](../docs/reference/design_principles.md)**: Background, patterns, library strategy
+- **[roadmap.md](../docs/development/roadmap.md)**: Progress tracking and implementation checklist
+- **[testing.md](../docs/development/testing.md)**: Testing strategy and smoke test checklists
+- **[usage guide](../docs/guides/usage.md)**: Detailed examples for all services
+
+## Code style & conventions
+- Python 3.10+ required
+- Type hints encouraged but not mandatory for personal use
+- Functions should be clear and self-documenting
+- Prefer composition over inheritance
+- Keep functions small and focused on single responsibility
