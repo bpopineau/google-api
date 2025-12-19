@@ -2,77 +2,98 @@
 description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**, **SHIP**. `task.md` is the source of truth for all progress."
 ---
 
-# evolve.md 
+# Workflow: /evolve
 
-## 0. PRE-FLIGHT
-1.  **Check Environment**:
-    - Ensure your virtual environment is activated (`.venv`).
-    - Run `where python` (Windows) or `which python` (Linux/Mac) to verify.
+## Phase 0: PRE-FLIGHT
 
-## 1. PLAN
-1.  **Context Gathering**:
-    - **Identify Goal**: Ask the user: "Do you have a specific goal, or should I propose features/ideas?"
-        - *No Goal?* Suggest running `@[/ideate_innovations]` or `@[/propose_features]`.
-        - *Have Goal?* Suggest running `@[/plan_feature]` to create a rigorous implementation plan.
-    - **Codebase Review**: **MANDATORY**. Review relevant files (`list_dir`, `view_file_outline`) *before* commiting to a plan.
-2.  **Initialize `task.md`**: Create a new task file with the structure below:
+**Role:** Build Engineer.
 
-### `task.md` Template
-```markdown
-# Task: [Clear Goal Summary]
+**Task:**
+1. Ensure virtual environment is activated (`.venv`).
+2. Run `where python` (Windows) to verify.
 
-- [ ] PLAN
-    - [x] Create implementation breakdown
-    - [ ] Get user approval
-- [ ] BUILD
-    - [ ] [Step 1: e.g., Implement core class]
-    - [ ] [Step 2: e.g., Update client wrapper]
-    - [ ] [Step 3: ...]
-    - [ ] Unit Tests
-    - [ ] Lint Check (`ruff check . --fix`)
-- [ ] SHIP
-    - [ ] Smoke Tests (Mandatory)
-    - [ ] Documentation Update (Mandatory: Docstrings, README, Guides)
-    - [ ] Update CHANGELOG
-    - [ ] Commit & Push
+---
+
+## Phase 1: PLAN
+
+**Role:** Principal Architect.
+
+**Context:** Gather context before any action.
+
+**Task:**
+1. Execute Atom: `atoms/_analyze_files.md`
+2. **Identify Goal:** Ask user: "Do you have a specific goal, or should I propose features?"
+   - *No Goal?* Suggest `@[/planning/ideate_innovations]` or `@[/planning/propose_features]`.
+   - *Have Goal?* Suggest `@[/planning/plan_feature]`.
+3. **Codebase Review:** *MANDATORY*. Review relevant files before committing to a plan.
+4. **Initialize `task.md`:** Create task file with PLAN/BUILD/SHIP structure.
+5. **Break down work:** Add specific implementation steps under BUILD.
+
+**Constraints:**
+- Do NOT proceed to BUILD until user explicitly approves the plan.
+
+**Output:** Summary of plan (Goal, Changes, Verification steps).
+
+---
+
+## Phase 2: BUILD
+
+**Role:** Senior Software Engineer.
+
+**Context:** Execute the approved plan.
+
+**Task:**
+1. Work through the checklist in `task.md`.
+2. Write unit tests for new functionality immediately.
+3. Quality Check:
+   - Execute Atom: `atoms/_run_tests.md`
+   - Execute Atom: `atoms/_lint.md`
+4. Mark items `[x]` in `task.md` ONLY after verified.
+
+**Constraints:**
+- Test frequently.
+- Verify each task individually before marking complete.
+
+---
+
+## Phase 3: SHIP
+
+**Role:** Release Manager.
+
+**Context:** Mandatory gate before merge.
+
+### Step 1: Smoke Tests
+**Task:**
+- Execute Atom: `atoms/_smoke_test.md`
+
+### Step 2: Documentation (Mandatory)
+**Task:**
+1. Ensure new code has Google-style docstrings.
+2. Consider `@[/maintenance/update_docs]` if significant changes.
+3. Update README with new features.
+
+### Step 3: Changelog
+**Task:**
+- Add concise entry to `CHANGELOG.md`.
+
+### Step 4: Release (Optional)
+**Task:**
+- Consider `@[/lifecycle/release_prep]` if named release.
+- Bump version in `pyproject.toml`.
+
+### Step 5: Commit & Push
+**Task:**
+1. Run `git status` to review changes.
+2. Execute Atom: `atoms/_checkpoint.md`
+3. Run `git push`.
+
+---
+
+**Final Output:** JSON
+```json
+{
+  "workflow_status": "COMPLETE | BLOCKED",
+  "phase_completed": "PLAN | BUILD | SHIP",
+  "blockers": ["<list of issues>"]
+}
 ```
-
-3.  **Break down the work**:
-    - Add specific **implementation steps** under the `BUILD` section in `task.md`.
-    - List the specific files you intend to modify.
-4.  **Brief the User**: Summarize the plan in chat (Goal, Changes, Verification).
-5.  **Get Approval**: **STOP**. Do not proceed to BUILD until the user explicitly approves the plan.
-
-## 2. BUILD
-1.  **Execute the plan**: Work through the checklist in `task.md`.
-2.  **Test as you go**: Write unit tests for new functionality immediately.
-3.  **Quality Check**:
-// turbo
-    - Run `pytest` to ensure all tests pass.
-// turbo
-    - Run `ruff check . --fix` to ensure clean code.
-
-4.  **Mark Complete**: Mark items `[x]` in `task.md` **only** after they are verified. Individually verify each and every task has been completed, not just marked complete.
-
-## 3. SHIP
-*Mandatory Gate: Do not skip these steps.*
-
-1.  **Smoke Tests**: 
-// turbo
-Run `python scripts/smoke_test.py` (or relevant service script) to verify end-to-end behavior on the real API.
-2.  **Documentation** (Mandatory):
-    - **Docstrings**: Ensure new code has Google-style docstrings.
-    - **Workflows**: Consider running `@[/update_docs]` if significant changes were made.
-    - **README**: Add new features to the main list. 
-    - **Guides**: Update or create files in `docs/` if workflows change.
-3.  **Changelog**: Add a concise entry to `CHANGELOG.md`.
-4.  **Release** (Ask the user if they want to do this step):
-    - Consider running `@[/release_prep]` if this is a named release.
-    - Bump version in `pyproject.toml` if this is a named release.
-5.  **Commit**: 
-    - **Check Status**: Run `git status` to see exactly what will be added.
-// turbo
-    - Run `git add .` and `git commit -m "type: description"`
-6.  **Push**: 
-// turbo
-run `git push`
