@@ -1,6 +1,6 @@
 # mygooglib
 
-Personal-use Python helpers for Google Drive, Sheets, Gmail, Docs, Calendar, and Tasks.
+Personal-use Python helpers for Google Drive, Sheets, Gmail, Docs, Calendar, Tasks, and Contacts.
 
 ## Quick Start
 
@@ -23,25 +23,56 @@ pip install -e ".[cli]"
 mygoog --help
 ```
 
+Install optional features:
+```bash
+pip install -e ".[cli,data]"  # Adds Pandas support for Sheets
+```
+
 ---
 
 ## Documentation
 
-- **[Configuration & Auth](docs/guides/configuration.md)**: How to set up Google Cloud and local secrets.
-- **[Usage Guide](docs/guides/usage.md)**: Detailed examples for Drive, Sheets, Gmail, and more.
-- **[Design Principles](docs/reference/design_principles.md)**: Foundational architecture and engineering strategy.
-- **[Testing](docs/development/testing.md)**: Automated tests and manual smoke test checklists.
-- **[Roadmap](docs/development/roadmap.md)**: Progress tracking and future feature ideas.
-
-## Feature Overview
-
-- **Google Drive**: File upload/download, name-based search, folder sync.
-- **Google Sheets**: Title/ID/URL resolution, row/column/A1 operations, batch updates.
-- **Gmail**: Robust email sending with attachments, search parsing, mark-read.
-- **Docs**: Template rendering (JSON/File support), text extraction, PDF export.
-- **Calendar & Tasks**: ISO-8601 aware event creation, tasklist management.
-- **Maintenance**: Built-in retries for transient errors, rich logging.
+- **[Configuration & Auth](docs/guides/configuration.md)**: OAuth setup and token management.
+- **[Usage Guide](docs/guides/usage.md)**: API examples for all services.
+- **[Roadmap](docs/development/roadmap.md)**: Progress tracking and feature ideas.
 
 ---
 
-For complete details on all modules and methods, see the **[Usage Guide](docs/guides/usage.md)**.
+## Feature Overview
+
+| Service | Key Features |
+|---------|--------------|
+| **Drive** | Upload, download, list, sync folders, path resolution (`"Reports/2025"`) |
+| **Sheets** | Read/write ranges, batch ops, Pandas `to_dataframe()`/`from_dataframe()` |
+| **Gmail** | Send with attachments, search, mark read, save attachments from search |
+| **Docs** | Template rendering, text extraction, PDF export, find & replace |
+| **Calendar** | Create/list/update events with Python `datetime` objects |
+| **Tasks** | List/add/complete tasks, manage tasklists |
+| **Contacts** | List, search, create, update, delete contacts (People API) |
+
+### Utilities
+
+- **Retry with Backoff**: Automatic retry on transient 429/5xx errors
+- **Idempotency Store**: SQLite-based duplicate prevention for scripts
+- **Logging**: Configurable via `MYGOOGLIB_LOG_LEVEL` environment variable
+
+---
+
+## Example: Cross-Service Workflow
+
+```python
+from mygooglib import get_clients
+from mygooglib.workflows import import_events_from_sheets
+
+clients = get_clients()
+result = import_events_from_sheets(
+    clients,
+    spreadsheet_id="Event Planning",
+    range_name="Events!A2:D50"
+)
+print(f"Created {result['created']} calendar events")
+```
+
+---
+
+For complete API details, see the **[Usage Guide](docs/guides/usage.md)**.
