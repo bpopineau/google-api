@@ -1,11 +1,23 @@
 # Changelog
  
+## 0.6.0 — 2025-12-19
+
+### Added
+- **Docs v2**: `insert_table()` for inserting tables from data, `render_list()` for replacing tags with bulleted lists.
+- **Retry Tests**: Comprehensive unit test coverage for `mygooglib/utils/retry.py` (13 tests).
+- **Example Scripts**: New examples for Contacts, Sheets batch operations, and idempotent email.
+- **Apps Script Bridge** (scaffolding): `mygooglib/appscript.py` module for future use.
+
+### Changed
+- Updated all documentation to reflect current feature set.
+
 ## 0.5.0 — 2025-12-19
 
 ### Added
 - **Sheets Batch Context Manager**: `BatchUpdater` class for ergonomic bulk updates via `with client.batch(spreadsheet_id) as batch: ...`.
 - **Gmail Attachments**: `get_attachment()` and `save_attachments()` functions for downloading attachments from search results.
 - **Gmail CLI**: `mygoog gmail save-attachments --query "..." --dest ./folder/` command.
+
 
 ## 0.4.0 — 2025-12-18
 

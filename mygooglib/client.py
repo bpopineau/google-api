@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from googleapiclient.discovery import build
 
+from mygooglib.appscript import AppScriptClient
 from mygooglib.auth import get_creds
 from mygooglib.calendar import CalendarClient
 from mygooglib.contacts import ContactsClient
@@ -33,6 +34,7 @@ class Clients:
     _tasks: TasksClient | None = None
     _gmail: GmailClient | None = None
     _contacts: ContactsClient | None = None
+    _appscript: AppScriptClient | None = None
 
     @property
     def drive(self) -> DriveClient:
@@ -85,6 +87,13 @@ class Clients:
             service = build("people", "v1", credentials=self._creds)
             self._contacts = ContactsClient(service)
         return self._contacts
+
+    @property
+    def appscript(self) -> AppScriptClient:
+        if self._appscript is None:
+            service = build("script", "v1", credentials=self._creds)
+            self._appscript = AppScriptClient(service)
+        return self._appscript
 
 
 _DEFAULT_CLIENTS: Clients | None = None

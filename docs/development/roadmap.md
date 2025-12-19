@@ -2,75 +2,55 @@
 
 This document tracks the progress of `mygooglib` and outlines future development goals.
 
-## 1. Project Progress (from TODO.md)
+## 1. Project Progress
 
-### Step 1 — Goals
-- [x] Capturing v0.1 decisions.
-- [x] Identifying personal automation goals.
+### Core Foundation
+- [x] OAuth flow and token refresh
+- [x] Package layout and module organization
+- [x] Factory for client creation with lazy loading
+- [x] Ergonomic class-based wrappers
 
-### Step 2 — Credentials
-- [x] OAuth flow implementation and token refresh verification.
-- [x] Secure secret storage and `.gitignore` setup.
+### Service Wrappers
+- [x] **Drive**: Upload, download, list, sync, path resolution
+- [x] **Sheets**: Read, write, append, batch ops, Pandas integration
+- [x] **Docs**: Create, template rendering, find/replace, tables, lists
+- [x] **Calendar**: Add, list, update, delete events
+- [x] **Tasks**: List, add, complete tasks
+- [x] **Gmail**: Send, search, mark read, save attachments
+- [x] **Contacts**: List, search, create, update, delete (People API)
 
-### Step 3 — Structure
-- [x] Package layout and module organization.
-- [x] Auth and utility modules.
-
-### Step 4 — Clients
-- [x] Factory for client creation.
-- [x] Ergonomic class-based wrappers.
-
-### Step 5-10 — Service Wrappers (v0.1)
-- [x] **Drive**: Upload, download, list, sync, path resolution.
-- [x] **Sheets**: Open, read, write, append, A1 conversion, batch ops.
-- [x] **Docs**: Create, insert, get text, template rendering, find/replace.
-- [x] **Calendar**: Add, list, update, delete events.
-- [x] **Tasks**: List, add, complete tasks.
-- [x] **Gmail**: Send, search, mark read, save attachments.
-
-### Step 11-15 — Advanced & Maintenance
-- [x] **Patterns**: Retries, backoff, factories.
-- [x] **Cleanup**: Documentation reorganization.
-- [x] **CLI**: Full Typer-based interface with rich formatting.
-- [x] **v0.2+ Releases**: Health improvements, Path Resolution, Workflows.
+### Advanced Features
+- [x] **Retry with Backoff**: Automatic retry on 429/5xx errors
+- [x] **Idempotency Store**: SQLite-based duplicate prevention
+- [x] **CLI**: Full Typer-based interface with rich formatting
+- [x] **Cross-Service Workflows**: Sheets→Calendar, etc.
 
 ---
 
-## 2. Implemented Features (v0.5.0)
+## 2. Current Version (v0.6.0)
 
-These features are now available:
+### Recent Additions
+- [x] **Docs v2**: `insert_table()` and `render_list()` for rich templates
+- [x] **Retry Tests**: Comprehensive unit tests for retry module
+- [x] **Examples**: New example scripts for contacts, batch ops, idempotency
 
-### Data & Power User Features
-- [x] **Pandas Integration**: `to_dataframe()` and `from_dataframe()` for Sheets.
-- [x] **Batch Operations**: `batch_get()`, `batch_update()`, and `BatchUpdater` context manager.
-- [x] **Idempotency**: SQLite store to prevent duplicate writes, with `@idempotent` decorator.
-
-### Service Extensions
-- [x] **Google People (Contacts)**: Full CRUD via `ContactsClient`.
-
-### Ergonomics
-- [x] **Drive Path Resolution**: Use paths like `"Reports/2025"` instead of IDs.
-- [x] **Gmail Attachments**: `save_attachments()` for query-based attachment downloading.
-
-### Workflows
-- [x] **Cross-Service recipes**: `import_events_from_sheets()` and `sync_tasks_to_calendar()`.
+### Power User Features
+- [x] **Pandas Integration**: `to_dataframe()`/`from_dataframe()` for Sheets
+- [x] **Batch Operations**: `batch_get()`, `batch_update()`, `BatchUpdater`
+- [x] **Gmail Attachments**: Query-based attachment downloading
 
 ---
 
 ## 3. Future Feature Ideas
 
-These are potential enhancements for future versions:
+### Planned
+- [ ] **Apps Script Bridge**: Execute Apps Script functions from Python (scaffolding complete)
+- [ ] **Recurrent Tasks**: Trigger workflows based on schedules
 
-### Planned (Next)
-- [ ] **Apps Script Bridge**: Trigger Apps Script functions from Python.
-- [ ] **Docs v2**: Table insertion, loop/list rendering for templates.
-- [ ] **Retry Tests**: Unit tests for `mygooglib/utils/retry.py`.
-
-### Ideas (Backlog)
-- [ ] **Recurrent Tasks**: Triggering workflows based on calendar events or schedules.
-- [ ] **Batch Email Send**: Send multiple emails efficiently.
-- [ ] **Sheets Formulas**: Helper to build complex formulas programmatically.
-- [ ] **Dashboard**: Streamlit-based web UI (v0.4 scaffolding exists).
+### Backlog
+- [ ] **Batch Email Send**: Send multiple emails efficiently
+- [ ] **Sheets Formulas**: Helper to build complex formulas
+- [ ] **Dashboard**: Streamlit-based web UI
 
 ---
 
@@ -78,10 +58,11 @@ These are potential enhancements for future versions:
 
 | Version | Date | Highlights |
 |---------|------|------------|
-| 0.5.0 | 2025-12-19 | BatchUpdater context manager, Gmail save_attachments |
-| 0.4.0 | 2025-12-18 | Contacts CRUD, Sheets batch ops, Gmail idempotency |
-| 0.3.0 | 2025-12-18 | Pandas integration, IdempotencyStore, ContactsClient |
-| 0.2.0 | 2025-12-18 | Path resolution, Sheets→Calendar workflow, find/replace |
+| 0.6.0 | 2025-12-19 | Docs v2 (tables, lists), retry tests, examples |
+| 0.5.0 | 2025-12-19 | BatchUpdater, Gmail save_attachments |
+| 0.4.0 | 2025-12-18 | Contacts CRUD, batch ops, Gmail idempotency |
+| 0.3.0 | 2025-12-18 | Pandas integration, IdempotencyStore |
+| 0.2.0 | 2025-12-18 | Path resolution, Sheets→Calendar workflow |
 | 0.1.0 | 2025-12-17 | Initial release with core services |
 
 See [CHANGELOG.md](../../CHANGELOG.md) for full details.

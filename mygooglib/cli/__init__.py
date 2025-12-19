@@ -19,6 +19,7 @@ from rich.traceback import install as install_rich_traceback
 from mygooglib import get_clients
 from mygooglib.exceptions import GoogleApiError
 
+from . import appscript as appscript_cmd
 from . import auth as auth_cmd
 from . import calendar as calendar_cmd
 from . import contacts as contacts_cmd
@@ -39,18 +40,18 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
+app.add_typer(appscript_cmd.app, name="appscript")
 app.add_typer(auth_cmd.app, name="auth")
-app.add_typer(drive_cmd.app, name="drive")
-app.add_typer(sheets_cmd.app, name="sheets")
-app.add_typer(gmail_cmd.app, name="gmail")
 app.add_typer(calendar_cmd.app, name="calendar")
-app.add_typer(tasks_cmd.app, name="tasks")
-app.add_typer(tasks_cmd.app, name="tasks")
-app.add_typer(docs_cmd.app, name="docs")
 app.add_typer(contacts_cmd.app, name="contacts")
-app.add_typer(workflows_cmd.app, name="workflows")
 app.add_typer(dashboard_cmd.app, name="dashboard")
 app.add_typer(dev_cmd.app, name="dev")
+app.add_typer(docs_cmd.app, name="docs")
+app.add_typer(drive_cmd.app, name="drive")
+app.add_typer(gmail_cmd.app, name="gmail")
+app.add_typer(sheets_cmd.app, name="sheets")
+app.add_typer(tasks_cmd.app, name="tasks")
+app.add_typer(workflows_cmd.app, name="workflows")
 
 
 @app.callback()

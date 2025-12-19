@@ -188,6 +188,157 @@ def export_pdf(
     return download_file(drive, doc_id, dest_path, export_mime_type="application/pdf")
 
 
+def insert_table(
+    docs: Any,
+    doc_id: str,
+    rows: list[list[str]],
+    *,
+    headers: list[str] | None = None,
+    index: int | None = None,
+) -> int:
+    """Insert a table into a document.
+
+    Args:
+        docs: Docs API Resource
+        doc_id: Document ID
+        rows: List of lists containing cell values (each inner list is a row)
+        headers: Optional header row (prepended to rows)
+        index: Position to insert (None = end of document)
+
+    Returns:
+        Number of rows inserted (including header if provided).
+    """
+    if not rows and not headers:
+        return 0
+
+    # Build complete data including headers
+    all_rows = []
+    if headers:
+        all_rows.append(headers)
+    all_rows.extend(rows)
+
+    num_rows = len(all_rows)
+    num_cols = max(len(row) for row in all_rows) if all_rows else 1
+
+    try:
+        # Get document to find insertion point
+        if index is None:
+            get_request = docs.documents().get(documentId=doc_id, fields="body/content")
+            response = execute_with_retry_http_error(get_request, is_write=False)
+            content = response.get("body", {}).get("content", [])
+            index = content[-1]["endIndex"] - 1 if content else 1
+
+        # Create table structure
+        requests = [
+            {
+                "insertTable": {
+                    "rows": num_rows,
+                    "columns": num_cols,
+                    "location": {"index": max(1, index)},
+                }
+            }
+        ]
+
+        # Insert table first
+        update_request = docs.documents().batchUpdate(
+            documentId=doc_id, body={"requests": requests}
+        )
+        execute_with_retry_http_error(update_request, is_write=True)
+
+        # Now populate the cells (requires a fresh get to know table structure)
+        get_request = docs.documents().get(documentId=doc_id)
+        doc = execute_with_retry_http_error(get_request, is_write=False)
+
+        # Find the table we just inserted and populate cells
+        content = doc.get("body", {}).get("content", [])
+        table_element = None
+        for element in content:
+            if "table" in element:
+                table_element = element
+                break
+
+        if table_element and "table" in table_element:
+            table = table_element["table"]
+            cell_requests = []
+
+            for row_idx, row_data in enumerate(all_rows):
+                table_row = (
+                    table.get("tableRows", [])[row_idx]
+                    if row_idx < len(table.get("tableRows", []))
+                    else None
+                )
+                if not table_row:
+                    continue
+
+                for col_idx, cell_value in enumerate(row_data):
+                    table_cells = table_row.get("tableCells", [])
+                    if col_idx >= len(table_cells):
+                        continue
+
+                    cell = table_cells[col_idx]
+                    cell_content = cell.get("content", [])
+                    if cell_content:
+                        # Insert at the start of the cell's paragraph
+                        para = cell_content[0]
+                        start_index = para.get("startIndex", 1)
+                        cell_requests.append(
+                            {
+                                "insertText": {
+                                    "location": {"index": start_index},
+                                    "text": str(cell_value),
+                                }
+                            }
+                        )
+
+            if cell_requests:
+                # Reverse to maintain correct indices
+                cell_requests.reverse()
+                populate_request = docs.documents().batchUpdate(
+                    documentId=doc_id, body={"requests": cell_requests}
+                )
+                execute_with_retry_http_error(populate_request, is_write=True)
+
+        return num_rows
+
+    except HttpError as e:
+        raise_for_http_error(e, context="Docs insert_table")
+        raise
+
+
+def render_list(
+    docs: Any,
+    doc_id: str,
+    tag: str,
+    items: list[str],
+    *,
+    bullet: str = "• ",
+) -> int:
+    """Replace a placeholder tag with a bulleted list.
+
+    Args:
+        docs: Docs API Resource
+        doc_id: Document ID
+        tag: Placeholder tag to replace (e.g., "{{ITEMS}}")
+        items: List of strings to render as bullet points
+        bullet: Bullet character/string (default "• ")
+
+    Returns:
+        Number of items inserted.
+    """
+    if not items:
+        # Just remove the tag if no items
+        find_replace(docs, doc_id, {tag: ""})
+        return 0
+
+    # Build the bulleted list text
+    list_text = "\n".join(f"{bullet}{item}" for item in items)
+
+    # Replace the tag with the list
+    find_replace(docs, doc_id, {tag: list_text})
+
+    return len(items)
+
+
 def find_replace(
     docs: Any,
     doc_id: str,
@@ -302,3 +453,25 @@ class DocsClient:
     ) -> int:
         """Perform multiple find-and-replace operations in a document."""
         return find_replace(self.service, doc_id, replacements, match_case=match_case)
+
+    def insert_table(
+        self,
+        doc_id: str,
+        rows: list[list[str]],
+        *,
+        headers: list[str] | None = None,
+        index: int | None = None,
+    ) -> int:
+        """Insert a table into a document."""
+        return insert_table(self.service, doc_id, rows, headers=headers, index=index)
+
+    def render_list(
+        self,
+        doc_id: str,
+        tag: str,
+        items: list[str],
+        *,
+        bullet: str = "• ",
+    ) -> int:
+        """Replace a placeholder tag with a bulleted list."""
+        return render_list(self.service, doc_id, tag, items, bullet=bullet)

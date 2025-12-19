@@ -45,7 +45,7 @@ pip install -e ".[cli,data]"  # Adds Pandas support for Sheets
 | **Drive** | Upload, download, list, sync folders, path resolution (`"Reports/2025"`) |
 | **Sheets** | Read/write ranges, batch ops, Pandas `to_dataframe()`/`from_dataframe()` |
 | **Gmail** | Send with attachments, search, mark read, save attachments from search |
-| **Docs** | Template rendering, text extraction, PDF export, find & replace |
+| **Docs** | Template rendering, tables, lists, text extraction, PDF export, find & replace |
 | **Calendar** | Create/list/update events with Python `datetime` objects |
 | **Tasks** | List/add/complete tasks, manage tasklists |
 | **Contacts** | List, search, create, update, delete contacts (People API) |

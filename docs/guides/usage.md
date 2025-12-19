@@ -133,6 +133,15 @@ count = clients.docs.find_replace(doc_id, {"old_text": "new_text"})
 
 # Export to PDF
 clients.docs.export_pdf(doc_id, "./output.pdf")
+
+# Insert a table from data
+clients.docs.insert_table(doc_id, [
+    ["Alice", "95"],
+    ["Bob", "87"],
+], headers=["Name", "Score"])
+
+# Replace a placeholder with a bulleted list
+clients.docs.render_list(doc_id, "{{ITEMS}}", ["Item 1", "Item 2", "Item 3"])
 ```
 
 ---
