@@ -794,6 +794,85 @@ def batch_update(
     }
 
 
+class BatchUpdater:
+    """Context manager for batching Sheets updates.
+
+    Collects multiple update operations and executes them as a single
+    batchUpdate API call when the context exits.
+
+    Example:
+        with BatchUpdater(sheets, spreadsheet_id) as batch:
+            batch.update("A1:B2", [[1, 2], [3, 4]])
+            batch.update("C1:D2", [[5, 6], [7, 8]])
+        # Both updates are sent in a single API call on context exit
+
+    Args:
+        sheets: Sheets API Resource from get_clients().sheets
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        drive: Optional Drive API Resource for title resolution
+        parent_id: Optional Drive folder ID for title resolution
+        allow_multiple: Allow multiple title matches
+        value_input_option: "RAW" (default) or "USER_ENTERED"
+    """
+
+    def __init__(
+        self,
+        sheets: Any,
+        spreadsheet_id: str,
+        *,
+        drive: Any | None = None,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        value_input_option: str = "RAW",
+    ):
+        self._sheets = sheets
+        self._spreadsheet_id = spreadsheet_id
+        self._drive = drive
+        self._parent_id = parent_id
+        self._allow_multiple = allow_multiple
+        self._value_input_option = value_input_option
+        self._updates: list[dict[str, Any]] = []
+
+    def update(self, range: str, values: Sequence[Sequence[Any]]) -> None:
+        """Queue an update to be executed on context exit.
+
+        Args:
+            range: A1 notation range (e.g., "Sheet1!A1:B2")
+            values: 2D list of values to write
+        """
+        self._updates.append({"range": range, "values": [list(row) for row in values]})
+
+    def append(self, range: str, row: Sequence[Any]) -> None:
+        """Queue a single row append (convenience method).
+
+        Args:
+            range: A1 notation range (e.g., "Sheet1!A:Z")
+            row: Single row of values to append
+        """
+        self._updates.append({"range": range, "values": [list(row)]})
+
+    def __enter__(self) -> "BatchUpdater":
+        return self
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        # Only commit if no exception and we have updates
+        if exc_type is None and self._updates:
+            batch_update(
+                self._sheets,
+                self._spreadsheet_id,
+                self._updates,
+                drive=self._drive,
+                parent_id=self._parent_id,
+                allow_multiple=self._allow_multiple,
+                value_input_option=self._value_input_option,
+            )
+
+    @property
+    def pending_count(self) -> int:
+        """Return the number of queued updates."""
+        return len(self._updates)
+
+
 class SheetsClient:
     """Simplified Google Sheets API wrapper focusing on common operations."""
 
@@ -1033,4 +1112,38 @@ class SheetsClient:
             response_value_render_option=response_value_render_option,
             response_date_time_render_option=response_date_time_render_option,
             raw=raw,
+        )
+
+    def batch(
+        self,
+        spreadsheet_id: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        value_input_option: str = "RAW",
+    ) -> BatchUpdater:
+        """Create a batch context manager for efficient bulk updates.
+
+        Example:
+            with client.batch(spreadsheet_id) as batch:
+                batch.update("A1:B2", [[1, 2], [3, 4]])
+                batch.update("C1:D2", [[5, 6], [7, 8]])
+            # Both updates sent in a single API call
+
+        Args:
+            spreadsheet_id: Spreadsheet ID, title, or URL
+            parent_id: Optional Drive folder ID for title resolution
+            allow_multiple: Allow multiple title matches
+            value_input_option: "RAW" (default) or "USER_ENTERED"
+
+        Returns:
+            BatchUpdater context manager
+        """
+        return BatchUpdater(
+            self.service,
+            spreadsheet_id,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            value_input_option=value_input_option,
         )

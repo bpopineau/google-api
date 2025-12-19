@@ -407,6 +407,146 @@ def get_message(
     }
 
 
+def get_attachment(
+    gmail: Any,
+    message_id: str,
+    attachment_id: str,
+    *,
+    user_id: str = "me",
+) -> bytes:
+    """Download a single attachment by ID.
+
+    Args:
+        gmail: Gmail API Resource
+        message_id: Message ID containing the attachment
+        attachment_id: Attachment ID from message parts
+        user_id: Gmail userId (default "me")
+
+    Returns:
+        Raw bytes of the attachment
+    """
+    try:
+        request = (
+            gmail.users()
+            .messages()
+            .attachments()
+            .get(userId=user_id, messageId=message_id, id=attachment_id)
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+    except HttpError as e:
+        raise_for_http_error(e, context="Gmail get_attachment")
+        raise
+
+    data = response.get("data", "")
+    return base64.urlsafe_b64decode(data)
+
+
+def _extract_attachments(payload: dict) -> list[dict]:
+    """Extract attachment metadata from message payload (internal helper).
+
+    Returns list of dicts with keys: filename, attachment_id, mime_type, size
+    """
+    attachments = []
+    parts = [payload]
+    while parts:
+        part = parts.pop(0)
+        if part.get("parts"):
+            parts.extend(part.get("parts"))
+
+        body = part.get("body", {})
+        attachment_id = body.get("attachmentId")
+        filename = part.get("filename")
+
+        # Only include parts that are actual attachments (have attachmentId and filename)
+        if attachment_id and filename:
+            attachments.append(
+                {
+                    "filename": filename,
+                    "attachment_id": attachment_id,
+                    "mime_type": part.get("mimeType"),
+                    "size": body.get("size", 0),
+                }
+            )
+
+    return attachments
+
+
+def save_attachments(
+    gmail: Any,
+    query: str,
+    dest_folder: str | Path,
+    *,
+    user_id: str = "me",
+    max_messages: int = 50,
+    filename_filter: str | None = None,
+    progress_callback: Any | None = None,
+) -> list[Path]:
+    """Save all attachments from messages matching a query to a folder.
+
+    Args:
+        gmail: Gmail API Resource
+        query: Gmail search query string (e.g., "has:attachment from:invoices@")
+        dest_folder: Destination folder path
+        user_id: Gmail userId (default "me")
+        max_messages: Maximum number of messages to process
+        filename_filter: Optional substring filter for filenames (case-insensitive)
+        progress_callback: Optional callable(saved_count, message_index, total_messages)
+
+    Returns:
+        List of Paths to saved attachment files
+    """
+    dest = Path(dest_folder)
+    dest.mkdir(parents=True, exist_ok=True)
+
+    # Search for messages
+    messages = search_messages(gmail, query, user_id=user_id, max_results=max_messages)
+
+    saved_files: list[Path] = []
+
+    for idx, msg_meta in enumerate(messages):
+        msg_id = msg_meta.get("id")
+        if not msg_id:
+            continue
+
+        # Get full message to access parts
+        try:
+            request = (
+                gmail.users().messages().get(userId=user_id, id=msg_id, format="full")
+            )
+            msg = execute_with_retry_http_error(request, is_write=False)
+        except HttpError as e:
+            raise_for_http_error(e, context="Gmail save_attachments get_message")
+            raise
+
+        payload = msg.get("payload", {})
+        attachments = _extract_attachments(payload)
+
+        for att in attachments:
+            filename = att["filename"]
+
+            # Apply filename filter if specified
+            if filename_filter and filename_filter.lower() not in filename.lower():
+                continue
+
+            # Download attachment
+            data = get_attachment(gmail, msg_id, att["attachment_id"], user_id=user_id)
+
+            # Handle duplicate filenames by adding message ID prefix if needed
+            target = dest / filename
+            if target.exists():
+                stem = Path(filename).stem
+                suffix = Path(filename).suffix
+                target = dest / f"{stem}_{msg_id[:8]}{suffix}"
+
+            target.write_bytes(data)
+            saved_files.append(target)
+
+            if progress_callback:
+                progress_callback(len(saved_files), idx + 1, len(messages))
+
+    return saved_files
+
+
 class GmailClient:
     """Simplified Gmail API wrapper focusing on common operations."""
 
