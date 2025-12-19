@@ -79,3 +79,69 @@ class BatchApiWorker(ApiWorker):
                 self.errors.append((i, e))
             self.progress.emit(i + 1, total)
         return self.results
+
+
+class SyncWorker(QThread):
+    """Worker to coordinate scanning local files and syncing to Sheets.
+
+    Signals:
+        started_scan: Emitted when file scanning starts.
+        started_upload: Emitted with total file count when upload starts.
+        finished: Emitted when the entire sync completes.
+        error: Emitted with error message if any step fails.
+    """
+
+    started_scan = Signal()
+    started_upload = Signal(int)
+    finished = Signal(dict)
+    error = Signal(str)
+
+    def __init__(
+        self,
+        clients: Any,
+        directory: str,
+        spreadsheet_id: str,
+        sheet_name: str,
+    ) -> None:
+        super().__init__()
+        self.clients = clients
+        self.directory = directory
+        self.spreadsheet_id = spreadsheet_id
+        self.sheet_name = sheet_name
+
+    def run(self) -> None:
+        from mygooglib.sheets import batch_write
+        from mygooglib.utils.file_scanner import FileScanner
+
+        try:
+            # 1. Scan
+            self.started_scan.emit()
+            scanner = FileScanner()
+            files = scanner.scan(self.directory)
+
+            if not files:
+                self.finished.emit({"updatedRows": 0, "message": "No files found"})
+                return
+
+            # 2. Prepare Data
+            self.started_upload.emit(len(files))
+            headers = ["Filename", "Path", "Last Modified"]
+            rows = [
+                [f["filename"], f["absolute_path"], str(f["last_modified_timestamp"])]
+                for f in files
+            ]
+
+            # 3. Upload
+            result = batch_write(
+                self.clients.sheets,
+                self.spreadsheet_id,
+                self.sheet_name,
+                rows,
+                headers=headers,
+                clear=True,
+            )
+
+            self.finished.emit(result or {"updatedRows": len(rows)})
+
+        except Exception as e:
+            self.error.emit(str(e))
