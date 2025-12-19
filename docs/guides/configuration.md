@@ -1,64 +1,53 @@
 # Configuration & Authentication
 
-This guide covers how to set up Google OAuth credentials and configure `mygooglib`.
+This guide covers how to set up Google OAuth credentials and configure the `mygoog` application.
 
-## 1. Google OAuth Credentials (Personal Use)
+## 1. Google OAuth Credentials
 
-This project uses **OAuth (Desktop app)** to access Google Workspace APIs for a single user (you).
-You will create two local secret files:
+`mygoog` uses **OAuth 2.0 (Desktop Flow)** to access your personal Google Workspace data securely.
 
-- `credentials.json` (OAuth client ID/secret downloaded from Google Cloud)
-- `token.json` (OAuth access + refresh token generated after you approve access once)
+### Quick Setup
 
-These files must **never** be committed to git.
+1.  **Download Credentials**: Get your `credentials.json` from the Google Cloud Console (OAuth Client ID > Desktop App).
+2.  **Launch App**: Run `mygoog`.
+3.  **Sign In**: The app will launch your browser. Approve access.
+4.  **Done**: Your access tokens are securely saved for future use.
 
-### Step-by-Step Setup
+> **Note**: Tokens are stored in:
+> - **Windows**: `%LOCALAPPDATA%\mygooglib\`
+> - **macOS/Linux**: `~/.config/mygooglib/`
 
-1. **Create a Google Cloud Project**:
-    - Go to [Google Cloud Console](https://console.cloud.google.com/).
-    - Create a new project.
-2. **Configure OAuth Consent Screen**:
-    - Choose **External**.
-    - Add yourself as a **Test user**.
-3. **Enable APIs**:
-    - Enable Drive, Sheets, Docs, Calendar, Tasks, and Gmail APIs in the Library.
-4. **Create Credentials**:
-    - Create an **OAuth client ID** of type **Desktop app**.
-    - Download the JSON and rename it to `credentials.json`.
+## 2. Application Settings
 
-## 2. Shared Secrets Storage
+The Desktop Application stores your preferences (Theme, Window Size, etc.) in a JSON file:
 
-By default, `mygooglib` looks for these files in your user's local app data directory to keep them out of the project folder:
+- **Path**: `~/.mygooglib/config.json`
+- **Format**:
+  ```json
+  {
+      "theme": "dark",
+      "window_geometry": [100, 100, 1200, 800],
+      "default_view": "home",
+      "log_level": "INFO"
+  }
+  ```
 
-- **Windows**: `%LOCALAPPDATA%\mygooglib\`
-- **macOS/Linux**: `~/.config/mygooglib/`
+You can modify these settings via the **Settings Page** in the app or by editing this file directly.
 
-### Environment Variables
+## 3. Environment Variables (Advanced)
 
-You can override these default paths using the following environment variables:
+For developers or advanced users, you can override paths and behaviors using environment variables:
 
-- `MYGOOGLIB_CREDENTIALS_PATH`: Full path to `credentials.json`.
-- `MYGOOGLIB_TOKEN_PATH`: Full path to `token.json`.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MYGOOGLIB_CREDENTIALS_PATH` | Path to `credentials.json` | `%LOCALAPPDATA%\mygooglib\credentials.json` |
+| `MYGOOGLIB_TOKEN_PATH` | Path to `token.json` | `%LOCALAPPDATA%\mygooglib\token.json` |
+| `MYGOOGLIB_LOG_LEVEL` | Logging verbosity | `INFO` |
+| `MYGOOGLIB_DEBUG` | Enable debug mode (verbose logs) | `0` |
 
-## 3. One-Time Setup
+## 4. Retry Policy
 
-Run the following script to initiate the OAuth flow and generate `token.json`:
+The library automatically handles transient errors (like "Rate Limit Exceeded"). This is largely internal but configurable via environment variables:
 
-```bash
-python scripts/oauth_setup.py
-```
-
-## 4. Logging & Debugging
-
-You can control the library's verbosity via environment variables:
-
-- `MYGOOGLIB_DEBUG=1`: Sets log level to `DEBUG`.
-- `MYGOOGLIB_LOG_LEVEL`: Explicitly set level (`INFO`, `DEBUG`, `WARNING`).
-
-## 5. Retry Policy
-
-`mygooglib` retries transient errors for **read** requests by default. Write retries are disabled by default to prevent duplicate actions (like sending an email twice).
-
-- `MYGOOGLIB_RETRY_ENABLED`: `0` or `1` (default `1`).
-- `MYGOOGLIB_RETRY_ATTEMPTS_READ`: default `4`.
-- `MYGOOGLIB_RETRY_ATTEMPTS_WRITE`: default `1`.
+- `MYGOOGLIB_RETRY_ENABLED`: `1` (default)
+- `MYGOOGLIB_RETRY_ATTEMPTS_READ`: `4` (default)

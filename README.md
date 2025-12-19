@@ -1,79 +1,68 @@
-# mygooglib
+# MyGoog: Google Workspace Desktop Manager
 
-Personal-use Python helpers for Google Drive, Sheets, Gmail, Docs, Calendar, Tasks, and Contacts.
+**MyGoog** is a desktop application for managing your Google Workspace life. It brings your Drive, Gmail, Calendar, Tasks, and Sheets together in a unified, fast, and hackable interface.
 
-## Quick Start
+> **For Developers**: MyGoog is also a powerful Python library. See the [Developer Guide](#developer-library) below.
+
+## Quick Start (Desktop App)
+
+1.  **Install**:
+    ```bash
+    pip install -e ".[gui]"
+    ```
+2.  **Launch**:
+    ```bash
+    mygoog
+    ```
+    *The App will open immediately. On first run, it will open your browser to authenticate with Google.*
+
+## Key Features
+
+- **⚡ Instant Startup**: Launches instantly, verifying credentials in the background.
+- **🎨 Modern UI**: Clean, dark-mode interface built with PySide6.
+- **📂 Drive Explorer**: Browse, search, and manage files without waiting for a browser to load.
+- **📧 Gmail Actions**: Rapidly triage emails (Mark Read, Trash, Archive).
+- **📅 Calendar & Tasks**: View your schedule and to-dos side-by-side.
+
+## App Documentation
+
+- **[User Guide](docs/guides/app_user_guide.md)**: Full walkthrough of the GUI features.
+- **[Configuration](docs/guides/configuration.md)**: Settings, Themes, and Auth management.
+
+---
+
+## <a name="developer-library"></a>Developer Library
+
+Under the hood, `mygoog` is built on `mygooglib`, a comprehensive wrapper for Google APIs.
+
+### Installation for Scripting
 
 ```bash
-# 1. Install
 pip install -e .
-
-# 2. Configure (one-time setup)
-python scripts/oauth_setup.py
-
-# 3. Use in Python
-from mygooglib import get_clients
-clients = get_clients()
 ```
 
-## CLI Interface
-
-```bash
-pip install -e ".[cli]"
-mygoog --help
-```
-
-Install optional features:
-```bash
-pip install -e ".[cli,data]"  # Adds Pandas support for Sheets
-pip install -e ".[gui]"       # PySide6 Desktop GUI
-```
-
----
-
-## Documentation
-
-- **[Configuration & Auth](docs/guides/configuration.md)**: OAuth setup and token management.
-- **[Usage Guide](docs/guides/usage.md)**: API examples for all services.
-- **[Roadmap](docs/development/roadmap.md)**: Progress tracking and feature ideas.
-
----
-
-## Feature Overview
-
-| Service | Key Features |
-|---------|--------------|
-| **Drive** | Upload, download, list, sync folders, path resolution (`"Reports/2025"`) |
-| **Sheets** | Read/write ranges, batch ops, Pandas `to_dataframe()`/`from_dataframe()` |
-| **Gmail** | Send with attachments, search, mark read, save attachments from search |
-| **Docs** | Template rendering, tables, lists, text extraction, PDF export, find & replace |
-| **Calendar** | Create/list/update events with Python `datetime` objects |
-| **Tasks** | List/add/complete tasks, manage tasklists |
-| **Contacts** | List, search, create, update, delete contacts (People API) |
-
-### Utilities
-
-- **Retry with Backoff**: Automatic retry on transient 429/5xx errors
-- **Idempotency Store**: SQLite-based duplicate prevention for scripts
-- **Logging**: Configurable via `MYGOOGLIB_LOG_LEVEL` environment variable
-
----
-
-## Example: Cross-Service Workflow
+### Usage Example
 
 ```python
 from mygooglib import get_clients
-from mygooglib.workflows import import_events_from_sheets
 
+# Initialize clients (handles Auth automatically)
 clients = get_clients()
-result = import_events_from_sheets(
-    clients,
-    spreadsheet_id="Event Planning",
-    range_name="Events!A2:D50"
+
+# List first 10 files in Drive
+files = clients.drive.list_files(page_size=10)
+for f in files:
+    print(f"{f['name']} ({f['id']})")
+
+# Create a Calendar Event
+clients.calendar.create_event(
+    summary="Code Review",
+    start_time="2025-12-20T10:00:00",
+    duration_minutes=45
 )
-print(f"Created {result['created']} calendar events")
 ```
 
----
+### Library Documentation
 
-For complete API details, see the **[Usage Guide](docs/guides/usage.md)**.
+- **[API Reference](docs/guides/usage.md)**: Detailed Python API usage.
+- **[Roadmap](docs/development/roadmap.md)**: Future plans and contribution opportunities.
