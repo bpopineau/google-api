@@ -133,7 +133,7 @@ class SyncWorker(QThread):
 
             # 3. Upload
             result = batch_write(
-                self.clients.sheets,
+                self.clients.sheets.service,
                 self.spreadsheet_id,
                 self.sheet_name,
                 rows,
