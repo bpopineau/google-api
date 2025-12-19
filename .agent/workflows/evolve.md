@@ -2,6 +2,8 @@
 description: This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**, **SHIP**. `task.md` is the source of truth for all progress.
 ---
 
+# evolve.md 
+
 ## 1. PLAN
 1.  **Initialize `task.md`**: Create a new task file with the structure below:
 
@@ -37,7 +39,7 @@ description: This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**,
 3.  **Quality Check**:
 // turbo
     - Run `pytest` to ensure all tests pass.
-//turbo
+// turbo
     - Run `ruff check . --fix` to ensure clean code.
 
 4.  **Mark Complete**: Mark items `[x]` in `task.md` **only** after they are verified. Individually verify each and every task has been completed, not just marked complete.
