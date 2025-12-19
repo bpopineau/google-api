@@ -32,9 +32,10 @@ def list_files(
     mime_type: str | None = None,
     trashed: bool = False,
     page_size: int = 100,
+    max_results: int | None = None,
     fields: str = DEFAULT_FIELDS,
 ) -> list[dict]:
-    """List files matching criteria with full pagination.
+    """List files matching criteria with pagination.
 
     Args:
         drive: Drive API Resource from get_clients().drive
@@ -43,6 +44,7 @@ def list_files(
         mime_type: Filter by MIME type
         trashed: Include trashed files (default False)
         page_size: Results per page (max 1000)
+        max_results: If provided, stop fetching after this many results.
         fields: Which file fields to return
 
     Returns:
@@ -66,21 +68,36 @@ def list_files(
 
     try:
         while True:
+            # If we have max_results, don't ask for more than we need in this page
+            current_page_size = page_size
+            if max_results is not None:
+                remaining = max_results - len(all_files)
+                if remaining <= 0:
+                    break
+                current_page_size = min(page_size, remaining)
+
             request = drive.files().list(
                 q=q,
-                pageSize=page_size,
+                pageSize=current_page_size,
                 pageToken=page_token,
                 fields=f"nextPageToken, files({fields})",
             )
             response = execute_with_retry_http_error(request, is_write=False)
-            all_files.extend(response.get("files", []))
+            files = response.get("files", [])
+            all_files.extend(files)
+
             page_token = response.get("nextPageToken")
             if not page_token:
                 break
+
+            if max_results is not None and len(all_files) >= max_results:
+                break
+
     except HttpError as e:
         raise_for_http_error(e, context="Drive list_files")
 
-    return all_files
+    # Final slice just in case the API returned more than pageSize
+    return all_files[:max_results] if max_results is not None else all_files
 
 
 def find_by_name(
@@ -546,9 +563,10 @@ class DriveClient:
         mime_type: str | None = None,
         trashed: bool = False,
         page_size: int = 100,
+        max_results: int | None = None,
         fields: str = DEFAULT_FIELDS,
     ) -> list[dict]:
-        """List files matching criteria with full pagination."""
+        """List files matching criteria with pagination."""
         return list_files(
             self.service,
             query=query,
@@ -556,6 +574,7 @@ class DriveClient:
             mime_type=mime_type,
             trashed=trashed,
             page_size=page_size,
+            max_results=max_results,
             fields=fields,
         )
 

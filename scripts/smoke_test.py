@@ -319,8 +319,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "all":
         now = datetime.now(timezone.utc).isoformat()
 
-        print("== Drive: list (root, first 5) ==")
-        files = clients.drive.list_files(page_size=5)
+        print("== Drive: list (root, first 5) ==\n")
+        files = clients.drive.list_files(max_results=5)
         _print_jsonable(files)
 
         if args.drive_sync_local_path and args.drive_sync_folder_id:

@@ -25,13 +25,66 @@ if TYPE_CHECKING:
 class Clients:
     """Container holding all Google API service wrappers."""
 
-    drive: DriveClient
-    sheets: SheetsClient
-    docs: DocsClient
-    calendar: CalendarClient
-    tasks: TasksClient
-    gmail: GmailClient
-    contacts: ContactsClient
+    _creds: "Credentials"
+    _drive: DriveClient | None = None
+    _sheets: SheetsClient | None = None
+    _docs: DocsClient | None = None
+    _calendar: CalendarClient | None = None
+    _tasks: TasksClient | None = None
+    _gmail: GmailClient | None = None
+    _contacts: ContactsClient | None = None
+
+    @property
+    def drive(self) -> DriveClient:
+        if self._drive is None:
+            service = build("drive", "v3", credentials=self._creds)
+            self._drive = DriveClient(service)
+        return self._drive
+
+    @property
+    def sheets(self) -> SheetsClient:
+        if self._sheets is None:
+            # Note: Sheets client needs the raw drive service for some operations
+            drive_service = build("drive", "v3", credentials=self._creds)
+            service = build("sheets", "v4", credentials=self._creds)
+            self._sheets = SheetsClient(service, drive=drive_service)
+        return self._sheets
+
+    @property
+    def docs(self) -> DocsClient:
+        if self._docs is None:
+            drive_service = build("drive", "v3", credentials=self._creds)
+            service = build("docs", "v1", credentials=self._creds)
+            self._docs = DocsClient(service, drive=drive_service)
+        return self._docs
+
+    @property
+    def calendar(self) -> CalendarClient:
+        if self._calendar is None:
+            service = build("calendar", "v3", credentials=self._creds)
+            self._calendar = CalendarClient(service)
+        return self._calendar
+
+    @property
+    def tasks(self) -> TasksClient:
+        if self._tasks is None:
+            service = build("tasks", "v1", credentials=self._creds)
+            self._tasks = TasksClient(service)
+        return self._tasks
+
+    @property
+    def gmail(self) -> GmailClient:
+        if self._gmail is None:
+            service = build("gmail", "v1", credentials=self._creds)
+            self._gmail = GmailClient(service)
+        return self._gmail
+
+    @property
+    def contacts(self) -> ContactsClient:
+        if self._contacts is None:
+            service = build("people", "v1", credentials=self._creds)
+            self._contacts = ContactsClient(service)
+        return self._contacts
 
 
 _DEFAULT_CLIENTS: Clients | None = None
@@ -72,23 +125,7 @@ def get_clients(
     if creds is None:
         creds = get_creds(scopes=scopes)
 
-    drive_service = build("drive", "v3", credentials=creds)
-    sheets_service = build("sheets", "v4", credentials=creds)
-    docs_service = build("docs", "v1", credentials=creds)
-    gmail_service = build("gmail", "v1", credentials=creds)
-    calendar_service = build("calendar", "v3", credentials=creds)
-    tasks_service = build("tasks", "v1", credentials=creds)
-    people_service = build("people", "v1", credentials=creds)
-
-    clients = Clients(
-        drive=DriveClient(drive_service),
-        sheets=SheetsClient(sheets_service, drive=drive_service),
-        docs=DocsClient(docs_service, drive=drive_service),
-        calendar=CalendarClient(calendar_service),
-        tasks=TasksClient(tasks_service),
-        gmail=GmailClient(gmail_service),
-        contacts=ContactsClient(people_service),
-    )
+    clients = Clients(_creds=creds)
 
     if use_cache and is_default_creds:
         _DEFAULT_CLIENTS = clients

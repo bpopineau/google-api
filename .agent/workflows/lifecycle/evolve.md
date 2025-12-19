@@ -2,6 +2,7 @@
 description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**, **SHIP**. `task.md` is the source of truth for all progress."
 ---
 
+// turbo-all
 # Workflow: /evolve
 
 ## Phase 0: PRE-FLIGHT
@@ -10,7 +11,8 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
 
 **Task:**
 1. Ensure virtual environment is activated (`.venv`).
-2. Run `where python` (Windows) to verify.
+2. Run `uv --version` to verify `uv` is installed.
+3. Run `where python` (Windows) to verify paths.
 
 ---
 
@@ -26,11 +28,18 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
    - *No Goal?* Suggest `@[/planning/ideate_innovations]` or `@[/planning/propose_features]`.
    - *Have Goal?* Suggest `@[/planning/plan_feature]`.
 3. **Codebase Review:** *MANDATORY*. Review relevant files before committing to a plan.
-4. **Initialize `task.md`:** Create task file with PLAN/BUILD/SHIP structure.
+4. **Initialize `task.md`:** Create task file with the following structure:
+   ```markdown
+   # [Feature Name]
+   
+   - [ ] Phase 1: Planning & Research <!-- id: 0 -->
+   - [ ] Phase 2: Implementation <!-- id: 1 -->
+   - [ ] Phase 3: Verification <!-- id: 2 -->
+   ```
 5. **Break down work:** Add specific implementation steps under BUILD.
 
 **Constraints:**
-- Do NOT proceed to BUILD until user explicitly approves the plan.
+- Do NOT proceed to BUILD until user explicitly approves the plan via `implementation_plan.md`.
 
 **Output:** Summary of plan (Goal, Changes, Verification steps).
 
@@ -68,24 +77,17 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
 
 ### Step 2: Documentation (Mandatory)
 **Task:**
-1. Ensure new code has Google-style docstrings.
-2. Consider `@[/maintenance/update_docs]` if significant changes.
-3. Update README with new features.
+- Execute Atom: `atoms/_update_docs.md` or `atoms/_write_docstrings.md`.
+- Update README with new features if applicable.
 
 ### Step 3: Changelog
 **Task:**
-- Add concise entry to `CHANGELOG.md`.
+- Add concise entry to `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-### Step 4: Release (Optional)
+### Step 4: Release & Checkpoint
 **Task:**
-- Consider `@[/lifecycle/release_prep]` if named release.
-- Bump version in `pyproject.toml`.
-
-### Step 5: Commit & Push
-**Task:**
-1. Run `git status` to review changes.
-2. Execute Atom: `atoms/_checkpoint.md`
-3. Run `git push`.
+- Bump version in `pyproject.toml` if this is a named release.
+- Execute Atom: `atoms/_checkpoint.md`
 
 ---
 
