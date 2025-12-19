@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -10,19 +9,18 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QFileDialog,
     QHBoxLayout,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QMenu,
     QMessageBox,
     QPushButton,
-    QTableWidget,
-    QTableWidgetItem,
+    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
 
 from mygooglib.gui.styles import COLORS
+from mygooglib.gui.widgets.drive_tree import FileTreeWidget
 from mygooglib.gui.workers import ApiWorker
 
 if TYPE_CHECKING:
@@ -38,7 +36,7 @@ class DrivePage(QWidget):
         self._workers: list[ApiWorker] = []
         self._files: list[dict] = []
         self._setup_ui()
-        self._load_files()
+        self._load_root()
 
     def _setup_ui(self) -> None:
         """Build the drive page layout."""
@@ -69,81 +67,60 @@ class DrivePage(QWidget):
         toolbar.addWidget(upload_btn)
 
         refresh_btn = QPushButton("🔄 Refresh")
-        refresh_btn.clicked.connect(self._load_files)
+        refresh_btn.clicked.connect(self._load_root)
         toolbar.addWidget(refresh_btn)
 
         layout.addLayout(toolbar)
 
-        # File table
-        self.table = QTableWidget()
-        self.table.setColumnCount(3)
-        self.table.setHorizontalHeaderLabels(["Name", "Type", "ID"])
-        self.table.horizontalHeader().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.Stretch
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.horizontalHeader().setSectionResizeMode(
-            2, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.table.customContextMenuRequested.connect(self._show_context_menu)
-        self.table.setAlternatingRowColors(True)
-        layout.addWidget(self.table)
+        # File tree
+        self.tree = FileTreeWidget()
+        self.tree.folder_expanded.connect(self._load_folder_contents)
+        self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self._show_context_menu)
+        layout.addWidget(self.tree)
 
         # Status bar
         self.status = QLabel("Loading...")
         self.status.setStyleSheet(f"color: {COLORS['text_secondary']};")
         layout.addWidget(self.status)
 
-    def _load_files(self, query: str | None = None) -> None:
-        """Load files from Drive."""
-        self.status.setText("Loading...")
+    def _load_root(self, query: str | None = None) -> None:
+        """Load root files from Drive."""
+        self.status.setText("Loading root..." if not query else "Searching...")
+        self.tree.clear()
 
         def fetch():
-            q_str = f"name contains '{query}'" if query else None
-            return self.clients.drive.list_files(query=q_str, page_size=50)
+            # If query is present, we might get a flat list, but that's okay.
+            # Tree can handle top-level items.
+            q_str = f"name contains '{query}'" if query else "'root' in parents"
+            return self.clients.drive.list_files(query=q_str, page_size=100)
 
         worker = ApiWorker(fetch)
-        worker.finished.connect(self._on_files_loaded)
+        worker.finished.connect(lambda files: self._on_folder_loaded(None, files))
         worker.error.connect(self._on_error)
         self._workers.append(worker)
         worker.start()
 
-    def _on_files_loaded(self, files: list[dict]) -> None:
-        """Handle loaded files."""
-        self._files = files
-        self.table.setRowCount(len(files))
+    def _load_folder_contents(self, item: QTreeWidgetItem, folder_id: str) -> None:
+        """Load contents of a specific folder."""
+        self.status.setText("Loading folder...")
 
-        for row, f in enumerate(files):
-            name = f.get("name", "")
-            mime = f.get("mimeType", "")
-            file_id = f.get("id", "")
+        def fetch():
+            # List files in this specific parent folder
+            return self.clients.drive.list_files(parent_id=folder_id)
 
-            # Determine icon
-            icon = "📄"
-            if "folder" in mime:
-                icon = "📁"
-            elif "spreadsheet" in mime:
-                icon = "📊"
-            elif "document" in mime:
-                icon = "📝"
-            elif "image" in mime:
-                icon = "🖼️"
+        worker = ApiWorker(fetch)
+        worker.finished.connect(lambda files: self._on_folder_loaded(item, files))
+        worker.error.connect(self._on_error)
+        self._workers.append(worker)
+        worker.start()
 
-            name_item = QTableWidgetItem(f"{icon} {name}")
-            type_item = QTableWidgetItem(
-                mime.split(".")[-1] if "." in mime else mime[:20]
-            )
-            id_item = QTableWidgetItem(file_id[:12] + "...")
-
-            self.table.setItem(row, 0, name_item)
-            self.table.setItem(row, 1, type_item)
-            self.table.setItem(row, 2, id_item)
-
-        self.status.setText(f"{len(files)} files loaded")
+    def _on_folder_loaded(
+        self, parent_item: QTreeWidgetItem | None, files: list[dict]
+    ) -> None:
+        """Handle loaded files for a folder."""
+        self.tree.populate_folder(parent_item, files)
+        self.status.setText(f"{len(files)} items loaded")
 
     def _on_error(self, e: Exception) -> None:
         """Handle API error."""
@@ -152,7 +129,9 @@ class DrivePage(QWidget):
     def _on_search(self) -> None:
         """Handle search action."""
         query = self.search_input.text().strip()
-        self._load_files(query if query else None)
+        # If searching, we reload "root" with the query.
+        # The tree will show them as top-level items.
+        self._load_root(query if query else None)
 
     def _on_upload(self) -> None:
         """Handle upload action."""
@@ -160,10 +139,24 @@ class DrivePage(QWidget):
         if not file_path:
             return
 
+        # Determine parent ID based on selection
+        parent_id = "root"
+        selected = self.tree.selectedItems()
+        if selected:
+            data = self.tree.get_file_data(selected[0])
+            if data:
+                if "folder" in data.get("mimeType", ""):
+                    parent_id = data.get("id", "root")
+                # If a file is selected, we could upload to its parent,
+                # but we don't easily know the parent from the file data in the tree without extra lookup.
+                # For now, let's default to root or explicitly selected folder.
+
         self.status.setText(f"Uploading {Path(file_path).name}...")
 
         def upload():
-            return self.clients.drive.upload_file(file_path)
+            return self.clients.drive.upload_file(
+                file_path, parent_id=parent_id if parent_id != "root" else None
+            )
 
         worker = ApiWorker(upload)
         worker.finished.connect(
@@ -176,15 +169,22 @@ class DrivePage(QWidget):
     def _on_upload_complete(self, file_id: str, name: str) -> None:
         """Handle upload completion."""
         self.status.setText(f"Uploaded: {name} (ID: {file_id[:12]}...)")
-        self._load_files()  # Refresh list
+        # ideally we refresh the folder we uploaded to
+        # for now, full refresh or manual refresh might be needed
+        # Let's just prompt user or rely on them to refresh/expand.
+        # Calling _load_root() might be too aggressive if they are deep in a tree.
+        pass
 
     def _show_context_menu(self, pos) -> None:
         """Show right-click context menu."""
-        row = self.table.rowAt(pos.y())
-        if row < 0 or row >= len(self._files):
+        item = self.tree.itemAt(pos)
+        if not item:
             return
 
-        file = self._files[row]
+        file_data = self.tree.get_file_data(item)
+        if not file_data:
+            return
+
         menu = QMenu(self)
 
         download_action = menu.addAction("⬇️ Download")
@@ -192,21 +192,21 @@ class DrivePage(QWidget):
         menu.addSeparator()
         delete_action = menu.addAction("🗑️ Delete")
 
-        action = menu.exec(self.table.mapToGlobal(pos))
+        action = menu.exec(self.tree.mapToGlobal(pos))
 
         if action == download_action:
-            self._download_file(file)
+            self._download_file(file_data)
         elif action == copy_id_action:
             from PySide6.QtWidgets import QApplication
 
-            QApplication.clipboard().setText(file.get("id", ""))
+            QApplication.clipboard().setText(file_data.get("id", ""))
             self.status.setText("File ID copied to clipboard")
         elif action == delete_action:
-            self._delete_file(file)
+            self._delete_file(file_data)
 
     def _download_file(self, file: dict) -> None:
         """Download a file."""
-        file_id = file.get("id")
+        file_id = str(file.get("id"))
         name = file.get("name", "file")
 
         save_path, _ = QFileDialog.getSaveFileName(self, "Save file", name)
@@ -237,7 +237,7 @@ class DrivePage(QWidget):
         if reply != QMessageBox.StandardButton.Yes:
             return
 
-        file_id = file.get("id")
+        file_id = str(file.get("id"))
         self.status.setText(f"Deleting {name}...")
 
         def delete():
@@ -252,4 +252,5 @@ class DrivePage(QWidget):
     def _on_delete_complete(self, name: str) -> None:
         """Handle delete completion."""
         self.status.setText(f"Deleted: {name}")
-        self._load_files()
+        # Ideally we remove the item from the tree directly
+        # For MVP, user can refresh

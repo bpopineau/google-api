@@ -176,7 +176,7 @@ class GmailPage(QWidget):
         self.status.setText("Loading...")
 
         def fetch():
-            return self.clients.gmail.list_messages(query=query, max_results=20)
+            return self.clients.gmail.search_messages(query=query, max_results=20)
 
         worker = ApiWorker(fetch)
         worker.finished.connect(self._on_messages_loaded)
