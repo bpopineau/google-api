@@ -462,7 +462,7 @@ def sync_folder(
             created += 1
             return "DRY_RUN_FOLDER_ID"
 
-        folder_id = create_folder(drive, name, parent_id=parent_id)
+        folder_id = str(create_folder(drive, name, parent_id=parent_id))
         created += 1
         return folder_id
 
@@ -493,11 +493,12 @@ def sync_folder(
                         continue
 
                     remote_folder = remote_folders_by_name.get(entry.name)
-                    remote_folder_id = (
-                        remote_folder.get("id")
-                        if remote_folder
-                        else _ensure_remote_folder(remote_parent_id, entry.name)
-                    )
+                    if remote_folder:
+                        remote_folder_id = str(remote_folder.get("id"))
+                    else:
+                        remote_folder_id = _ensure_remote_folder(
+                            remote_parent_id, entry.name
+                        )
                     _sync_dir(entry, remote_folder_id)
                     continue
 

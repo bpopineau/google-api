@@ -389,7 +389,7 @@ def get_message(
     while parts:
         part = parts.pop(0)
         if part.get("parts"):
-            parts.extend(part.get("parts"))
+            parts.extend(part.get("parts") or [])
         if part.get("mimeType") == "text/plain":
             data = part.get("body", {}).get("data")
             if data:
@@ -451,7 +451,7 @@ def _extract_attachments(payload: dict) -> list[dict]:
     while parts:
         part = parts.pop(0)
         if part.get("parts"):
-            parts.extend(part.get("parts"))
+            parts.extend(part.get("parts") or [])
 
         body = part.get("body", {})
         attachment_id = body.get("attachmentId")

@@ -2,100 +2,105 @@
 description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**, **SHIP**. `task.md` is the source of truth for all progress."
 ---
 
-// turbo-all
 # Workflow: /evolve
 
 ## Phase 0: PRE-FLIGHT
 
-**Role:** Build Engineer.
+**Role:** DevOps Engineer
+
+**Goal:** Ensure a deterministic build environment.
 
 **Task:**
-1. Ensure virtual environment is activated (`.venv`).
-2. Run `uv --version` to verify `uv` is installed.
-3. Run `where python` (Windows) to verify paths.
+1. **Environment Check:**
+   - Verify `uv` is installed: `uv --version`
+   - Sync dependencies to lockfile: `uv sync`
+   - Verify shell: `Get-Command python` (PowerShell) or `which python` (Bash) to confirm paths.
+
+2. **Clean State:**
+   - Ensure git is clean: `git status --short`. (Stash or commit if dirty).
 
 ---
 
 ## Phase 1: PLAN
 
-**Role:** Principal Architect.
+**Role:** Principal Architect
 
-**Context:** Gather context before any action.
+**Goal:** Define *what* to build before writing code.
 
-**Task:**
-1. Execute Atom: `atoms/_analyze_files.md`
-2. **Identify Goal:** Ask user: "Do you have a specific goal, or should I propose features?"
-   - *No Goal?* Suggest `@[/planning/ideate_innovations]` or `@[/planning/propose_features]`.
-   - *Have Goal?* Suggest `@[/planning/plan_feature]`.
-3. **Codebase Review:** *MANDATORY*. Review relevant files before committing to a plan.
-4. **Initialize `task.md`:** Create task file with the following structure:
-   ```markdown
-   # [Feature Name]
-   
-   - [ ] Phase 1: Planning & Research <!-- id: 0 -->
-   - [ ] Phase 2: Implementation <!-- id: 1 -->
-   - [ ] Phase 3: Verification <!-- id: 2 -->
-   ```
-5. **Break down work:** Add specific implementation steps under BUILD.
+**Protocol:**
+1. **Context Analysis:**
+   - Review `AUTOMATION_GOALS.md` and `docs/development/roadmap.md`.
+   - *Action:* If ambiguous, ask user for clarification.
+2. **Task Artifact Creation:**
+   - Create or overwrite `task.md` with the implementation plan.
+   - **Critical Rule:** The `task.md` is the Single Source of Truth.
+   - **Template:**
+     ```markdown
+     # [Feature Name]
+     
+     ## Phase 1: Planning
+     - [x] Context Analysis
+     
+     ## Phase 2: Implementation
+     - [ ] Core Logic: [Component A]
+     - [ ] Core Logic: [Component B]
+     - [ ] Tests: Unit tests for A & B
+     - [ ] CLI: Command structure
+     
+     ## Phase 3: Verification
+     - [ ] Lint (`ruff check`)
+     - [ ] Tests (`pytest`)
+     - [ ] Smoke Test (`scripts/smoke_test.py`)
+     ```
 
-**Constraints:**
-- Do NOT proceed to BUILD until user explicitly approves the plan via `implementation_plan.md`.
-
-**Output:** Summary of plan (Goal, Changes, Verification steps).
+**Output:** Present the Plan to the user. **STOP** and wait for approval.
 
 ---
 
 ## Phase 2: BUILD
 
-**Role:** Senior Software Engineer.
+**Role:** Senior Software Engineer
 
-**Context:** Execute the approved plan.
+**Goal:** Execute the plan with Test-Driven Development (TDD).
 
-**Task:**
-1. Work through the checklist in `task.md`.
-2. Write unit tests for new functionality immediately.
-3. Quality Check:
-   - Execute Atom: `atoms/_run_tests.md`
-   - Execute Atom: `atoms/_lint.md`
-4. Mark items `[x]` in `task.md` ONLY after verified.
-
-**Constraints:**
-- Test frequently.
-- Verify each task individually before marking complete.
+**Loop Protocol:**
+For each unchecked item in `task.md`:
+1. **Mark In-Progress:** Change `[ ]` to `[/]`.
+2. **Implement:** Write the code or test.
+   - *Constraint:* Write unit tests in `tests/` *concurrently* with code in `mygooglib/`.
+3. **Micro-Verify:**
+   - Lint: `uv run ruff check . --fix`
+   - Test: `uv run pytest tests/test_specific_feature.py`
+4. **Mark Complete:** Change `[/]` to `[x]` ONLY after the micro-verification passes.
 
 ---
 
 ## Phase 3: SHIP
 
-**Role:** Release Manager.
+**Role:** Release Manager
 
-**Context:** Mandatory gate before merge.
+**Goal:** Quality Assurance and release packaging.
 
-### Step 1: Smoke Tests
 **Task:**
-- Execute Atom: `atoms/_smoke_test.md`
+1. **Full Suite Verification:**
+   - Run entire test suite: `uv run pytest`
+   - Run Type/Lint check: `uv run ruff check .` and `uv run ruff format .`
+   - **Smoke Test:** Execute `uv run python scripts/smoke_test.py all`.
+     - *Gate:* If this fails, DO NOT SHIP. Fix and recurse to Phase 2.
 
-### Step 2: Documentation (Mandatory)
-**Task:**
-- Execute Atom: `atoms/_update_docs.md` or `atoms/_write_docstrings.md`.
-- Update README with new features if applicable.
+2. **Documentation Update:**
+   - Update `README.md` features list.
+   - Ensure `docs/guides/usage.md` reflects new CLI commands.
 
-### Step 3: Changelog
-**Task:**
-- Add concise entry to `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+3. **Release Artifacts:**
+   - Bump version in `pyproject.toml` (if applicable).
+   - Update `CHANGELOG.md` with a concise entry.
 
-### Step 4: Release & Checkpoint
-**Task:**
-- Bump version in `pyproject.toml` if this is a named release.
-- Execute Atom: `atoms/_checkpoint.md`
-
----
-
-**Final Output:** JSON
-```json
-{
-  "workflow_status": "COMPLETE | BLOCKED",
-  "phase_completed": "PLAN | BUILD | SHIP",
-  "blockers": ["<list of issues>"]
-}
-```
+4. **Final Output:**
+   - Provide a summary JSON:
+   ```json
+   {
+     "status": "READY_TO_MERGE",
+     "files_changed": ["list", "of", "files"],
+     "tests_passed": true
+   }

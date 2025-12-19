@@ -37,12 +37,61 @@ def a1_to_col(letters: str) -> int:
     return result
 
 
+def a1_to_range(
+    a1_range: str,
+) -> tuple[str | None, int, int, int | None, int | None]:
+    """Parse an A1 range string into components.
+
+    Args:
+        a1_range: A1 notation string like "Sheet1!A1:C10" or "A1:B5"
+
+    Returns:
+        Tuple of (sheet_name, start_row, start_col, end_row, end_col).
+        sheet_name is None if not specified.
+        end_row and end_col are None if it's a single cell.
+
+    Examples:
+        a1_to_range("A1") -> (None, 1, 1, None, None)
+        a1_to_range("A1:C10") -> (None, 1, 1, 10, 3)
+        a1_to_range("Sheet1!A1:C10") -> ("Sheet1", 1, 1, 10, 3)
+    """
+    sheet_name: str | None = None
+    cell_range = a1_range
+
+    # Check for sheet name prefix
+    if "!" in a1_range:
+        sheet_part, cell_range = a1_range.rsplit("!", 1)
+        # Remove surrounding quotes if present
+        if sheet_part.startswith("'") and sheet_part.endswith("'"):
+            sheet_part = sheet_part[1:-1].replace("''", "'")
+        sheet_name = sheet_part
+
+    # Parse cell range (e.g., "A1:C10" or "A1")
+    cell_pattern = re.compile(r"^([A-Za-z]+)(\d+)(?::([A-Za-z]+)(\d+))?$")
+    match = cell_pattern.match(cell_range)
+    if not match:
+        raise ValueError(f"Invalid A1 notation: {a1_range}")
+
+    start_col_str, start_row_str, end_col_str, end_row_str = match.groups()
+
+    start_row = int(start_row_str)
+    start_col = a1_to_col(start_col_str)
+
+    end_row: int | None = None
+    end_col: int | None = None
+    if end_row_str and end_col_str:
+        end_row = int(end_row_str)
+        end_col = a1_to_col(end_col_str)
+
+    return (sheet_name, start_row, start_col, end_row, end_col)
+
+
 def range_to_a1(
+    sheet_name: str | None,
     start_row: int,
     start_col: int,
     end_row: int | None = None,
     end_col: int | None = None,
-    sheet_name: str | None = None,
 ) -> str:
     """Build an A1 range string from 1-indexed row/col coordinates.
 

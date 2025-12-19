@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import webbrowser
 from pathlib import Path
+from typing import Any, cast
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -236,8 +237,9 @@ def list_tabs_cmd(
     state.console.print(table)
 
     if interactive and results:
+        results_list = cast(list[dict[Any, Any]], results)
         selected_title = prompt_selection(
-            state.console, results, label_key="title", id_key="title"
+            state.console, results_list, label_key="title", id_key="title"
         )
         if selected_title:
             action = typer.prompt(

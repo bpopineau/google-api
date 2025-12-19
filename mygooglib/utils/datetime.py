@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 # optional `tzdata` package is installed. We fall back to UTC rather than
 # failing at import time.
 _DEFAULT_TZ_KEY = os.environ.get("MYGOOGLIB_DEFAULT_TZ", "America/New_York")
+DEFAULT_TZ: ZoneInfo | dt.timezone
 try:
     DEFAULT_TZ = ZoneInfo(_DEFAULT_TZ_KEY)
 except ZoneInfoNotFoundError:

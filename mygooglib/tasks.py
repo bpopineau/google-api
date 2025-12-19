@@ -105,8 +105,8 @@ def list_tasks(
     Returns:
         List of task dicts by default, or full response if raw=True.
     """
-    all_items = []
-    page_token = None
+    all_items: list[dict[str, Any]] = []
+    page_token: str | None = None
 
     try:
         while True:

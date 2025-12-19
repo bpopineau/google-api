@@ -21,6 +21,7 @@ with st.form("email_form"):
             with st.spinner("Sending..."):
                 try:
                     resp = clients.gmail.send_email(to=to, subject=subject, body=body)
-                    st.success(f"Sent! Message ID: `{resp.get('id')}`")
+                    msg_id = resp.get("id") if isinstance(resp, dict) else resp
+                    st.success(f"Sent! Message ID: `{msg_id}`")
                 except Exception as e:
                     st.error(f"Error sending email: {e}")

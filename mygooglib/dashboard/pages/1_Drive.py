@@ -17,8 +17,8 @@ with st.expander("Upload File"):
             with st.spinner("Uploading..."):
                 # Save temp to upload
                 temp_path = f"temp_{uploaded_file.name}"
-                with open(temp_path, "wb") as f:
-                    f.write(uploaded_file.getbuffer())
+                with open(temp_path, "wb") as fh:
+                    fh.write(uploaded_file.getbuffer())
 
                 try:
                     file_id = clients.drive.upload_file(

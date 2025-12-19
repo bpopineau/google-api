@@ -37,11 +37,11 @@ with col1:
         if not events:
             st.info("No upcoming events.")
         else:
-            for e in events:
-                start = e.get("start", {}).get(
-                    "dateTime", e.get("start", {}).get("date")
+            for event in events:
+                start = event.get("start", {}).get(
+                    "dateTime", event.get("start", {}).get("date")
                 )
-                summary = e.get("summary", "No Title")
+                summary = event.get("summary", "No Title")
                 st.write(f"**{summary}**")
                 st.caption(f"{start}")
     except Exception as e:

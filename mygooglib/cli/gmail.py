@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -140,8 +141,9 @@ def search_cmd(
     state.console.print(table)
 
     if interactive and results:
+        results_list = cast(list[dict[Any, Any]], results)
         selected_id = prompt_selection(
-            state.console, results, label_key="subject", id_key="id"
+            state.console, results_list, label_key="subject", id_key="id"
         )
         if selected_id:
             action = typer.prompt(

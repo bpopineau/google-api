@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import webbrowser
+from typing import Any, cast
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -62,14 +63,16 @@ def list_cmd(
         state.console.print(format_output(results, json_mode=True))
         return
 
-    table = Table(title=f"Calendar events ({len(results)})")
+    results_list = cast(list[dict[Any, Any]], results)
+
+    table = Table(title=f"Calendar events ({len(results_list)})")
     if interactive:
         table.add_column("#", justify="right")
     table.add_column("start", overflow="fold")
     table.add_column("summary", overflow="fold")
     table.add_column("id", overflow="fold")
 
-    for i, item in enumerate(results, 1):
+    for i, item in enumerate(results_list, 1):
         start = item.get("start", {})
         start_val = start.get("dateTime") or start.get("date") or ""
         row = [
@@ -83,9 +86,9 @@ def list_cmd(
 
     state.console.print(table)
 
-    if interactive and results:
+    if interactive and results_list:
         selected = prompt_selection(
-            state.console, results, label_key="summary", id_key=None
+            state.console, results_list, label_key="summary", id_key=None
         )
         if selected:
             action = typer.prompt(

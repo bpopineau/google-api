@@ -19,6 +19,7 @@ dependencies = [
 dev = [
     "pytest>=7",
     "ruff>=0.1",
+    "mypy>=1.0",
 ]
 
 cli = [
@@ -40,3 +41,11 @@ mygoog = "mygooglib.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["mygooglib*"]
+
+[tool.mypy]
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "googleapiclient.*"
+ignore_missing_imports = true

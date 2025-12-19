@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import webbrowser
+from typing import Any, cast
 
 import typer
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -61,8 +62,9 @@ def list_lists_cmd(
     state.console.print(table)
 
     if interactive and results:
+        results_list = cast(list[dict[Any, Any]], results)
         selected = prompt_selection(
-            state.console, results, label_key="title", id_key=None
+            state.console, results_list, label_key="title", id_key=None
         )
         if selected:
             action = typer.prompt(
@@ -141,8 +143,9 @@ def list_cmd(
     state.console.print(table)
 
     if interactive and results:
+        tasks_list = cast(list[dict[Any, Any]], results)
         selected = prompt_selection(
-            state.console, results, label_key="title", id_key=None
+            state.console, tasks_list, label_key="title", id_key=None
         )
         if selected:
             action = typer.prompt(
@@ -263,7 +266,10 @@ def complete_cmd(
             table.add_row(str(i), t.get("title"), t.get("id"))
 
         state.console.print(table)
-        task_id = prompt_selection(state.console, tasks, label_key="title", id_key="id")
+        tasks_casted = cast(list[dict[Any, Any]], tasks)
+        task_id = prompt_selection(
+            state.console, tasks_casted, label_key="title", id_key="id"
+        )
         if not task_id:
             return
 
