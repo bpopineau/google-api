@@ -57,3 +57,8 @@ ignore_missing_imports = true
 module = "pandas.*"
 ignore_missing_imports = true
 
+[dependency-groups]
+dev = [
+    "pytest-qt>=4.5.0",
+]
+

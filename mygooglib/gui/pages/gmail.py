@@ -257,7 +257,13 @@ class GmailPage(QWidget):
             )
 
         worker = ApiWorker(send)
-        worker.finished.connect(lambda _: self.status.setText("Email sent!"))
+        worker.finished.connect(self._on_email_sent)
         worker.error.connect(self._on_error)
         self._workers.append(worker)
         worker.start()
+
+    def _on_email_sent(self, _) -> None:
+        """Handle email sent successfully."""
+        self.status.setText("Email sent!")
+        # Auto-refresh to update the message list
+        self._load_messages()

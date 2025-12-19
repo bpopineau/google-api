@@ -169,11 +169,8 @@ class DrivePage(QWidget):
     def _on_upload_complete(self, file_id: str, name: str) -> None:
         """Handle upload completion."""
         self.status.setText(f"Uploaded: {name} (ID: {file_id[:12]}...)")
-        # ideally we refresh the folder we uploaded to
-        # for now, full refresh or manual refresh might be needed
-        # Let's just prompt user or rely on them to refresh/expand.
-        # Calling _load_root() might be too aggressive if they are deep in a tree.
-        pass
+        # Auto-refresh to show the new file
+        self._load_root()
 
     def _show_context_menu(self, pos) -> None:
         """Show right-click context menu."""
@@ -252,5 +249,5 @@ class DrivePage(QWidget):
     def _on_delete_complete(self, name: str) -> None:
         """Handle delete completion."""
         self.status.setText(f"Deleted: {name}")
-        # Ideally we remove the item from the tree directly
-        # For MVP, user can refresh
+        # Auto-refresh to remove the deleted file from view
+        self._load_root()
