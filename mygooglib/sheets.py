@@ -10,10 +10,8 @@ import re
 from collections.abc import Sequence
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.base import BaseClient
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 try:
     import pandas as pd
@@ -153,6 +151,7 @@ def _quote_sheet_name(sheet_name: str) -> str:
     return sheet_name
 
 
+@api_call("Sheets get_range", is_write=False)
 def get_range(
     sheets: Any,
     spreadsheet_id: str,
@@ -210,22 +209,18 @@ def get_range(
         )
 
     if not chunk_size:
-        try:
-            request = (
-                sheets.spreadsheets()
-                .values()
-                .get(
-                    spreadsheetId=spreadsheet_real_id,
-                    range=a1_range,
-                    majorDimension=major_dimension,
-                    valueRenderOption=value_render_option,
-                    dateTimeRenderOption=date_time_render_option,
-                )
+        request = (
+            sheets.spreadsheets()
+            .values()
+            .get(
+                spreadsheetId=spreadsheet_real_id,
+                range=a1_range,
+                majorDimension=major_dimension,
+                valueRenderOption=value_render_option,
+                dateTimeRenderOption=date_time_render_option,
             )
-            response = execute_with_retry_http_error(request, is_write=False)
-        except HttpError as e:
-            raise_for_http_error(e, context="Sheets get_range")
-            raise
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
 
         return response if raw else response.get("values", [])
 
@@ -291,6 +286,7 @@ def get_range(
     return all_values
 
 
+@api_call("Sheets update_range", is_write=True)
 def update_range(
     sheets: Any,
     spreadsheet_id: str,
@@ -347,24 +343,20 @@ def update_range(
         )
 
     body = {"values": [list(row) for row in values]}
-    try:
-        request = (
-            sheets.spreadsheets()
-            .values()
-            .update(
-                spreadsheetId=spreadsheet_real_id,
-                range=a1_range,
-                valueInputOption=value_input_option,
-                includeValuesInResponse=include_values_in_response,
-                responseValueRenderOption=response_value_render_option,
-                responseDateTimeRenderOption=response_date_time_render_option,
-                body=body,
-            )
+    request = (
+        sheets.spreadsheets()
+        .values()
+        .update(
+            spreadsheetId=spreadsheet_real_id,
+            range=a1_range,
+            valueInputOption=value_input_option,
+            includeValuesInResponse=include_values_in_response,
+            responseValueRenderOption=response_value_render_option,
+            responseDateTimeRenderOption=response_date_time_render_option,
+            body=body,
         )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Sheets update_range")
-        raise
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
         return response
@@ -378,6 +370,7 @@ def update_range(
     }
 
 
+@api_call("Sheets append_row", is_write=True)
 def append_row(
     sheets: Any,
     spreadsheet_id: str,
@@ -435,23 +428,19 @@ def append_row(
     append_range = f"{safe_sheet}!A:A"
     body = {"values": [list(values)]}
 
-    try:
-        request = (
-            sheets.spreadsheets()
-            .values()
-            .append(
-                spreadsheetId=spreadsheet_real_id,
-                range=append_range,
-                valueInputOption=value_input_option,
-                insertDataOption=insert_data_option,
-                includeValuesInResponse=include_values_in_response,
-                body=body,
-            )
+    request = (
+        sheets.spreadsheets()
+        .values()
+        .append(
+            spreadsheetId=spreadsheet_real_id,
+            range=append_range,
+            valueInputOption=value_input_option,
+            insertDataOption=insert_data_option,
+            includeValuesInResponse=include_values_in_response,
+            body=body,
         )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Sheets append_row")
-        raise
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
         return response
@@ -467,6 +456,7 @@ def append_row(
     }
 
 
+@api_call("Sheets get_sheets", is_write=False)
 def get_sheets(
     sheets: Any,
     spreadsheet_id: str,
@@ -500,14 +490,10 @@ def get_sheets(
         else spreadsheet_id
     )
 
-    try:
-        request = sheets.spreadsheets().get(
-            spreadsheetId=spreadsheet_real_id, fields="sheets(properties)"
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Sheets get_sheets")
-        raise
+    request = sheets.spreadsheets().get(
+        spreadsheetId=spreadsheet_real_id, fields="sheets(properties)"
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
         return response
@@ -621,6 +607,7 @@ def from_dataframe(
     )
 
 
+@api_call("Sheets batch_get", is_write=False)
 def batch_get(
     sheets: Any,
     spreadsheet_id: str,
@@ -672,22 +659,18 @@ def batch_get(
             "Spreadsheet identifier looks like a title; pass drive=clients.drive."
         )
 
-    try:
-        request = (
-            sheets.spreadsheets()
-            .values()
-            .batchGet(
-                spreadsheetId=spreadsheet_real_id,
-                ranges=ranges,
-                majorDimension=major_dimension,
-                valueRenderOption=value_render_option,
-                dateTimeRenderOption=date_time_render_option,
-            )
+    request = (
+        sheets.spreadsheets()
+        .values()
+        .batchGet(
+            spreadsheetId=spreadsheet_real_id,
+            ranges=ranges,
+            majorDimension=major_dimension,
+            valueRenderOption=value_render_option,
+            dateTimeRenderOption=date_time_render_option,
         )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Sheets batch_get")
-        raise
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
         return response
@@ -700,6 +683,7 @@ def batch_get(
     return result
 
 
+@api_call("Sheets batch_update", is_write=True)
 def batch_update(
     sheets: Any,
     spreadsheet_id: str,
@@ -771,16 +755,12 @@ def batch_update(
         "responseDateTimeRenderOption": response_date_time_render_option,
     }
 
-    try:
-        request = (
-            sheets.spreadsheets()
-            .values()
-            .batchUpdate(spreadsheetId=spreadsheet_real_id, body=body)
-        )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Sheets batch_update")
-        raise
+    request = (
+        sheets.spreadsheets()
+        .values()
+        .batchUpdate(spreadsheetId=spreadsheet_real_id, body=body)
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
         return response
@@ -873,7 +853,7 @@ class BatchUpdater:
         return len(self._updates)
 
 
-class SheetsClient:
+class SheetsClient(BaseClient):
     """Simplified Google Sheets API wrapper focusing on common operations."""
 
     def __init__(self, service: Any, drive: Any | None = None):
@@ -883,7 +863,7 @@ class SheetsClient:
             service: Sheets API Resource from get_clients().sheets
             drive: Optional Drive API Resource for title-based resolution
         """
-        self.service = service
+        super().__init__(service)
         self.drive = drive
 
     def resolve_spreadsheet(

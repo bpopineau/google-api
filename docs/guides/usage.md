@@ -303,6 +303,39 @@ mygoog contacts add --given-name John --email john@example.com
 
 ---
 
+---
+
+## 10. Desktop GUI
+
+The library includes a native PySide6 desktop application for managing your services.
+
+### Installation
+
+The GUI requires additional dependencies:
+
+```bash
+pip install -e ".[gui]"
+```
+
+### Launching
+
+Run the GUI from the command line:
+
+```bash
+mygoog gui run
+```
+
+### Features
+
+- **Dashboard**: Overview of connected services
+- **Drive**: Browser-like file explorer
+- **Gmail**: Read and send emails with attachments
+- **Tasks**: Manage to-do lists drag-and-drop
+- **Calendar**: View upcoming events
+- **Dark Mode**: Integrated dark theme
+
+---
+
 ## See Also
 
 For more examples, check the [examples/](../../examples/) directory in the repository.

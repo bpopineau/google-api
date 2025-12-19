@@ -7,12 +7,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.base import BaseClient
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 
+@api_call("Contacts list", is_write=False)
 def list_contacts(
     people_service: Any,
     *,
@@ -29,25 +28,21 @@ def list_contacts(
     Returns:
         List of contact dicts with flattened names and emails.
     """
-    try:
-        request = (
-            people_service.people()
-            .connections()
-            .list(
-                resourceName="people/me",
-                pageSize=page_size,
-                personFields="names,emailAddresses,phoneNumbers",
-                sortOrder=sort_order,
-            )
+    request = (
+        people_service.people()
+        .connections()
+        .list(
+            resourceName="people/me",
+            pageSize=page_size,
+            personFields="names,emailAddresses,phoneNumbers",
+            sortOrder=sort_order,
         )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts list")
-        raise
-
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
     return [_flatten_person(p) for p in response.get("connections", [])]
 
 
+@api_call("Contacts search", is_write=False)
 def search_contacts(
     people_service: Any,
     query: str,
@@ -61,36 +56,26 @@ def search_contacts(
     Returns:
         List of matching contact dicts.
     """
-    try:
-        request = people_service.people().searchContacts(
-            query=query,
-            readMask="names,emailAddresses,phoneNumbers",
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts search")
-        raise
-
-    # searchContacts returns 'results' -> 'person'
+    request = people_service.people().searchContacts(
+        query=query,
+        readMask="names,emailAddresses,phoneNumbers",
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
     results = response.get("results", [])
     return [_flatten_person(r.get("person", {})) for r in results]
 
 
+@api_call("Contacts get", is_write=False)
 def get_contact_by_resource_name(
     people_service: Any,
     resource_name: str,
 ) -> dict:
     """Get a single contact by resource name (e.g., 'people/c123...')."""
-    try:
-        request = people_service.people().get(
-            resourceName=resource_name,
-            personFields="names,emailAddresses,phoneNumbers",
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts get")
-        raise
-
+    request = people_service.people().get(
+        resourceName=resource_name,
+        personFields="names,emailAddresses,phoneNumbers",
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
     return _flatten_person(response)
 
 
@@ -109,6 +94,7 @@ def _flatten_person(person: dict) -> dict:
     }
 
 
+@api_call("Contacts create", is_write=True)
 def create_contact(
     people_service: Any,
     *,
@@ -137,16 +123,22 @@ def create_contact(
     if phone:
         person_body["phoneNumbers"] = [{"value": phone}]
 
-    try:
-        request = people_service.people().createContact(body=person_body)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts create")
-        raise
-
+    request = people_service.people().createContact(body=person_body)
+    response = execute_with_retry_http_error(request, is_write=True)
     return _flatten_person(response)
 
 
+@api_call("Contacts update (get)", is_write=False)
+def _get_existing_contact(people_service: Any, resource_name: str) -> dict:
+    """Get existing contact for update (internal helper)."""
+    get_request = people_service.people().get(
+        resourceName=resource_name,
+        personFields="names,emailAddresses,phoneNumbers",
+    )
+    return execute_with_retry_http_error(get_request, is_write=False)
+
+
+@api_call("Contacts update", is_write=True)
 def update_contact(
     people_service: Any,
     resource_name: str,
@@ -172,18 +164,8 @@ def update_contact(
     Note:
         At least one field must be provided to update.
     """
-    # First, get existing contact to retrieve etag
-    try:
-        get_request = people_service.people().get(
-            resourceName=resource_name,
-            personFields="names,emailAddresses,phoneNumbers",
-        )
-        existing = execute_with_retry_http_error(get_request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts update (get)")
-        raise
+    existing = _get_existing_contact(people_service, resource_name)
 
-    # Build update fields
     update_person_fields: list[str] = []
     person_body: dict[str, Any] = {"etag": existing.get("etag")}
 
@@ -208,20 +190,16 @@ def update_contact(
     if not update_person_fields:
         raise ValueError("At least one field must be provided to update")
 
-    try:
-        request = people_service.people().updateContact(
-            resourceName=resource_name,
-            body=person_body,
-            updatePersonFields=",".join(update_person_fields),
-        )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts update")
-        raise
-
+    request = people_service.people().updateContact(
+        resourceName=resource_name,
+        body=person_body,
+        updatePersonFields=",".join(update_person_fields),
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
     return _flatten_person(response)
 
 
+@api_call("Contacts delete", is_write=True)
 def delete_contact(
     people_service: Any,
     resource_name: str,
@@ -232,19 +210,12 @@ def delete_contact(
         people_service: People API Resource
         resource_name: Contact resource name (e.g., 'people/c123...')
     """
-    try:
-        request = people_service.people().deleteContact(resourceName=resource_name)
-        execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Contacts delete")
-        raise
+    request = people_service.people().deleteContact(resourceName=resource_name)
+    execute_with_retry_http_error(request, is_write=True)
 
 
-class ContactsClient:
+class ContactsClient(BaseClient):
     """Simplified Google Contacts (People API) wrapper."""
-
-    def __init__(self, service: Any):
-        self.service = service
 
     def list_contacts(
         self,

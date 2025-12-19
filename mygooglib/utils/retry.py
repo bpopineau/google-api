@@ -171,3 +171,46 @@ def execute_with_retry_http_error(
 
     # Unreachable
     raise AssertionError("execute_with_retry_http_error: fell through")
+
+
+def api_call(context: str, *, is_write: bool = False):
+    """Decorator that wraps API calls with retry and error handling.
+
+    This decorator eliminates the try/except boilerplate pattern:
+
+        try:
+            request = service.method(...)
+            response = execute_with_retry_http_error(request, is_write=False)
+        except HttpError as e:
+            raise_for_http_error(e, context="...")
+            raise
+
+    Usage:
+        @api_call("Tasks list_tasklists", is_write=False)
+        def list_tasklists(tasks, *, max_results=100):
+            request = tasks.tasklists().list(maxResults=max_results)
+            return execute_with_retry_http_error(request, is_write=False)
+
+    Args:
+        context: Context string for error messages (e.g., "Drive list_files")
+        is_write: Whether this is a write operation (affects retry behavior)
+
+    Returns:
+        Decorated function with automatic error handling.
+    """
+    from functools import wraps
+
+    from mygooglib.exceptions import raise_for_http_error
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except HttpError as e:
+                raise_for_http_error(e, context=context)
+                raise  # Unreachable but satisfies type checker
+
+        return wrapper
+
+    return decorator

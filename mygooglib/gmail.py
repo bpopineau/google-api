@@ -13,10 +13,8 @@ from email.message import EmailMessage
 from pathlib import Path
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.base import BaseClient
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 
 def _as_address_list(value: str | Sequence[str] | None) -> str | None:
@@ -51,6 +49,7 @@ def _guess_mime(path: Path) -> tuple[str, str]:
     return maintype, subtype
 
 
+@api_call("Gmail send_email", is_write=True)
 def send_email(
     gmail: Any,
     *,
@@ -115,12 +114,8 @@ def send_email(
     encoded = base64.urlsafe_b64encode(msg.as_bytes()).decode("utf-8")
     payload = {"raw": encoded}
 
-    try:
-        request = gmail.users().messages().send(userId=user_id, body=payload)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail send_email")
-        raise
+    request = gmail.users().messages().send(userId=user_id, body=payload)
+    response = execute_with_retry_http_error(request, is_write=True)
 
     # Record successful send if idempotency key was provided
     if idempotency_key:
@@ -150,6 +145,7 @@ def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]
     return result
 
 
+@api_call("Gmail search_messages", is_write=False)
 def search_messages(
     gmail: Any,
     query: str,
@@ -182,106 +178,102 @@ def search_messages(
     collected: list[dict] = []
     first_page: dict | None = None
 
-    try:
-        while len(collected) < max_results:
-            list_request = (
+    while len(collected) < max_results:
+        list_request = (
+            gmail.users()
+            .messages()
+            .list(
+                userId=user_id,
+                q=query,
+                includeSpamTrash=include_spam_trash,
+                pageToken=page_token,
+                maxResults=min(500, max_results - len(collected)),
+            )
+        )
+        response = execute_with_retry_http_error(list_request, is_write=False)
+        if first_page is None:
+            first_page = response
+
+        message_refs = response.get("messages", []) or []
+        if not message_refs:
+            break
+
+        # Batch fetch metadata for this page of results to reduce round-trips.
+        batch = gmail.new_batch_http_request()
+        batch_results: dict[str, dict] = {}
+
+        def _callback(
+            request_id: str, response: dict, exception: Exception | None
+        ) -> None:
+            if not exception:
+                batch_results[request_id] = response
+
+        for ref in message_refs:
+            msg_id = ref.get("id")
+            if not msg_id:
+                continue
+            batch.add(
                 gmail.users()
                 .messages()
-                .list(
+                .get(
                     userId=user_id,
-                    q=query,
-                    includeSpamTrash=include_spam_trash,
-                    pageToken=page_token,
-                    maxResults=min(500, max_results - len(collected)),
-                )
+                    id=msg_id,
+                    format="metadata",
+                    metadataHeaders=["From", "To", "Subject", "Date"],
+                ),
+                callback=_callback,
+                request_id=msg_id,
             )
-            response = execute_with_retry_http_error(list_request, is_write=False)
-            if first_page is None:
-                first_page = response
 
-            message_refs = response.get("messages", []) or []
-            if not message_refs:
+        # Wrap batch in a simple object with .execute() for retry helper.
+        class _BatchWrapper:
+            def __init__(self, b: Any):
+                self.b = b
+
+            def execute(self) -> Any:
+                return self.b.execute()
+
+        execute_with_retry_http_error(_BatchWrapper(batch), is_write=False)
+
+        # Process batch results in order.
+        for ref in message_refs:
+            msg_id = ref.get("id")
+            meta = batch_results.get(msg_id or "")
+            if not meta:
+                continue
+
+            payload = meta.get("payload") or {}
+            headers = _headers_to_dict(payload.get("headers"))
+            sender = headers.get("from")
+            collected.append(
+                {
+                    "id": meta.get("id"),
+                    "threadId": meta.get("threadId"),
+                    "subject": headers.get("subject"),
+                    "sender": sender,
+                    "from": headers.get("from"),
+                    "to": headers.get("to"),
+                    "date": headers.get("date"),
+                    "snippet": meta.get("snippet"),
+                }
+            )
+
+            if progress_callback:
+                progress_callback(len(collected), max_results)
+
+            if len(collected) >= max_results:
                 break
 
-            # Batch fetch metadata for this page of results to reduce round-trips.
-            batch = gmail.new_batch_http_request()
-            batch_results: dict[str, dict] = {}
-
-            def _callback(
-                request_id: str, response: dict, exception: Exception | None
-            ) -> None:
-                if not exception:
-                    batch_results[request_id] = response
-
-            for ref in message_refs:
-                msg_id = ref.get("id")
-                if not msg_id:
-                    continue
-                batch.add(
-                    gmail.users()
-                    .messages()
-                    .get(
-                        userId=user_id,
-                        id=msg_id,
-                        format="metadata",
-                        metadataHeaders=["From", "To", "Subject", "Date"],
-                    ),
-                    callback=_callback,
-                    request_id=msg_id,
-                )
-
-            # Wrap batch in a simple object with .execute() for retry helper.
-            class _BatchWrapper:
-                def __init__(self, b: Any):
-                    self.b = b
-
-                def execute(self) -> Any:
-                    return self.b.execute()
-
-            execute_with_retry_http_error(_BatchWrapper(batch), is_write=False)
-
-            # Process batch results in order.
-            for ref in message_refs:
-                msg_id = ref.get("id")
-                meta = batch_results.get(msg_id or "")
-                if not meta:
-                    continue
-
-                payload = meta.get("payload") or {}
-                headers = _headers_to_dict(payload.get("headers"))
-                sender = headers.get("from")
-                collected.append(
-                    {
-                        "id": meta.get("id"),
-                        "threadId": meta.get("threadId"),
-                        "subject": headers.get("subject"),
-                        "sender": sender,
-                        "from": headers.get("from"),
-                        "to": headers.get("to"),
-                        "date": headers.get("date"),
-                        "snippet": meta.get("snippet"),
-                    }
-                )
-
-                if progress_callback:
-                    progress_callback(len(collected), max_results)
-
-                if len(collected) >= max_results:
-                    break
-
-            page_token = response.get("nextPageToken")
-            if not page_token:
-                break
-
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail search_messages")
-        raise
+        page_token = response.get("nextPageToken")
+        if not page_token:
+            break
 
     if raw:
         return first_page or {"messages": []}
     return collected
 
 
+@api_call("Gmail mark_read", is_write=True)
 def mark_read(
     gmail: Any,
     message_id: str,
@@ -290,24 +282,20 @@ def mark_read(
     raw: bool = False,
 ) -> dict | None:
     """Mark a message as read by removing the UNREAD label."""
-    try:
-        request = (
-            gmail.users()
-            .messages()
-            .modify(
-                userId=user_id,
-                id=message_id,
-                body={"removeLabelIds": ["UNREAD"]},
-            )
+    request = (
+        gmail.users()
+        .messages()
+        .modify(
+            userId=user_id,
+            id=message_id,
+            body={"removeLabelIds": ["UNREAD"]},
         )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail mark_read")
-        raise
-
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else None
 
 
+@api_call("Gmail trash_message", is_write=True)
 def trash_message(
     gmail: Any,
     message_id: str,
@@ -316,15 +304,12 @@ def trash_message(
     raw: bool = False,
 ) -> dict | None:
     """Move a message to trash."""
-    try:
-        request = gmail.users().messages().trash(userId=user_id, id=message_id)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail trash_message")
-        raise
+    request = gmail.users().messages().trash(userId=user_id, id=message_id)
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else None
 
 
+@api_call("Gmail archive_message", is_write=True)
 def archive_message(
     gmail: Any,
     message_id: str,
@@ -333,23 +318,20 @@ def archive_message(
     raw: bool = False,
 ) -> dict | None:
     """Archive a message by removing the INBOX label."""
-    try:
-        request = (
-            gmail.users()
-            .messages()
-            .modify(
-                userId=user_id,
-                id=message_id,
-                body={"removeLabelIds": ["INBOX"]},
-            )
+    request = (
+        gmail.users()
+        .messages()
+        .modify(
+            userId=user_id,
+            id=message_id,
+            body={"removeLabelIds": ["INBOX"]},
         )
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail archive_message")
-        raise
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else None
 
 
+@api_call("Gmail get_message", is_write=False)
 def get_message(
     gmail: Any,
     message_id: str,
@@ -368,14 +350,8 @@ def get_message(
     Returns:
         Dict with id, threadId, subject, from, to, date, snippet, and body.
     """
-    try:
-        request = (
-            gmail.users().messages().get(userId=user_id, id=message_id, format="full")
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail get_message")
-        raise
+    request = gmail.users().messages().get(userId=user_id, id=message_id, format="full")
+    response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
         return response
@@ -407,6 +383,7 @@ def get_message(
     }
 
 
+@api_call("Gmail get_attachment", is_write=False)
 def get_attachment(
     gmail: Any,
     message_id: str,
@@ -425,18 +402,13 @@ def get_attachment(
     Returns:
         Raw bytes of the attachment
     """
-    try:
-        request = (
-            gmail.users()
-            .messages()
-            .attachments()
-            .get(userId=user_id, messageId=message_id, id=attachment_id)
-        )
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Gmail get_attachment")
-        raise
-
+    request = (
+        gmail.users()
+        .messages()
+        .attachments()
+        .get(userId=user_id, messageId=message_id, id=attachment_id)
+    )
+    response = execute_with_retry_http_error(request, is_write=False)
     data = response.get("data", "")
     return base64.urlsafe_b64decode(data)
 
@@ -508,15 +480,8 @@ def save_attachments(
         if not msg_id:
             continue
 
-        # Get full message to access parts
-        try:
-            request = (
-                gmail.users().messages().get(userId=user_id, id=msg_id, format="full")
-            )
-            msg = execute_with_retry_http_error(request, is_write=False)
-        except HttpError as e:
-            raise_for_http_error(e, context="Gmail save_attachments get_message")
-            raise
+        # Get full message to access parts (reuse decorated get_message)
+        msg = get_message(gmail, msg_id, user_id=user_id, raw=True)
 
         payload = msg.get("payload", {})
         attachments = _extract_attachments(payload)
@@ -547,12 +512,8 @@ def save_attachments(
     return saved_files
 
 
-class GmailClient:
+class GmailClient(BaseClient):
     """Simplified Gmail API wrapper focusing on common operations."""
-
-    def __init__(self, service: Any):
-        """Initialize with an authorized Gmail API service object."""
-        self.service = service
 
     def send_email(
         self,

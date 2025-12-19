@@ -24,76 +24,66 @@ if TYPE_CHECKING:
 
 @dataclass
 class Clients:
-    """Container holding all Google API service wrappers."""
+    """Container holding all Google API service wrappers.
+
+    All clients are lazily loaded on first access for performance.
+    """
 
     _creds: "Credentials"
-    _drive: DriveClient | None = None
-    _sheets: SheetsClient | None = None
-    _docs: DocsClient | None = None
-    _calendar: CalendarClient | None = None
-    _tasks: TasksClient | None = None
-    _gmail: GmailClient | None = None
-    _contacts: ContactsClient | None = None
-    _appscript: AppScriptClient | None = None
+
+    def _get_or_build(
+        self,
+        attr_name: str,
+        api_name: str,
+        version: str,
+        client_class: type,
+        needs_drive: bool = False,
+    ):
+        """Helper to lazily build and cache a client."""
+        cached = getattr(self, f"_{attr_name}", None)
+        if cached is None:
+            service = build(api_name, version, credentials=self._creds)
+            if needs_drive:
+                drive_service = build("drive", "v3", credentials=self._creds)
+                cached = client_class(service, drive=drive_service)
+            else:
+                cached = client_class(service)
+            object.__setattr__(self, f"_{attr_name}", cached)
+        return cached
 
     @property
     def drive(self) -> DriveClient:
-        if self._drive is None:
-            service = build("drive", "v3", credentials=self._creds)
-            self._drive = DriveClient(service)
-        return self._drive
+        return self._get_or_build("drive", "drive", "v3", DriveClient)
 
     @property
     def sheets(self) -> SheetsClient:
-        if self._sheets is None:
-            # Note: Sheets client needs the raw drive service for some operations
-            drive_service = build("drive", "v3", credentials=self._creds)
-            service = build("sheets", "v4", credentials=self._creds)
-            self._sheets = SheetsClient(service, drive=drive_service)
-        return self._sheets
+        return self._get_or_build(
+            "sheets", "sheets", "v4", SheetsClient, needs_drive=True
+        )
 
     @property
     def docs(self) -> DocsClient:
-        if self._docs is None:
-            drive_service = build("drive", "v3", credentials=self._creds)
-            service = build("docs", "v1", credentials=self._creds)
-            self._docs = DocsClient(service, drive=drive_service)
-        return self._docs
+        return self._get_or_build("docs", "docs", "v1", DocsClient, needs_drive=True)
 
     @property
     def calendar(self) -> CalendarClient:
-        if self._calendar is None:
-            service = build("calendar", "v3", credentials=self._creds)
-            self._calendar = CalendarClient(service)
-        return self._calendar
+        return self._get_or_build("calendar", "calendar", "v3", CalendarClient)
 
     @property
     def tasks(self) -> TasksClient:
-        if self._tasks is None:
-            service = build("tasks", "v1", credentials=self._creds)
-            self._tasks = TasksClient(service)
-        return self._tasks
+        return self._get_or_build("tasks", "tasks", "v1", TasksClient)
 
     @property
     def gmail(self) -> GmailClient:
-        if self._gmail is None:
-            service = build("gmail", "v1", credentials=self._creds)
-            self._gmail = GmailClient(service)
-        return self._gmail
+        return self._get_or_build("gmail", "gmail", "v1", GmailClient)
 
     @property
     def contacts(self) -> ContactsClient:
-        if self._contacts is None:
-            service = build("people", "v1", credentials=self._creds)
-            self._contacts = ContactsClient(service)
-        return self._contacts
+        return self._get_or_build("contacts", "people", "v1", ContactsClient)
 
     @property
     def appscript(self) -> AppScriptClient:
-        if self._appscript is None:
-            service = build("script", "v1", credentials=self._creds)
-            self._appscript = AppScriptClient(service)
-        return self._appscript
+        return self._get_or_build("appscript", "script", "v1", AppScriptClient)
 
 
 _DEFAULT_CLIENTS: Clients | None = None

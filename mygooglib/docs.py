@@ -10,12 +10,11 @@ import os
 from pathlib import Path
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.base import BaseClient
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 
+@api_call("Docs create", is_write=True)
 def create(docs: Any, title: str) -> str:
     """Create a new empty document.
 
@@ -26,15 +25,12 @@ def create(docs: Any, title: str) -> str:
     Returns:
         The new document's ID.
     """
-    try:
-        request = docs.documents().create(body={"title": title})
-        response = execute_with_retry_http_error(request, is_write=True)
-        return response["documentId"]
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs create")
-        raise
+    request = docs.documents().create(body={"title": title})
+    response = execute_with_retry_http_error(request, is_write=True)
+    return response["documentId"]
 
 
+@api_call("Docs get_text", is_write=False)
 def get_text(docs: Any, doc_id: str) -> str:
     """Get all plain text from a document.
 
@@ -45,23 +41,20 @@ def get_text(docs: Any, doc_id: str) -> str:
     Returns:
         Full plain text content of the document.
     """
-    try:
-        request = docs.documents().get(documentId=doc_id)
-        response = execute_with_retry_http_error(request, is_write=False)
+    request = docs.documents().get(documentId=doc_id)
+    response = execute_with_retry_http_error(request, is_write=False)
 
-        content = response.get("body", {}).get("content", [])
-        text_parts = []
-        for element in content:
-            if "paragraph" in element:
-                for part in element["paragraph"]["elements"]:
-                    if "textRun" in part:
-                        text_parts.append(part["textRun"]["content"])
-        return "".join(text_parts)
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs get_text")
-        raise
+    content = response.get("body", {}).get("content", [])
+    text_parts = []
+    for element in content:
+        if "paragraph" in element:
+            for part in element["paragraph"]["elements"]:
+                if "textRun" in part:
+                    text_parts.append(part["textRun"]["content"])
+    return "".join(text_parts)
 
 
+@api_call("Docs append_text", is_write=True)
 def append_text(docs: Any, doc_id: str, text: str) -> None:
     """Append text to the end of a document.
 
@@ -70,35 +63,32 @@ def append_text(docs: Any, doc_id: str, text: str) -> None:
         doc_id: Document ID
         text: Text to append
     """
-    try:
-        # Fetch current content to find the end index
-        request = docs.documents().get(documentId=doc_id, fields="body/content")
-        response = execute_with_retry_http_error(request, is_write=False)
-        content = response.get("body", {}).get("content", [])
+    # Fetch current content to find the end index
+    request = docs.documents().get(documentId=doc_id, fields="body/content")
+    response = execute_with_retry_http_error(request, is_write=False)
+    content = response.get("body", {}).get("content", [])
 
-        # The last element's endIndex (minus 1 for the trailing newline) is usually the end.
-        if not content:
-            end_index = 1
-        else:
-            end_index = content[-1]["endIndex"] - 1
+    # The last element's endIndex (minus 1 for the trailing newline) is usually the end.
+    if not content:
+        end_index = 1
+    else:
+        end_index = content[-1]["endIndex"] - 1
 
-        requests = [
-            {
-                "insertText": {
-                    "location": {"index": max(1, end_index)},
-                    "text": text,
-                }
+    requests = [
+        {
+            "insertText": {
+                "location": {"index": max(1, end_index)},
+                "text": text,
             }
-        ]
-        update_request = docs.documents().batchUpdate(
-            documentId=doc_id, body={"requests": requests}
-        )
-        execute_with_retry_http_error(update_request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs append_text")
-        raise
+        }
+    ]
+    update_request = docs.documents().batchUpdate(
+        documentId=doc_id, body={"requests": requests}
+    )
+    execute_with_retry_http_error(update_request, is_write=True)
 
 
+@api_call("Docs render_template", is_write=True)
 def render_template(
     docs: Any,
     template_id: str,
@@ -127,14 +117,10 @@ def render_template(
         raise ValueError("drive=clients.drive is required to copy the template.")
 
     # 1. Copy the template using Drive API
-    try:
-        copy_metadata = {"name": title} if title else {}
-        copy_request = drive.files().copy(fileId=template_id, body=copy_metadata)
-        new_doc = execute_with_retry_http_error(copy_request, is_write=True)
-        new_doc_id = new_doc["id"]
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs render_template (copy)")
-        raise
+    copy_metadata = {"name": title} if title else {}
+    copy_request = drive.files().copy(fileId=template_id, body=copy_metadata)
+    new_doc = execute_with_retry_http_error(copy_request, is_write=True)
+    new_doc_id = new_doc["id"]
 
     # 2. Perform find-and-replace using Docs API
     requests = []
@@ -154,14 +140,10 @@ def render_template(
     if not requests:
         return new_doc if raw else new_doc_id
 
-    try:
-        update_request = docs.documents().batchUpdate(
-            documentId=new_doc_id, body={"requests": requests}
-        )
-        response = execute_with_retry_http_error(update_request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs render_template (update)")
-        raise
+    update_request = docs.documents().batchUpdate(
+        documentId=new_doc_id, body={"requests": requests}
+    )
+    response = execute_with_retry_http_error(update_request, is_write=True)
 
     return response if raw else new_doc_id
 
@@ -188,6 +170,7 @@ def export_pdf(
     return download_file(drive, doc_id, dest_path, export_mime_type="application/pdf")
 
 
+@api_call("Docs insert_table", is_write=True)
 def insert_table(
     docs: Any,
     doc_id: str,
@@ -220,89 +203,84 @@ def insert_table(
     num_rows = len(all_rows)
     num_cols = max(len(row) for row in all_rows) if all_rows else 1
 
-    try:
-        # Get document to find insertion point
-        if index is None:
-            get_request = docs.documents().get(documentId=doc_id, fields="body/content")
-            response = execute_with_retry_http_error(get_request, is_write=False)
-            content = response.get("body", {}).get("content", [])
-            index = content[-1]["endIndex"] - 1 if content else 1
+    # Get document to find insertion point
+    if index is None:
+        get_request = docs.documents().get(documentId=doc_id, fields="body/content")
+        response = execute_with_retry_http_error(get_request, is_write=False)
+        content = response.get("body", {}).get("content", [])
+        index = content[-1]["endIndex"] - 1 if content else 1
 
-        # Create table structure
-        requests = [
-            {
-                "insertTable": {
-                    "rows": num_rows,
-                    "columns": num_cols,
-                    "location": {"index": max(1, index)},
-                }
+    # Create table structure
+    requests = [
+        {
+            "insertTable": {
+                "rows": num_rows,
+                "columns": num_cols,
+                "location": {"index": max(1, index)},
             }
-        ]
+        }
+    ]
 
-        # Insert table first
-        update_request = docs.documents().batchUpdate(
-            documentId=doc_id, body={"requests": requests}
-        )
-        execute_with_retry_http_error(update_request, is_write=True)
+    # Insert table first
+    update_request = docs.documents().batchUpdate(
+        documentId=doc_id, body={"requests": requests}
+    )
+    execute_with_retry_http_error(update_request, is_write=True)
 
-        # Now populate the cells (requires a fresh get to know table structure)
-        get_request = docs.documents().get(documentId=doc_id)
-        doc = execute_with_retry_http_error(get_request, is_write=False)
+    # Now populate the cells (requires a fresh get to know table structure)
+    get_request = docs.documents().get(documentId=doc_id)
+    doc = execute_with_retry_http_error(get_request, is_write=False)
 
-        # Find the table we just inserted and populate cells
-        content = doc.get("body", {}).get("content", [])
-        table_element = None
-        for element in content:
-            if "table" in element:
-                table_element = element
-                break
+    # Find the table we just inserted and populate cells
+    content = doc.get("body", {}).get("content", [])
+    table_element = None
+    for element in content:
+        if "table" in element:
+            table_element = element
+            break
 
-        if table_element and "table" in table_element:
-            table = table_element["table"]
-            cell_requests = []
+    if table_element and "table" in table_element:
+        table = table_element["table"]
+        cell_requests = []
 
-            for row_idx, row_data in enumerate(all_rows):
-                table_row = (
-                    table.get("tableRows", [])[row_idx]
-                    if row_idx < len(table.get("tableRows", []))
-                    else None
-                )
-                if not table_row:
+        for row_idx, row_data in enumerate(all_rows):
+            table_row = (
+                table.get("tableRows", [])[row_idx]
+                if row_idx < len(table.get("tableRows", []))
+                else None
+            )
+            if not table_row:
+                continue
+
+            for col_idx, cell_value in enumerate(row_data):
+                table_cells = table_row.get("tableCells", [])
+                if col_idx >= len(table_cells):
                     continue
 
-                for col_idx, cell_value in enumerate(row_data):
-                    table_cells = table_row.get("tableCells", [])
-                    if col_idx >= len(table_cells):
-                        continue
-
-                    cell = table_cells[col_idx]
-                    cell_content = cell.get("content", [])
-                    if cell_content:
-                        # Insert at the start of the cell's paragraph
-                        para = cell_content[0]
-                        start_index = para.get("startIndex", 1)
-                        cell_requests.append(
-                            {
-                                "insertText": {
-                                    "location": {"index": start_index},
-                                    "text": str(cell_value),
-                                }
+                cell = table_cells[col_idx]
+                cell_content = cell.get("content", [])
+                if cell_content:
+                    # Insert at the start of the cell's paragraph
+                    para = cell_content[0]
+                    start_index = para.get("startIndex", 1)
+                    cell_requests.append(
+                        {
+                            "insertText": {
+                                "location": {"index": start_index},
+                                "text": str(cell_value),
                             }
-                        )
+                        }
+                    )
 
-            if cell_requests:
-                # Reverse to maintain correct indices
-                cell_requests.reverse()
-                populate_request = docs.documents().batchUpdate(
-                    documentId=doc_id, body={"requests": cell_requests}
-                )
-                execute_with_retry_http_error(populate_request, is_write=True)
+        if cell_requests:
+            # Reverse to maintain correct indices
+            cell_requests.reverse()
+            populate_request = docs.documents().batchUpdate(
+                documentId=doc_id, body={"requests": cell_requests}
+            )
+            execute_with_retry_http_error(populate_request, is_write=True)
 
-        return num_rows
-
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs insert_table")
-        raise
+    return num_rows
 
 
 def render_list(
@@ -331,7 +309,7 @@ def render_list(
         return 0
 
     # Build the bulleted list text
-    list_text = "\n".join(f"{bullet}{item}" for item in items)
+    list_text = "\\n".join(f"{bullet}{item}" for item in items)
 
     # Replace the tag with the list
     find_replace(docs, doc_id, {tag: list_text})
@@ -339,6 +317,7 @@ def render_list(
     return len(items)
 
 
+@api_call("Docs find_replace", is_write=True)
 def find_replace(
     docs: Any,
     doc_id: str,
@@ -386,9 +365,6 @@ def find_replace(
                 total_replaced += reply["replaceAllText"].get("occurrencesChanged", 0)
         return total_replaced
 
-    except HttpError as e:
-        raise_for_http_error(e, context="Docs find_replace")
-        raise
     except Exception as e:
         # Check for empty response or other oddities
         if "replies" not in str(e):
@@ -396,12 +372,12 @@ def find_replace(
         return 0
 
 
-class DocsClient:
+class DocsClient(BaseClient):
     """Simplified Google Docs API wrapper focusing on common operations."""
 
     def __init__(self, service: Any, drive: Any | None = None):
         """Initialize with an authorized Docs API service object."""
-        self.service = service
+        super().__init__(service)
         self.drive = drive
 
     def render_template(

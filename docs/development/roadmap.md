@@ -24,6 +24,7 @@ This document tracks the progress of `mygooglib` and outlines future development
 - [x] **Idempotency Store**: SQLite-based duplicate prevention
 - [x] **CLI**: Full Typer-based interface with rich formatting
 - [x] **Cross-Service Workflows**: Sheets→Calendar, etc.
+- [x] **Desktop GUI**: PySide6-based native desktop application
 
 ---
 
@@ -33,6 +34,7 @@ This document tracks the progress of `mygooglib` and outlines future development
 - [x] **Docs v2**: `insert_table()` and `render_list()` for rich templates
 - [x] **Retry Tests**: Comprehensive unit tests for retry module
 - [x] **Examples**: New example scripts for contacts, batch ops, idempotency
+- [x] **PySide6 GUI**: Native desktop dashboard with dark theme
 
 ### Power User Features
 - [x] **Pandas Integration**: `to_dataframe()`/`from_dataframe()` for Sheets
@@ -50,7 +52,6 @@ This document tracks the progress of `mygooglib` and outlines future development
 ### Backlog
 - [ ] **Batch Email Send**: Send multiple emails efficiently
 - [ ] **Sheets Formulas**: Helper to build complex formulas
-- [ ] **Dashboard**: Streamlit-based web UI
 
 ---
 

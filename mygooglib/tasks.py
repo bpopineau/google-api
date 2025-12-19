@@ -9,13 +9,12 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.base import BaseClient
 from mygooglib.utils.datetime import to_rfc3339
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 
+@api_call("Tasks list_tasklists", is_write=False)
 def list_tasklists(
     tasks: Any,
     *,
@@ -32,16 +31,12 @@ def list_tasklists(
     Returns:
         List of task list dicts by default, or full response if raw=True.
     """
-    try:
-        request = tasks.tasklists().list(maxResults=max_results)
-        response = execute_with_retry_http_error(request, is_write=False)
-    except HttpError as e:
-        raise_for_http_error(e, context="Tasks list_tasklists")
-        raise
-
+    request = tasks.tasklists().list(maxResults=max_results)
+    response = execute_with_retry_http_error(request, is_write=False)
     return response if raw else response.get("items", [])
 
 
+@api_call("Tasks add_task", is_write=True)
 def add_task(
     tasks: Any,
     *,
@@ -68,19 +63,14 @@ def add_task(
     if notes:
         body["notes"] = notes
     if due:
-        # Tasks API expects RFC3339 timestamp for due date
         body["due"] = to_rfc3339(due)
 
-    try:
-        request = tasks.tasks().insert(tasklist=tasklist_id, body=body)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Tasks add_task")
-        raise
-
+    request = tasks.tasks().insert(tasklist=tasklist_id, body=body)
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else response.get("id")
 
 
+@api_call("Tasks list_tasks", is_write=False)
 def list_tasks(
     tasks: Any,
     *,
@@ -108,37 +98,31 @@ def list_tasks(
     all_items: list[dict[str, Any]] = []
     page_token: str | None = None
 
-    try:
-        while True:
-            request = tasks.tasks().list(
-                tasklist=tasklist_id,
-                showCompleted=show_completed,
-                showHidden=show_hidden,
-                maxResults=min(max_results - len(all_items), 100)
-                if max_results
-                else 100,
-                pageToken=page_token,
-            )
-            response = execute_with_retry_http_error(request, is_write=False)
-            items = response.get("items", [])
-            all_items.extend(items)
+    while True:
+        request = tasks.tasks().list(
+            tasklist=tasklist_id,
+            showCompleted=show_completed,
+            showHidden=show_hidden,
+            maxResults=min(max_results - len(all_items), 100) if max_results else 100,
+            pageToken=page_token,
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+        items = response.get("items", [])
+        all_items.extend(items)
 
-            if progress_callback:
-                progress_callback(len(items))
+        if progress_callback:
+            progress_callback(len(items))
 
-            page_token = response.get("nextPageToken")
-            if not page_token or (max_results and len(all_items) >= max_results):
-                break
-
-    except HttpError as e:
-        raise_for_http_error(e, context="Tasks list_tasks")
-        raise
+        page_token = response.get("nextPageToken")
+        if not page_token or (max_results and len(all_items) >= max_results):
+            break
 
     if raw:
         return {"items": all_items}
     return all_items
 
 
+@api_call("Tasks complete_task", is_write=True)
 def complete_task(
     tasks: Any,
     task_id: str,
@@ -147,20 +131,13 @@ def complete_task(
     raw: bool = False,
 ) -> dict | None:
     """Mark a task as completed."""
-    try:
-        # We must first get the task to have its current state,
-        # then update status to 'completed'.
-        # Actually, patch is better.
-        body = {"status": "completed"}
-        request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Tasks complete_task")
-        raise
-
+    body = {"status": "completed"}
+    request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else None
 
 
+@api_call("Tasks delete_task", is_write=True)
 def delete_task(
     tasks: Any,
     task_id: str,
@@ -168,20 +145,12 @@ def delete_task(
     tasklist_id: str = "@default",
 ) -> None:
     """Delete a task from a task list."""
-    try:
-        request = tasks.tasks().delete(tasklist=tasklist_id, task=task_id)
-        execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Tasks delete_task")
-        raise
+    request = tasks.tasks().delete(tasklist=tasklist_id, task=task_id)
+    execute_with_retry_http_error(request, is_write=True)
 
 
-class TasksClient:
+class TasksClient(BaseClient):
     """Simplified Google Tasks API wrapper focusing on common operations."""
-
-    def __init__(self, service: Any):
-        """Initialize with an authorized Tasks API service object."""
-        self.service = service
 
     def list_tasklists(
         self, *, max_results: int = 100, raw: bool = False

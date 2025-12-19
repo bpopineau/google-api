@@ -31,9 +31,8 @@ data = [
     "pandas>=2.0",
 ]
 
-dashboard = [
-    "streamlit>=1.30",
-    "watchdog",
+gui = [
+    "PySide6>=6.6",
 ]
 
 [project.scripts]
@@ -58,6 +57,3 @@ ignore_missing_imports = true
 module = "pandas.*"
 ignore_missing_imports = true
 
-[[tool.mypy.overrides]]
-module = "streamlit.*"
-ignore_missing_imports = true

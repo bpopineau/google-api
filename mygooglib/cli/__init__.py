@@ -23,11 +23,11 @@ from . import appscript as appscript_cmd
 from . import auth as auth_cmd
 from . import calendar as calendar_cmd
 from . import contacts as contacts_cmd
-from . import dashboard as dashboard_cmd
 from . import dev as dev_cmd
 from . import docs as docs_cmd
 from . import drive as drive_cmd
 from . import gmail as gmail_cmd
+from . import gui as gui_cmd
 from . import sheets as sheets_cmd
 from . import tasks as tasks_cmd
 from . import workflows as workflows_cmd
@@ -44,11 +44,11 @@ app.add_typer(appscript_cmd.app, name="appscript")
 app.add_typer(auth_cmd.app, name="auth")
 app.add_typer(calendar_cmd.app, name="calendar")
 app.add_typer(contacts_cmd.app, name="contacts")
-app.add_typer(dashboard_cmd.app, name="dashboard")
 app.add_typer(dev_cmd.app, name="dev")
 app.add_typer(docs_cmd.app, name="docs")
 app.add_typer(drive_cmd.app, name="drive")
 app.add_typer(gmail_cmd.app, name="gmail")
+app.add_typer(gui_cmd.app, name="gui")
 app.add_typer(sheets_cmd.app, name="sheets")
 app.add_typer(tasks_cmd.app, name="tasks")
 app.add_typer(workflows_cmd.app, name="workflows")
@@ -113,7 +113,7 @@ def version_cmd(ctx: typer.Context) -> None:
     state = CliState.from_ctx(ctx)
     # In a real package, we'd use importlib.metadata.version("mygooglib")
     # For this local dev setup, we'll just hardcode it or read from pyproject.toml
-    version = "0.2.0"
+    version = "0.6.0"
     if state.json:
         state.console.print(format_output({"version": version}, json_mode=True))
     else:

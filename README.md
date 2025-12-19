@@ -26,6 +26,7 @@ mygoog --help
 Install optional features:
 ```bash
 pip install -e ".[cli,data]"  # Adds Pandas support for Sheets
+pip install -e ".[gui]"       # PySide6 Desktop GUI
 ```
 
 ---

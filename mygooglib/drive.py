@@ -7,12 +7,11 @@ import os
 from pathlib import Path
 from typing import Any
 
-from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
-from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.base import BaseClient
 from mygooglib.utils.logging import get_logger
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 # Google Workspace MIME types
 FOLDER_MIME_TYPE = "application/vnd.google-apps.folder"
@@ -24,6 +23,7 @@ GOOGLE_SLIDES_MIME = "application/vnd.google-apps.presentation"
 DEFAULT_FIELDS = "id, name, mimeType, modifiedTime, size, parents"
 
 
+@api_call("Drive list_files", is_write=False)
 def list_files(
     drive: Any,
     *,
@@ -66,35 +66,31 @@ def list_files(
     all_files: list[dict] = []
     page_token: str | None = None
 
-    try:
-        while True:
-            # If we have max_results, don't ask for more than we need in this page
-            current_page_size = page_size
-            if max_results is not None:
-                remaining = max_results - len(all_files)
-                if remaining <= 0:
-                    break
-                current_page_size = min(page_size, remaining)
-
-            request = drive.files().list(
-                q=q,
-                pageSize=current_page_size,
-                pageToken=page_token,
-                fields=f"nextPageToken, files({fields})",
-            )
-            response = execute_with_retry_http_error(request, is_write=False)
-            files = response.get("files", [])
-            all_files.extend(files)
-
-            page_token = response.get("nextPageToken")
-            if not page_token:
+    while True:
+        # If we have max_results, don't ask for more than we need in this page
+        current_page_size = page_size
+        if max_results is not None:
+            remaining = max_results - len(all_files)
+            if remaining <= 0:
                 break
+            current_page_size = min(page_size, remaining)
 
-            if max_results is not None and len(all_files) >= max_results:
-                break
+        request = drive.files().list(
+            q=q,
+            pageSize=current_page_size,
+            pageToken=page_token,
+            fields=f"nextPageToken, files({fields})",
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+        files = response.get("files", [])
+        all_files.extend(files)
 
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive list_files")
+        page_token = response.get("nextPageToken")
+        if not page_token:
+            break
+
+        if max_results is not None and len(all_files) >= max_results:
+            break
 
     # Final slice just in case the API returned more than pageSize
     return all_files[:max_results] if max_results is not None else all_files
@@ -129,6 +125,7 @@ def find_by_name(
     return results[0] if results else None
 
 
+@api_call("Drive create_folder", is_write=True)
 def create_folder(
     drive: Any,
     name: str,
@@ -153,13 +150,9 @@ def create_folder(
     if parent_id:
         metadata["parents"] = [parent_id]
 
-    try:
-        request = drive.files().create(body=metadata, fields="id")
-        folder = execute_with_retry_http_error(request, is_write=True)
-        return folder if raw else folder["id"]
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive create_folder")
-        raise  # unreachable but satisfies type checker
+    request = drive.files().create(body=metadata, fields="id")
+    folder = execute_with_retry_http_error(request, is_write=True)
+    return folder if raw else folder["id"]
 
 
 def resolve_path(
@@ -221,6 +214,7 @@ def resolve_path(
     return current_meta
 
 
+@api_call("Drive upload_file", is_write=True)
 def upload_file(
     drive: Any,
     local_path: str | os.PathLike,
@@ -259,25 +253,22 @@ def upload_file(
 
     media = MediaFileUpload(str(path), mimetype=detected_mime, resumable=True)
 
-    try:
-        request = drive.files().create(body=metadata, media_body=media, fields="id")
+    request = drive.files().create(body=metadata, media_body=media, fields="id")
 
-        if progress_callback:
-            response = None
-            while response is None:
-                status, response = request.next_chunk()
-                if status:
-                    progress_callback(status.resumable_progress, status.total_size)
-            result = response
-        else:
-            result = execute_with_retry_http_error(request, is_write=True)
+    if progress_callback:
+        response = None
+        while response is None:
+            status, response = request.next_chunk()
+            if status:
+                progress_callback(status.resumable_progress, status.total_size)
+        result = response
+    else:
+        result = execute_with_retry_http_error(request, is_write=True)
 
-        return result if raw else result["id"]
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive upload_file")
-        raise  # unreachable but satisfies type checker
+    return result if raw else result["id"]
 
 
+@api_call("Drive download_file", is_write=False)
 def download_file(
     drive: Any,
     file_id: str,
@@ -303,45 +294,40 @@ def download_file(
     dest = Path(dest_path)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    try:
-        # Get file metadata to check if it's a Google Workspace file
-        meta_request = drive.files().get(fileId=file_id, fields="mimeType, name, size")
-        meta = execute_with_retry_http_error(meta_request, is_write=False)
-        file_mime = meta.get("mimeType", "")
-        total_size = int(meta.get("size", 0))
+    # Get file metadata to check if it's a Google Workspace file
+    meta_request = drive.files().get(fileId=file_id, fields="mimeType, name, size")
+    meta = execute_with_retry_http_error(meta_request, is_write=False)
+    file_mime = meta.get("mimeType", "")
+    total_size = int(meta.get("size", 0))
 
-        is_workspace_file = file_mime.startswith("application/vnd.google-apps.")
+    is_workspace_file = file_mime.startswith("application/vnd.google-apps.")
 
-        if is_workspace_file:
-            if not export_mime_type:
-                raise ValueError(
-                    f"File '{meta.get('name')}' is a Google Workspace file ({file_mime}). "
-                    "Specify export_mime_type (e.g., 'application/pdf', 'text/csv')."
-                )
-            request = drive.files().export_media(
-                fileId=file_id, mimeType=export_mime_type
+    if is_workspace_file:
+        if not export_mime_type:
+            raise ValueError(
+                f"File '{meta.get('name')}' is a Google Workspace file ({file_mime}). "
+                "Specify export_mime_type (e.g., 'application/pdf', 'text/csv')."
             )
-        else:
-            request = drive.files().get_media(fileId=file_id)
+        request = drive.files().export_media(fileId=file_id, mimeType=export_mime_type)
+    else:
+        request = drive.files().get_media(fileId=file_id)
 
-        with open(dest, "wb") as f:
-            downloader = MediaIoBaseDownload(f, request)
-            done = False
-            while not done:
-                status, done = downloader.next_chunk()
-                if progress_callback and status:
-                    # For exports, total_size might be 0 or unknown from metadata
-                    # but status.total_size might be available.
-                    progress_callback(
-                        status.resumable_progress, status.total_size or total_size
-                    )
-
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive download_file")
+    with open(dest, "wb") as f:
+        downloader = MediaIoBaseDownload(f, request)
+        done = False
+        while not done:
+            status, done = downloader.next_chunk()
+            if progress_callback and status:
+                # For exports, total_size might be 0 or unknown from metadata
+                # but status.total_size might be available.
+                progress_callback(
+                    status.resumable_progress, status.total_size or total_size
+                )
 
     return dest
 
 
+@api_call("Drive delete_file", is_write=True)
 def delete_file(
     drive: Any,
     file_id: str,
@@ -355,16 +341,14 @@ def delete_file(
         file_id: ID of file to delete
         permanent: If True, delete permanently. If False (default), move to trash.
     """
-    try:
-        if permanent:
-            request = drive.files().delete(fileId=file_id)
-        else:
-            request = drive.files().update(fileId=file_id, body={"trashed": True})
-        execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive delete_file")
+    if permanent:
+        request = drive.files().delete(fileId=file_id)
+    else:
+        request = drive.files().update(fileId=file_id, body={"trashed": True})
+    execute_with_retry_http_error(request, is_write=True)
 
 
+@api_call("Drive _update_file", is_write=True)
 def _update_file(
     drive: Any,
     file_id: str,
@@ -392,13 +376,9 @@ def _update_file(
     )
     media = MediaFileUpload(str(local_path), mimetype=detected_mime, resumable=True)
 
-    try:
-        request = drive.files().update(fileId=file_id, media_body=media, fields="id")
-        result = execute_with_retry_http_error(request, is_write=True)
-        return result["id"]
-    except HttpError as e:
-        raise_for_http_error(e, context="Drive _update_file")
-        raise  # unreachable but satisfies type checker
+    request = drive.files().update(fileId=file_id, media_body=media, fields="id")
+    result = execute_with_retry_http_error(request, is_write=True)
+    return result["id"]
 
 
 def sync_folder(
@@ -549,12 +529,8 @@ def sync_folder(
     }
 
 
-class DriveClient:
+class DriveClient(BaseClient):
     """Simplified Google Drive API wrapper focusing on common operations."""
-
-    def __init__(self, service: Any):
-        """Initialize with an authorized Drive API service object."""
-        self.service = service
 
     def list_files(
         self,

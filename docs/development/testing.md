@@ -69,3 +69,9 @@ Sync a local folder into a Drive folder:
 ```bash
 python scripts/smoke_test.py drive-sync --local-path "C:\path\to\folder" --drive-folder-id "<FOLDER_ID>"
 ```
+
+### Desktop GUI
+Verify the application launches and renders (requires display):
+```bash
+mygoog gui run
+```

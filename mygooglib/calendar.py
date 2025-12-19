@@ -9,13 +9,12 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any
 
-from googleapiclient.errors import HttpError
-
-from mygooglib.exceptions import raise_for_http_error
+from mygooglib.utils.base import BaseClient
 from mygooglib.utils.datetime import from_rfc3339, to_rfc3339
-from mygooglib.utils.retry import execute_with_retry_http_error
+from mygooglib.utils.retry import api_call, execute_with_retry_http_error
 
 
+@api_call("Calendar add_event", is_write=True)
 def add_event(
     calendar: Any,
     *,
@@ -54,22 +53,17 @@ def add_event(
     if end is None:
         if duration_minutes is not None:
             if is_all_day:
-                # For all-day, duration doesn't make much sense in minutes,
-                # but we'll treat it as days if it's a multiple of 1440.
                 days = max(1, duration_minutes // 1440)
                 end = start + dt.timedelta(days=days)
             else:
                 end = start + dt.timedelta(minutes=duration_minutes)
         else:
-            # Default 1 hour or 1 day
             if is_all_day:
                 end = start + dt.timedelta(days=1)
             else:
                 end = start + dt.timedelta(hours=1)
 
-    event: dict[str, Any] = {
-        "summary": summary,
-    }
+    event: dict[str, Any] = {"summary": summary}
     if description:
         event["description"] = description
     if location:
@@ -82,16 +76,12 @@ def add_event(
         event["start"] = {"dateTime": to_rfc3339(start)}
         event["end"] = {"dateTime": to_rfc3339(end)}
 
-    try:
-        request = calendar.events().insert(calendarId=calendar_id, body=event)
-        response = execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Calendar add_event")
-        raise
-
+    request = calendar.events().insert(calendarId=calendar_id, body=event)
+    response = execute_with_retry_http_error(request, is_write=True)
     return response if raw else response.get("id")
 
 
+@api_call("Calendar list_events", is_write=False)
 def list_events(
     calendar: Any,
     *,
@@ -119,39 +109,33 @@ def list_events(
     all_items: list[dict] = []
     page_token = None
 
-    try:
-        while True:
-            request = calendar.events().list(
-                calendarId=calendar_id,
-                timeMin=to_rfc3339(time_min) if time_min else None,
-                timeMax=to_rfc3339(time_max) if time_max else None,
-                maxResults=min(max_results - len(all_items), 2500)
-                if max_results
-                else 2500,
-                singleEvents=True,
-                orderBy="startTime",
-                pageToken=page_token,
-            )
-            response = execute_with_retry_http_error(request, is_write=False)
-            items = response.get("items", [])
-            all_items.extend(items)
+    while True:
+        request = calendar.events().list(
+            calendarId=calendar_id,
+            timeMin=to_rfc3339(time_min) if time_min else None,
+            timeMax=to_rfc3339(time_max) if time_max else None,
+            maxResults=min(max_results - len(all_items), 2500) if max_results else 2500,
+            singleEvents=True,
+            orderBy="startTime",
+            pageToken=page_token,
+        )
+        response = execute_with_retry_http_error(request, is_write=False)
+        items = response.get("items", [])
+        all_items.extend(items)
 
-            if progress_callback:
-                progress_callback(len(items))
+        if progress_callback:
+            progress_callback(len(items))
 
-            page_token = response.get("nextPageToken")
-            if not page_token or (max_results and len(all_items) >= max_results):
-                break
-
-    except HttpError as e:
-        raise_for_http_error(e, context="Calendar list_events")
-        raise
+        page_token = response.get("nextPageToken")
+        if not page_token or (max_results and len(all_items) >= max_results):
+            break
 
     if raw:
         return {"items": all_items}
     return all_items
 
 
+@api_call("Calendar delete_event", is_write=True)
 def delete_event(
     calendar: Any,
     event_id: str,
@@ -159,20 +143,12 @@ def delete_event(
     calendar_id: str = "primary",
 ) -> None:
     """Delete an event from a Google Calendar."""
-    try:
-        request = calendar.events().delete(calendarId=calendar_id, eventId=event_id)
-        execute_with_retry_http_error(request, is_write=True)
-    except HttpError as e:
-        raise_for_http_error(e, context="Calendar delete_event")
-        raise
+    request = calendar.events().delete(calendarId=calendar_id, eventId=event_id)
+    execute_with_retry_http_error(request, is_write=True)
 
 
-class CalendarClient:
+class CalendarClient(BaseClient):
     """Simplified Google Calendar API wrapper focusing on common operations."""
-
-    def __init__(self, service: Any):
-        """Initialize with an authorized Calendar API service object."""
-        self.service = service
 
     def add_event(
         self,

@@ -3,7 +3,8 @@
 ## 0.6.0 — 2025-12-19
 
 ### Added
-- **Docs v2**: `insert_table()` for inserting tables from data, `render_list()` for replacing tags with bulleted lists.
+- **PySide6 GUI**: Native desktop dashboard with dark theme (`mygoog gui`).
+- **Docs v2**: `insert_table()` and `insert_list()` for rich templates.
 - **Retry Tests**: Comprehensive unit test coverage for `mygooglib/utils/retry.py` (13 tests).
 - **Example Scripts**: New examples for Contacts, Sheets batch operations, and idempotent email.
 - **Apps Script Bridge** (scaffolding): `mygooglib/appscript.py` module for future use.
