@@ -29,6 +29,7 @@ from mygooglib.gui.workers import ApiWorker
 
 if TYPE_CHECKING:
     from mygooglib.client import Clients
+    from mygooglib.gui.widgets.activity import ActivityModel
 
 
 class ComposeDialog(QDialog):
@@ -79,9 +80,10 @@ class ComposeDialog(QDialog):
 class GmailPage(QWidget):
     """Gmail inbox viewer and composer."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None) -> None:
+    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
         super().__init__(parent)
         self.clients = clients
+        self.activity_model = activity_model
         self._workers: list[ApiWorker] = []
         self._messages: list[dict] = []
         self._current_query: str = "in:inbox"

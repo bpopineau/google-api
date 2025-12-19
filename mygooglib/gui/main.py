@@ -22,6 +22,7 @@ from mygooglib.config import AppConfig
 from mygooglib.gui.pages.settings import SettingsPage
 from mygooglib.gui.styles import STYLESHEET
 from mygooglib.gui.widgets.sidebar import Sidebar
+from mygooglib.gui.widgets.activity import ActivityModel, ActivityWidget
 
 if TYPE_CHECKING:
     from mygooglib.client import Clients
@@ -93,6 +94,13 @@ class MainWindow(QMainWindow):
         self.stack.setObjectName("content")
         layout.addWidget(self.stack)
 
+        # Activity Dashboard (Right Sidebar)
+        self.activity_model = ActivityModel(self)
+        self.activity_widget = ActivityWidget(self.activity_model)
+        self.activity_widget.setFixedWidth(250)
+        self.activity_widget.setStyleSheet("border-left: 1px solid #3d444d; background-color: #161b22;")
+        layout.addWidget(self.activity_widget)
+
         # If we have clients, load pages. If not, show loading/auth placeholder.
         if self.clients:
             self._init_authenticated_state()
@@ -135,12 +143,12 @@ class MainWindow(QMainWindow):
         from mygooglib.gui.pages.sheets import SheetsPage
         from mygooglib.gui.pages.tasks import TasksPage
 
-        self._pages["home"] = HomePage(self.clients)
-        self._pages["drive"] = DrivePage(self.clients)
-        self._pages["gmail"] = GmailPage(self.clients)
-        self._pages["tasks"] = TasksPage(self.clients)
-        self._pages["calendar"] = CalendarPage(self.clients)
-        self._pages["sheets"] = SheetsPage(self.clients)
+        self._pages["home"] = HomePage(self.clients, activity_model=self.activity_model)
+        self._pages["drive"] = DrivePage(self.clients, activity_model=self.activity_model)
+        self._pages["gmail"] = GmailPage(self.clients, activity_model=self.activity_model)
+        self._pages["tasks"] = TasksPage(self.clients, activity_model=self.activity_model)
+        self._pages["calendar"] = CalendarPage(self.clients, activity_model=self.activity_model)
+        self._pages["sheets"] = SheetsPage(self.clients, activity_model=self.activity_model)
         self._pages["settings"] = self._create_settings_page()
 
         for page in self._pages.values():

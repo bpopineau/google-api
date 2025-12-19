@@ -10,7 +10,7 @@
 - [x] Task: Conductor - User Manual Verification 'Backend Foundation' (Protocol in workflow.md)
 
 ## Phase 2: GUI Implementation - Activity Dashboard
-- [ ] Task: Create `ActivityModel` and `ActivityWidget` in `mygooglib.gui.widgets`.
+- [~] Task: Create `ActivityModel` and `ActivityWidget` in `mygooglib.gui.widgets`.
     - [ ] Subtask: Design the `ActivityModel` (QAbstractListModel) to store task status.
     - [ ] Subtask: Implement `ActivityWidget` to display the list of activities with icons.
 - [ ] Task: Integrate `ActivityWidget` into the main application layout.

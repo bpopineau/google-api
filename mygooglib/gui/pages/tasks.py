@@ -23,14 +23,16 @@ from mygooglib.gui.workers import ApiWorker
 
 if TYPE_CHECKING:
     from mygooglib.client import Clients
+    from mygooglib.gui.widgets.activity import ActivityModel
 
 
 class TasksPage(QWidget):
     """Google Tasks manager."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None) -> None:
+    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
         super().__init__(parent)
         self.clients = clients
+        self.activity_model = activity_model
         self._workers: list[ApiWorker] = []
         self._tasks: list[dict] = []
         self._task_list_id: str = "@default"

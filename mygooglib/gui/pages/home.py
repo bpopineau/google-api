@@ -24,14 +24,16 @@ from mygooglib.gui.workers import ApiWorker
 
 if TYPE_CHECKING:
     from mygooglib.client import Clients
+    from mygooglib.gui.widgets.activity import ActivityModel
 
 
 class HomePage(QScrollArea):
     """Dashboard home page with Global Search."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None) -> None:
+    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
         super().__init__(parent)
         self.clients = clients
+        self.activity_model = activity_model
         self._workers: list[ApiWorker] = []
         self._setup_ui()
         self._load_dashboard_data()

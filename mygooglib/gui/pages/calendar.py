@@ -31,6 +31,7 @@ from mygooglib.gui.workers import ApiWorker
 
 if TYPE_CHECKING:
     from mygooglib.client import Clients
+    from mygooglib.gui.widgets.activity import ActivityModel
 
 
 class AddEventDialog(QDialog):
@@ -164,9 +165,10 @@ class EventCard(QFrame):
 class CalendarPage(QWidget):
     """Google Calendar with visual calendar view."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None) -> None:
+    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
         super().__init__(parent)
         self.clients = clients
+        self.activity_model = activity_model
         self._workers: list[ApiWorker] = []
         self._events: list[dict] = []
         self._events_by_date: dict[str, list[dict]] = {}
@@ -340,7 +342,7 @@ class CalendarPage(QWidget):
     def _update_calendar_highlights(self) -> None:
         """Highlight dates that have events."""
         # Reset all dates to default format
-        default_format = QTextCharFormat()
+        QTextCharFormat()
 
         # Highlight format for dates with events
         event_format = QTextCharFormat()
