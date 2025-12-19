@@ -73,6 +73,10 @@ class DrivePage(QWidget):
         upload_btn.clicked.connect(self._on_upload)
         toolbar.addWidget(upload_btn)
 
+        sync_btn = QPushButton("🔄 Sync Folder")
+        sync_btn.clicked.connect(self._on_sync_folder)
+        toolbar.addWidget(sync_btn)
+
         refresh_btn = QPushButton("🔄 Refresh")
         refresh_btn.clicked.connect(self._load_root)
         toolbar.addWidget(refresh_btn)
@@ -293,3 +297,62 @@ class DrivePage(QWidget):
         """Handle folder creation completion."""
         self.status.setText(f"Created folder: {name}")
         self._load_root()
+
+    def _on_sync_folder(self) -> None:
+        """Handle sync folder to sheets action."""
+        if not self.activity_model:
+            QMessageBox.warning(self, "Activity Error", "Activity model not initialized")
+            return
+
+        # 1. Select local folder
+        directory = QFileDialog.getExistingDirectory(self, "Select Folder to Sync")
+        if not directory:
+            return
+
+        # 2. Select target spreadsheet (simple implementation: ask for ID or use title)
+        # For a better UX, we could list sheets, but for now let's ask for ID or title
+        spreadsheet_id, ok = QInputDialog.getText(
+            self, "Target Spreadsheet", "Enter Spreadsheet ID or Title:", text="Metadata Sync"
+        )
+        if not ok or not spreadsheet_id.strip():
+            return
+        
+        spreadsheet_id = spreadsheet_id.strip()
+
+        # 3. Start worker
+        from uuid import uuid4
+        from mygooglib.gui.workers import SyncWorker
+        from mygooglib.gui.widgets.activity import ActivityItem, ActivityStatus
+
+        activity_id = str(uuid4())
+        activity = ActivityItem(
+            id=activity_id,
+            title=f"Sync: {Path(directory).name}",
+            details="Initializing..."
+        )
+        self.activity_model.add_activity(activity)
+
+        worker = SyncWorker(self.clients, directory, spreadsheet_id, "Sheet1")
+        
+        def on_scan():
+            self.activity_model.update_status(activity_id, ActivityStatus.RUNNING, "Scanning files...")
+        
+        def on_upload(count):
+            self.activity_model.update_status(activity_id, ActivityStatus.RUNNING, f"Uploading {count} files...")
+        
+        def on_finished(result):
+            rows = result.get("updatedRows", 0)
+            self.activity_model.update_status(activity_id, ActivityStatus.SUCCESS, f"Synced {rows} rows")
+            self.status.setText(f"Sync complete: {rows} rows")
+
+        def on_error(err):
+            self.activity_model.update_status(activity_id, ActivityStatus.ERROR, err)
+            QMessageBox.critical(self, "Sync Error", f"Sync failed:\n\n{err}")
+
+        worker.started_scan.connect(on_scan)
+        worker.started_upload.connect(on_upload)
+        worker.finished.connect(on_finished)
+        worker.error.connect(on_error)
+        
+        self._workers.append(worker)
+        worker.start()
