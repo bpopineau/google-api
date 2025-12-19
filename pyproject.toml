@@ -36,7 +36,7 @@ gui = [
 ]
 
 [project.scripts]
-mygoog = "mygooglib.cli:main"
+mygoog = "mygooglib.app:main"
 
 [tool.setuptools.packages.find]
 include = ["mygooglib*"]

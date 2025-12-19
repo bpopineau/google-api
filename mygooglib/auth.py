@@ -114,3 +114,16 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     logger.info("Saved new token to %s", token_path)
 
     return new_creds  # type: ignore[return-value]
+
+
+def verify_creds_exist() -> bool:
+    """Check if valid or refreshable credentials likely exist.
+
+    This is a fast, non-blocking check suitable for GUI startup detection.
+    It does NOT attempt to refresh tokens or verify against the API.
+
+    Returns:
+        True if token.json exists, False otherwise.
+    """
+    _, token_path = _get_paths()
+    return token_path.exists()
