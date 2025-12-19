@@ -11,6 +11,7 @@ from mygooglib.gmail import (
     archive_message,
     get_message,
     mark_read,
+    save_attachments,
     search_messages,
     send_email,
     trash_message,
@@ -238,3 +239,58 @@ def view_cmd(
     state.console.rule()
     state.console.print(msg.get("body") or "[italic]No plain text body found.[/italic]")
     state.console.rule()
+
+
+@app.command("save-attachments")
+def save_attachments_cmd(
+    ctx: typer.Context,
+    query: str = typer.Argument(
+        ..., help='Gmail query, e.g. "has:attachment from:invoices@"'
+    ),
+    dest: Path = typer.Option(
+        ...,
+        "--dest",
+        "-d",
+        help="Destination folder for attachments.",
+        file_okay=False,
+        dir_okay=True,
+    ),
+    max_messages: int = typer.Option(50, "--max", min=1, max=500),
+    filename_filter: str = typer.Option(
+        None, "--filter", "-f", help="Only save files containing this substring."
+    ),
+) -> None:
+    """Save attachments from messages matching a query."""
+    state = CliState.from_ctx(ctx)
+    clients = get_clients()
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=state.console,
+    ) as progress:
+        task = progress.add_task("Saving attachments...", total=None)
+
+        def _cb(saved, msg_idx, total):
+            progress.update(
+                task, description=f"Saved {saved} files ({msg_idx}/{total} messages)"
+            )
+
+        saved_files = save_attachments(
+            clients.gmail.service,
+            query,
+            dest,
+            max_messages=max_messages,
+            filename_filter=filename_filter,
+            progress_callback=_cb,
+        )
+
+    if state.json:
+        state.console.print(
+            format_output({"saved": [str(f) for f in saved_files]}, json_mode=True)
+        )
+        return
+
+    print_success(state.console, f"Saved {len(saved_files)} attachments")
+    for f in saved_files:
+        print_kv(state.console, "File", str(f))

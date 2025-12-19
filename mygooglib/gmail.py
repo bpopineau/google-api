@@ -661,3 +661,39 @@ class GmailClient:
             user_id=user_id,
             raw=raw,
         )
+
+    def get_attachment(
+        self,
+        message_id: str,
+        attachment_id: str,
+        *,
+        user_id: str = "me",
+    ) -> bytes:
+        """Download a single attachment by ID."""
+        return get_attachment(
+            self.service,
+            message_id,
+            attachment_id,
+            user_id=user_id,
+        )
+
+    def save_attachments(
+        self,
+        query: str,
+        dest_folder: str | Path,
+        *,
+        user_id: str = "me",
+        max_messages: int = 50,
+        filename_filter: str | None = None,
+        progress_callback: Any | None = None,
+    ) -> list[Path]:
+        """Save all attachments from messages matching a query to a folder."""
+        return save_attachments(
+            self.service,
+            query,
+            dest_folder,
+            user_id=user_id,
+            max_messages=max_messages,
+            filename_filter=filename_filter,
+            progress_callback=progress_callback,
+        )

@@ -1,5 +1,12 @@
 # Changelog
  
+## 0.5.0 — 2025-12-19
+
+### Added
+- **Sheets Batch Context Manager**: `BatchUpdater` class for ergonomic bulk updates via `with client.batch(spreadsheet_id) as batch: ...`.
+- **Gmail Attachments**: `get_attachment()` and `save_attachments()` functions for downloading attachments from search results.
+- **Gmail CLI**: `mygoog gmail save-attachments --query "..." --dest ./folder/` command.
+
 ## 0.4.0 — 2025-12-18
 
 ### Added
