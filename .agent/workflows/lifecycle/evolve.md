@@ -4,8 +4,18 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
 
 # evolve.md 
 
+## 0. PRE-FLIGHT
+1.  **Check Environment**:
+    - Ensure your virtual environment is activated (`.venv`).
+    - Run `where python` (Windows) or `which python` (Linux/Mac) to verify.
+
 ## 1. PLAN
-1.  **Initialize `task.md`**: Create a new task file with the structure below:
+1.  **Context Gathering**:
+    - **Identify Goal**: Ask the user: "Do you have a specific goal, or should I propose features/ideas?"
+        - *No Goal?* Suggest running `@[/ideate_innovations]` or `@[/propose_features]`.
+        - *Have Goal?* Suggest running `@[/plan_feature]` to create a rigorous implementation plan.
+    - **Codebase Review**: **MANDATORY**. Review relevant files (`list_dir`, `view_file_outline`) *before* commiting to a plan.
+2.  **Initialize `task.md`**: Create a new task file with the structure below:
 
 ### `task.md` Template
 ```markdown
@@ -27,11 +37,11 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
     - [ ] Commit & Push
 ```
 
-2.  **Break down the work**:
+3.  **Break down the work**:
     - Add specific **implementation steps** under the `BUILD` section in `task.md`.
     - List the specific files you intend to modify.
-3.  **Brief the User**: Summarize the plan in chat (Goal, Changes, Verification).
-4.  **Get Approval**: **STOP**. Do not proceed to BUILD until the user explicitly approves the plan.
+4.  **Brief the User**: Summarize the plan in chat (Goal, Changes, Verification).
+5.  **Get Approval**: **STOP**. Do not proceed to BUILD until the user explicitly approves the plan.
 
 ## 2. BUILD
 1.  **Execute the plan**: Work through the checklist in `task.md`.
@@ -51,15 +61,18 @@ description: "This workflow enforces a simple 3-phase cycle: **PLAN**, **BUILD**
 // turbo
 Run `python scripts/smoke_test.py` (or relevant service script) to verify end-to-end behavior on the real API.
 2.  **Documentation** (Mandatory):
-    - **Docstrings**: Ensure new code has Google-style docstrings. Check every function you have added or changed and manually ensure they have docstrings.
+    - **Docstrings**: Ensure new code has Google-style docstrings.
+    - **Workflows**: Consider running `@[/update_docs]` if significant changes were made.
     - **README**: Add new features to the main list. 
     - **Guides**: Update or create files in `docs/` if workflows change.
 3.  **Changelog**: Add a concise entry to `CHANGELOG.md`.
 4.  **Release** (Ask the user if they want to do this step):
+    - Consider running `@[/release_prep]` if this is a named release.
     - Bump version in `pyproject.toml` if this is a named release.
 5.  **Commit**: 
+    - **Check Status**: Run `git status` to see exactly what will be added.
 // turbo
-run `git add .` and `git commit -m "type: description"`
+    - Run `git add .` and `git commit -m "type: description"`
 6.  **Push**: 
 // turbo
 run `git push`
