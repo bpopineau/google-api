@@ -4,9 +4,9 @@
 - [x] Task: Create `FileScanner` utility in `mygooglib.utils` to extract metadata (name, path, modified date). [713becf]
     - [ ] Subtask: Write unit tests for `FileScanner` covering standard files and edge cases (empty folders, permission errors).
     - [ ] Subtask: Implement `FileScanner` class.
-- [ ] Task: Extend `mygooglib.sheets` with `batch_write` capability.
-    - [ ] Subtask: Write integration tests for `batch_write` using a mock or test Sheet.
-    - [ ] Subtask: Implement `batch_write` method to accept a list of headers and rows.
+- [x] Task: Extend `mygooglib.sheets` with `batch_write` capability. [d2c1968]
+    - [x] Subtask: Write integration tests for `batch_write` using a mock or test Sheet.
+    - [x] Subtask: Implement `batch_write` method to accept a list of headers and rows.
 - [ ] Task: Conductor - User Manual Verification 'Backend Foundation' (Protocol in workflow.md)
 
 ## Phase 2: GUI Implementation - Activity Dashboard
