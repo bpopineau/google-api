@@ -1,7 +1,7 @@
 # Plan: Local File Metadata Sync to Google Sheets
 
 ## Phase 1: Backend Foundation
-- [ ] Task: Create `FileScanner` utility in `mygooglib.utils` to extract metadata (name, path, modified date).
+- [x] Task: Create `FileScanner` utility in `mygooglib.utils` to extract metadata (name, path, modified date). [713becf]
     - [ ] Subtask: Write unit tests for `FileScanner` covering standard files and edge cases (empty folders, permission errors).
     - [ ] Subtask: Implement `FileScanner` class.
 - [ ] Task: Extend `mygooglib.sheets` with `batch_write` capability.
