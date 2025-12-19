@@ -105,10 +105,12 @@ class MainWindow(QMainWindow):
 
         # Load default view from config
         default = self.config.default_view
-        if default in self._pages:
-            self.sidebar.select_page(default)
-        else:
-            self.sidebar.select_page("home")
+        if default not in self._pages:
+            default = "home"
+
+        # Select in sidebar AND switch the stack widget
+        self.sidebar.select_page(default)
+        self._on_page_changed(default)
 
     def _init_loading_state(self) -> None:
         """Show a loading placeholder while auth happens."""
