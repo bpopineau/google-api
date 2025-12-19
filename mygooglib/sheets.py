@@ -102,7 +102,7 @@ def open_by_title(
     from mygooglib.drive import list_files
 
     # Escape single quotes in Drive query
-    escaped = title.replace("'", "\\'")
+    escaped = title.replace("'", "''")
     results = list_files(
         drive,
         query=f"name = '{escaped}'",
@@ -1027,6 +1027,7 @@ class SheetsClient(BaseClient):
         start_cell: str = "A1",
         include_header: bool = True,
         include_index: bool = False,
+        resize: bool = False,
     ) -> dict | None:
         """Write a Pandas DataFrame to a sheet."""
         return from_dataframe(
@@ -1127,3 +1128,119 @@ class SheetsClient(BaseClient):
             allow_multiple=allow_multiple,
             value_input_option=value_input_option,
         )
+
+
+@api_call("Sheets clear_sheet", is_write=True)
+def clear_sheet(
+    sheets: Any,
+    spreadsheet_id: str,
+    sheet_name: str,
+    *,
+    drive: Any | None = None,
+    parent_id: str | None = None,
+    allow_multiple: bool = False,
+    raw: bool = False,
+) -> dict | None:
+    """Clear all values from a specific sheet (tab).
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        sheet_name: Name of the sheet to clear (e.g., 'Sheet1')
+        drive: Drive API Resource (required if spreadsheet_id is a title)
+        parent_id: Optional Drive folder ID for title resolution
+        allow_multiple: Allow multiple title matches
+        raw: If True, return full API response
+
+    Returns:
+        Summary dict of cleared range, or full response if raw=True.
+    """
+    spreadsheet_real_id = (
+        resolve_spreadsheet(
+            drive,
+            spreadsheet_id,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+        if drive is not None
+        else spreadsheet_id
+    )
+
+    safe_sheet = _quote_sheet_name(sheet_name)
+    # Clear the entire sheet
+    range_to_clear = f"{safe_sheet}"
+
+    request = (
+        sheets.spreadsheets()
+        .values()
+        .clear(spreadsheetId=spreadsheet_real_id, range=range_to_clear)
+    )
+    response = execute_with_retry_http_error(request, is_write=True)
+
+    if raw:
+        return response
+    if not response:
+        return None
+
+    return {
+        "clearedRange": response.get("clearedRange"),
+    }
+
+
+def batch_write(
+    sheets: Any,
+    spreadsheet_id: str,
+    sheet_name: str,
+    rows: Sequence[Sequence[Any]],
+    *,
+    headers: Sequence[str] | None = None,
+    drive: Any | None = None,
+    parent_id: str | None = None,
+    allow_multiple: bool = False,
+    clear: bool = False,
+    start_cell: str = "A1",
+) -> dict | None:
+    """Write a batch of rows to a sheet, optionally clearing it first.
+
+    Args:
+        sheets: Sheets API Resource
+        spreadsheet_id: Spreadsheet ID, title, or URL
+        sheet_name: Name of the sheet to write to
+        rows: List of lists containing the data rows
+        headers: Optional list of header strings to write as the first row
+        drive: Drive API Resource (required if spreadsheet_id is a title)
+        parent_id: Optional Drive folder ID for title resolution
+        allow_multiple: Allow multiple title matches
+        clear: If True, clear the sheet before writing
+        start_cell: Top-left cell to start writing (default 'A1')
+
+    Returns:
+        Result of the update_range call.
+    """
+    if clear:
+        clear_sheet(
+            sheets,
+            spreadsheet_id,
+            sheet_name,
+            drive=drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+        )
+
+    values = list(rows)
+    if headers:
+        values.insert(0, list(headers))
+
+    safe_sheet = _quote_sheet_name(sheet_name)
+    target_range = f"{safe_sheet}!{start_cell}"
+
+    return update_range(
+        sheets,
+        spreadsheet_id,
+        target_range,
+        values,
+        drive=drive,
+        parent_id=parent_id,
+        allow_multiple=allow_multiple,
+        value_input_option="USER_ENTERED",
+    )
