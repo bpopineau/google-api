@@ -6,15 +6,16 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from PySide6.QtCore import QAbstractListModel, QModelIndex, Qt, QSize, QRect
-from PySide6.QtGui import QPainter, QColor, QFont
+from PySide6.QtCore import QAbstractListModel, QModelIndex, QRect, QSize, Qt
+from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import (
     QLabel,
     QListView,
-    QVBoxLayout,
-    QWidget,
+    QStyle,
     QStyledItemDelegate,
     QStyleOptionViewItem,
+    QVBoxLayout,
+    QWidget,
 )
 
 
@@ -68,7 +69,9 @@ class ActivityModel(QAbstractListModel):
         self._activities.append(activity)
         self.endInsertRows()
 
-    def update_status(self, activity_id: str, status: ActivityStatus, details: str | None = None) -> None:
+    def update_status(
+        self, activity_id: str, status: ActivityStatus, details: str | None = None
+    ) -> None:
         """Update the status of an existing activity."""
         for i, activity in enumerate(self._activities):
             if activity.id == activity_id:
@@ -95,10 +98,12 @@ class ActivityDelegate(QStyledItemDelegate):
             ActivityStatus.PENDING: "#6e7681",  # text_muted
             ActivityStatus.RUNNING: "#d29922",  # warning (amber)
             ActivityStatus.SUCCESS: "#3fb950",  # success (green)
-            ActivityStatus.ERROR: "#f85149",    # error (red)
+            ActivityStatus.ERROR: "#f85149",  # error (red)
         }
 
-    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
+    def paint(
+        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> None:
         if not index.isValid():
             return
 
@@ -106,7 +111,8 @@ class ActivityDelegate(QStyledItemDelegate):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Draw selection background
-        if option.state & Qt.StateFlag.State_Selected:
+        # Use QStyle.State.State_Selected (PySide6)
+        if option.state & QStyle.State.State_Selected:
             painter.fillRect(option.rect, QColor("#2d333b"))  # bg_tertiary
 
         rect = option.rect
@@ -121,29 +127,50 @@ class ActivityDelegate(QStyledItemDelegate):
 
         # Draw Icon
         icon_font = QFont()
-        icon_font.setPointSize(14)
+        icon_font.setPixelSize(18)
         painter.setFont(icon_font)
-        icon_rect = QRect(rect.left() + margin, rect.top() + margin, 30, rect.height() - 2 * margin)
+        icon_rect = QRect(
+            rect.left() + margin, rect.top() + margin, 30, rect.height() - 2 * margin
+        )
         painter.drawText(icon_rect, Qt.AlignmentFlag.AlignCenter, icon)
 
         # Draw Title
         title_font = QFont()
+        title_font.setPixelSize(13)
         title_font.setBold(True)
         painter.setFont(title_font)
         painter.setPen(QColor("#f0f6fc"))  # text_primary
-        title_rect = QRect(rect.left() + margin + 40, rect.top() + margin, rect.width() - margin * 2 - 40, 20)
-        painter.drawText(title_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, title)
+        title_rect = QRect(
+            rect.left() + margin + 40,
+            rect.top() + margin,
+            rect.width() - margin * 2 - 40,
+            20,
+        )
+        painter.drawText(
+            title_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            title,
+        )
 
         # Draw Details/Status
         details_font = QFont()
-        details_font.setPointSize(10)
+        details_font.setPixelSize(12)
         painter.setFont(details_font)
         painter.setPen(QColor(status_color))
-        details_rect = QRect(rect.left() + margin + 40, rect.top() + margin + 20, rect.width() - margin * 2 - 40, 20)
+        details_rect = QRect(
+            rect.left() + margin + 40,
+            rect.top() + margin + 20,
+            rect.width() - margin * 2 - 40,
+            20,
+        )
         display_text = f"{status.value.upper()}"
         if details:
             display_text += f": {details}"
-        painter.drawText(details_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, display_text)
+        painter.drawText(
+            details_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            display_text,
+        )
 
         painter.restore()
 
