@@ -5,7 +5,7 @@ This plan outlines the implementation of a structured Settings UI and a dynamic 
 ## Phase 1: Core Configuration & Persistence (mygooglib)
 Enhance the existing configuration system to support new personalization options.
 
-- [ ] **Task 1: Update Config Schema**
+- [~] **Task 1: Update Config Schema**
     - Add `accent_color` (string) to `Config` dataclass in `mygooglib/core/config.py`.
     - Update `AppConfig` to support `accent_color` property with auto-save.
 - [ ] **Task 2: Write Config Tests**

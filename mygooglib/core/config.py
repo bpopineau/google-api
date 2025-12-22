@@ -16,6 +16,7 @@ class Config:
     """Application configuration schema."""
 
     theme: str = "dark"
+    accent_color: str = "blue"
     window_geometry: list[int] = field(default_factory=lambda: [100, 100, 1200, 800])
     default_view: str = "home"
     log_level: str = "INFO"
@@ -97,6 +98,15 @@ class AppConfig:
     @theme.setter
     def theme(self, value: str) -> None:
         self._config.theme = value
+        self.save()
+
+    @property
+    def accent_color(self) -> str:
+        return self._config.accent_color
+
+    @accent_color.setter
+    def accent_color(self, value: str) -> None:
+        self._config.accent_color = value
         self.save()
 
     @property

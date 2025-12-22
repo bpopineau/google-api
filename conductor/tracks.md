@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Implement functional Settings UI with Theme Switcher
+## [~] Track: Implement functional Settings UI with Theme Switcher
 *Link: [./conductor/tracks/settings_ui_20251222/](./conductor/tracks/settings_ui_20251222/)*
 
 ---
