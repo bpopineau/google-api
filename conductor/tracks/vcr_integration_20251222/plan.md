@@ -12,6 +12,8 @@ Configure the core VCR engine to ensure secure and consistent recording.
     - Implement `filter_post_data_parameters` for common sensitive fields.
 - [x] **Task: Conductor - User Manual Verification 'Infrastructure & Sanitization' (Protocol in workflow.md)**
 
+## Phase 1: Infrastructure & Sanitization [checkpoint: 3347956]
+
 ## Phase 2: Core Implementation & Verification (TDD)
 Apply the system to existing tests to verify the recording and replay lifecycle.
 
@@ -19,23 +21,27 @@ Apply the system to existing tests to verify the recording and replay lifecycle.
     - Annotate `tests/test_sheets_exists.py` (or similar) with `@pytest.mark.vcr`.
     - Run `pytest --record-mode=none`.
     - **Expected Result:** Test fails because no cassette exists.
-- [~] **Task 2: Green Phase - Record and Replay**
+- [x] **Task 2: Green Phase - Record and Replay**
     - Run `pytest --record-mode=once` to generate the cassette.
     - Run `pytest --record-mode=none` again.
     - **Expected Result:** Test passes using the local cassette.
-- [ ] **Task 3: Refactor - Refine Cassette Organization**
+- [x] **Task 3: Refactor - Refine Cassette Organization**
     - Ensure cassettes are stored in `tests/cassettes/`.
     - Verify YAML content for sanitization (manually check for leaked tokens).
-- [ ] **Task: Conductor - User Manual Verification 'Core Implementation & Verification' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Core Implementation & Verification' (Protocol in workflow.md)**
+
+## Phase 2: Core Implementation & Verification [checkpoint: 3347956]
 
 ## Phase 3: Documentation & Standardization
 Finalize the developer experience for other contributors (and future me).
 
-- [ ] **Task 1: Create Developer Testing Guide**
+- [x] **Task 1: Create Developer Testing Guide**
     - Write `docs/dev/testing.md`.
     - Explain the recording modes (`once`, `none`, `all`, `rewrite`).
     - Document how to refresh cassettes when APIs change.
-- [ ] **Task 2: Broaden Test Coverage**
+- [x] **Task 2: Broaden Test Coverage**
     - Apply VCR recording to `tests/test_docs_features.py` and `tests/test_auth.py`.
     - Ensure CI configuration (if any) is updated to run in `none` mode.
-- [ ] **Task: Conductor - User Manual Verification 'Documentation & Standardization' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Documentation & Standardization' (Protocol in workflow.md)**
+
+## Phase 3: Documentation & Standardization [checkpoint: pending]

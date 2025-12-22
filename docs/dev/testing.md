@@ -79,4 +79,56 @@ Verify the application launches and renders (requires display):
 mgui
 ```
 
+---
 
+## 4. VCR Cassette Recording (Integration Tests)
+
+The project uses [pytest-recording](https://pypi.org/project/pytest-recording/) to record and replay HTTP interactions.
+
+### Recording Modes
+
+| Mode | Command | Use Case |
+|------|---------|----------|
+| `none` | `--record-mode=none` | CI/default - replay only |
+| `once` | `--record-mode=once` | Record new cassettes |
+| `rewrite` | `--record-mode=rewrite` | Refresh outdated cassettes |
+
+### Running VCR Tests
+
+```bash
+# Replay from cassettes (default for CI)
+uv run pytest tests/test_vcr_integration.py --record-mode=none
+
+# Record new cassettes
+uv run pytest tests/test_vcr_integration.py --record-mode=once
+```
+
+### Writing VCR Tests
+
+```python
+import pytest
+
+@pytest.mark.vcr
+def test_api_call():
+    """Test with recorded HTTP interactions."""
+    import urllib.request
+    response = urllib.request.urlopen("https://api.example.com")
+    assert response.status == 200
+```
+
+### Security
+
+Cassettes are automatically sanitized:
+- `Authorization` headers → `<ACCESS_TOKEN>`
+- Email addresses → `<REDACTED_EMAIL>`
+- OAuth tokens → `<REFRESH_TOKEN>`
+
+Configuration: `tests/conftest.py`
+
+### Refreshing Cassettes
+
+```bash
+rm tests/cassettes/test_my_api.yaml
+uv run pytest tests/test_my_api.py --record-mode=once
+git add tests/cassettes/
+```
