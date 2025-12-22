@@ -241,6 +241,18 @@ result = import_events_from_sheets(
 print(f"Created {result['created']} events.")
 ```
 
+### Global Search
+
+Search across Drive and Gmail simultaneously:
+
+```python
+from mygooglib.workflows import global_search
+
+results = global_search(clients, "invoice", limit=10)
+for r in results:
+    print(f"[{r['type'].upper()}] {r['title']}")
+```
+
 ---
 
 ## 9. Idempotency for Scripts

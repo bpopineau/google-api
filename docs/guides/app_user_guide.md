@@ -25,6 +25,14 @@ The **Home Dashboard** is your command center. It provides a quick summary:
 - **Recent Files**: The last 5 files accessed in Drive.
 - **Inbox Zero Status**: Unread email count.
 
+### 🔍 Global Search
+
+Use the search bar at the top of the Dashboard to search **both Drive and Gmail** at once:
+1.  Type a query (e.g., "invoice" or "project report").
+2.  Press **Enter** or click **Search**.
+3.  Results are separated into **Drive Matches** and **Gmail Matches**.
+4.  Click **Back to Dashboard** to return.
+
 ## Features
 
 ### 📂 Drive Explorer

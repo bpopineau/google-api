@@ -8,10 +8,13 @@ The repo uses `pytest` for unit and integration tests.
 
 ```bash
 # Run all tests
-pytest
+uv run pytest
 
 # Run tests with coverage
-pytest --cov=mygooglib
+uv run pytest --cov=mygooglib
+
+# Run a specific test file
+uv run pytest tests/test_workflow_search.py
 ```
 
 ## 2. Smoke Test Runner
@@ -73,7 +76,7 @@ python scripts/smoke_test.py drive-sync --local-path "C:\path\to\folder" --drive
 ### Desktop GUI
 Verify the application launches and renders (requires display):
 ```bash
-mg gui run
+mgui
 ```
 
 

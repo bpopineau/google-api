@@ -1,5 +1,14 @@
 # Changelog
  
+## 0.7.0 — 2025-12-22
+
+### Added
+- **Global Search**: Search across Drive and Gmail simultaneously from the Home page (`global_search` workflow).
+- **GUI Enhancements**: Updated search results display with Drive/Gmail categorization.
+
+### Changed
+- Documentation overhaul: Updated roadmap, usage guide, and app user guide.
+
 ## 0.6.0 — 2025-12-19
 
 ### Added

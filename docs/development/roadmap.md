@@ -17,15 +17,17 @@ Track the progress of `mygooglib` features and future plans.
 - [x] **Calendar**: Event creation and listing.
 - [x] **Sheets**: Read/Write ranges, Pandas integration.
 
+### GUI Features (v0.7.0)
+- [x] **Global Search**: Search across Drive and Gmail simultaneously from the Home page.
+
 ## 🚧 In Progress / Next Up
 
-### GUI Polish (v0.7.0)
+### GUI Polish
 - [ ] **Settings UI**: Complete the Settings page implementation (Theme switcher logic).
 - [ ] **Error Handling**: Friendly error dialogs for network failures.
 - [ ] **Context Menus**: Right-click actions for Drive files (Download, Delete).
 
 ### New Features
-- [ ] **Global Search**: Search across Drive and Gmail simultaneously.
 - [ ] **Offline Mode**: Cache file lists for offline viewing.
 
 ## 💡 Future Ideas
