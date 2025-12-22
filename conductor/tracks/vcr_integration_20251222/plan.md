@@ -3,23 +3,23 @@
 ## Phase 1: Infrastructure & Sanitization
 Configure the core VCR engine to ensure secure and consistent recording.
 
-- [ ] **Task 1: Install VCR Dependencies**
+- [x] **Task 1: Install VCR Dependencies** [c0e6f31]
     - Add `vcrpy` and `pytest-recording` to the environment (via `uv add --dev`).
     - Verify installation with `pytest --version`.
-- [ ] **Task 2: Configure Global VCR Sanitizers**
+- [x] **Task 2: Configure Global VCR Sanitizers** [924bae8]
     - Update `tests/conftest.py` to include a `pytest_recording_configure` hook.
     - Implement `filter_headers` to replace 'Authorization' with `<ACCESS_TOKEN>`.
     - Implement `filter_post_data_parameters` for common sensitive fields.
-- [ ] **Task: Conductor - User Manual Verification 'Infrastructure & Sanitization' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Infrastructure & Sanitization' (Protocol in workflow.md)**
 
 ## Phase 2: Core Implementation & Verification (TDD)
 Apply the system to existing tests to verify the recording and replay lifecycle.
 
-- [ ] **Task 1: Red Phase - Fail Offline Execution**
+- [x] **Task 1: Red Phase - Fail Offline Execution**
     - Annotate `tests/test_sheets_exists.py` (or similar) with `@pytest.mark.vcr`.
     - Run `pytest --record-mode=none`.
     - **Expected Result:** Test fails because no cassette exists.
-- [ ] **Task 2: Green Phase - Record and Replay**
+- [~] **Task 2: Green Phase - Record and Replay**
     - Run `pytest --record-mode=once` to generate the cassette.
     - Run `pytest --record-mode=none` again.
     - **Expected Result:** Test passes using the local cassette.

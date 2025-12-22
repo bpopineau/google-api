@@ -18,7 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from mygoog_gui.pages.settings import SettingsPage
-from mygoog_gui.styles import STYLESHEET
+from mygoog_gui.theme_manager import ThemeManager
 from mygoog_gui.widgets.activity import ActivityModel, ActivityWidget
 from mygoog_gui.widgets.sidebar import Sidebar
 from mygooglib.core.auth import verify_creds_exist
@@ -184,7 +184,10 @@ class MainWindow(QMainWindow):
 def main() -> None:
     """Run the PySide6 application."""
     app = QApplication(sys.argv)
-    app.setStyleSheet(STYLESHEET)
+
+    # Initialize theme manager and apply saved theme
+    theme_manager = ThemeManager()
+    theme_manager.apply_theme()
 
     # 1. Initial Checks
     verify_creds_exist()
