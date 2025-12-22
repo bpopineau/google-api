@@ -66,5 +66,7 @@ ignore_missing_imports = true
 [dependency-groups]
 dev = [
     "pytest-qt>=4.5.0",
+    "pytest-recording>=0.13.4",
+    "vcrpy>=8.1.0",
 ]
 
