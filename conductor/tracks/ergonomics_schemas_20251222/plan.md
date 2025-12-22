@@ -14,7 +14,7 @@ Define the central registry and the first set of foundational schemas.
     - [x] Sub-task: Run `uv run mypy mygooglib/core/types.py`
 - [x] Task: Conductor - User Manual Verification 'Setup & Basic Types' [2975e91]
 
-## Phase 2: Sheets Service Integration
+## Phase 2: Sheets Service Integration [checkpoint: 4022393]
 Integrate the new types into the Sheets service and enforce strict typing.
 
 - [x] Task: Red Phase - Sheets Typings
@@ -24,14 +24,14 @@ Integrate the new types into the Sheets service and enforce strict typing.
 - [x] Task: Green Phase - Resolve Sheets Type Errors
     - [x] Sub-task: Fix any logic or annotation mismatches in `sheets.py` to satisfy mypy
     - [x] Sub-task: Run `pytest tests/test_sheets_exists.py` (and other sheets tests) to ensure zero regressions
-- [~] Task: Conductor - User Manual Verification 'Sheets Service Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Sheets Service Integration' [4022393]
 
 ## Phase 3: Gmail Service Integration
 Integrate the new types into the Gmail service.
 
-- [ ] Task: Define Gmail Foundational Types
-    - [ ] Sub-task: Define `MessageDict`, `ThreadDict`, and `LabelDict` in `types.py`
-- [ ] Task: Red Phase - Gmail Typings
+- [x] Task: Define Gmail Foundational Types [e9fc118]
+    - [x] Sub-task: Define `MessageDict`, `ThreadDict`, and `LabelDict` in `types.py`
+- [~] Task: Red Phase - Gmail Typings
     - [ ] Sub-task: Update `mygooglib/services/gmail.py` with new type annotations
     - [ ] Sub-task: Run `uv run mypy mygooglib/services/gmail.py` and confirm failures (Red)
 - [ ] Task: Green Phase - Resolve Gmail Type Errors
