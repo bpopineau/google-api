@@ -10,14 +10,15 @@ This document outlines the strategy for maximizing the effectiveness of AI agent
 *   **Why:** Solves "Discovery". The agent sees the entire toolkit in one glance.
 *   **Status:** **Implemented** (via `scripts/generate_context_map.py`).
 
-### 2. [ ] Strict Typing (TypedDicts/Schemas)
+### 2. [x] Strict Typing (TypedDicts/Schemas)
 *   **What:** Convert loose `dict` returns from Google APIs into strict `TypedDict` or `Pydantic` models.
 *   **Why:** Solves "Hallucination". Agents know exactly what fields exist (e.g., `mimeType` vs `mime_type`) without inspecting live API responses.
-*   **Implementation Idea:** Use `datamodel-code-generator` to build `mygooglib/core/types.py`.
+*   **Status:** **Implemented** (via `mygooglib/core/types.py`).
 
-### 3. [ ] Semantic Error Codes (Structured Exceptions)
+### 3. [x] Semantic Error Codes (Structured Exceptions)
 *   **What:** Wrap opaque `HttpError` (403/404) into clean domain exceptions (`PermissionDeniedError`, `ResourceNotFoundError`).
 *   **Why:** Solves "Self-Correction". Agents get clear, actionable signals ("File not found") instead of raw JSON noise.
+*   **Status:** **Implemented** (via `mygooglib/core/exceptions.py`).
 
 ## 🥈 Tier 2: The "Safety & Simulation" Layer
 *Tools that allow agents to act confidently without destroying data.*
@@ -26,9 +27,10 @@ This document outlines the strategy for maximizing the effectiveness of AI agent
 *   **What:** Destructive methods (`delete`, `update`) support `dry_run=True` and return a structured JSON report.
 *   **Why:** Solves "Hesitation". Agents can simulate a cleanup script, verify the targeted files in the JSON report, and then execute for real.
 
-### 5. [ ] Integration Test Recorder (VCR.py)
+### 5. [x] Integration Test Recorder (VCR.py)
 *   **What:** Record real API interactions into "cassettes" for offline replay.
 *   **Why:** Solves "Testability". Agents can write/verify features without needing real Google credentials, enabling "Test-Driven Debugging".
+*   **Status:** **Implemented** (via `tests/test_vcr_integration.py` and `tests/conftest.py`).
 
 ### 6. [ ] Deterministic Data Factories
 *   **What:** Helper library (`tests/factories.py`) generating predictable mock objects.
