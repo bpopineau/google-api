@@ -1,0 +1,8 @@
+{
+  "track_id": "ergonomics_schemas_20251222",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2025-12-22T12:00:00Z",
+  "updated_at": "2025-12-22T12:00:00Z",
+  "description": "Enhance developer ergonomics for AI agents by implementing strict typing and schemas for Sheets and Gmail."
+}
