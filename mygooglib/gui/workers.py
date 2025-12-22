@@ -110,11 +110,33 @@ class SyncWorker(QThread):
         self.sheet_name = sheet_name
 
     def run(self) -> None:
-        from mygooglib.sheets import batch_write
+        from mygooglib.drive import GOOGLE_SHEET_MIME, find_by_name
+        from mygooglib.sheets import batch_write, create_spreadsheet
         from mygooglib.utils.file_scanner import FileScanner
 
         try:
-            # 1. Scan
+            # 1. Resolve or create spreadsheet
+            spreadsheet_id = self.spreadsheet_id
+
+            # Check if input looks like a title (not a long ID)
+            if len(spreadsheet_id) < 20 or " " in spreadsheet_id:
+                # Try to find existing spreadsheet by name
+                existing = find_by_name(
+                    self.clients.drive.service,
+                    spreadsheet_id,
+                    mime_type=GOOGLE_SHEET_MIME,
+                )
+                if existing:
+                    spreadsheet_id = existing["id"]
+                else:
+                    # Create new spreadsheet with this title
+                    spreadsheet_id = create_spreadsheet(
+                        self.clients.sheets.service,
+                        spreadsheet_id,
+                        sheet_name=self.sheet_name,
+                    )
+
+            # 2. Scan
             self.started_scan.emit()
             scanner = FileScanner()
             files = scanner.scan(self.directory)
@@ -123,7 +145,7 @@ class SyncWorker(QThread):
                 self.finished.emit({"updatedRows": 0, "message": "No files found"})
                 return
 
-            # 2. Prepare Data
+            # 3. Prepare Data
             self.started_upload.emit(len(files))
             headers = ["Filename", "Path", "Last Modified"]
             rows = [
@@ -131,10 +153,10 @@ class SyncWorker(QThread):
                 for f in files
             ]
 
-            # 3. Upload
+            # 4. Upload
             result = batch_write(
                 self.clients.sheets.service,
-                self.spreadsheet_id,
+                spreadsheet_id,
                 self.sheet_name,
                 rows,
                 headers=headers,

@@ -1187,6 +1187,39 @@ def clear_sheet(
     }
 
 
+@api_call("Sheets create_spreadsheet", is_write=True)
+def create_spreadsheet(
+    sheets: Any,
+    title: str,
+    *,
+    sheet_name: str = "Sheet1",
+    raw: bool = False,
+) -> dict | str:
+    """Create a new Google Spreadsheet.
+
+    Args:
+        sheets: Sheets API Resource
+        title: Title for the new spreadsheet
+        sheet_name: Name for the first sheet tab (default: 'Sheet1')
+        raw: If True, return full API response
+
+    Returns:
+        Spreadsheet ID by default, or full response if raw=True.
+    """
+    body = {
+        "properties": {"title": title},
+        "sheets": [{"properties": {"title": sheet_name}}],
+    }
+
+    request = sheets.spreadsheets().create(body=body)
+    response = execute_with_retry_http_error(request, is_write=True)
+
+    if raw:
+        return response
+
+    return response.get("spreadsheetId", "")
+
+
 def batch_write(
     sheets: Any,
     spreadsheet_id: str,

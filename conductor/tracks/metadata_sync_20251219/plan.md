@@ -24,4 +24,4 @@
 - [x] Task: Add UI controls for the Sync Workflow. [0e99f15]
     - [x] Subtask: Add a "Sync Folder to Sheets" button in the GUI (likely in a "Tools" or "Drive" section).
     - [x] Subtask: Connect the button to a folder selection dialog and then start the `SyncWorker`.
-- [~] Task: Conductor - User Manual Verification 'Workflow Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Workflow Integration' (Protocol in workflow.md)
