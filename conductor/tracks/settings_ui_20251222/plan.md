@@ -1,38 +1,57 @@
-# Track Plan: Implement functional Settings UI with Theme Switcher
+# Plan: Settings & Theming (Personalization)
 
-## Phase 1: Core Logic & Configuration
-This phase focuses on the backend logic for storing and retrieving the theme preference.
+This plan outlines the implementation of a structured Settings UI and a dynamic theming system for the MyGoog GUI.
 
-- [ ] Task: Create reproduction test for Theme Config persistence
-    - [ ] Sub-task: Create `tests/gui/test_theme_config.py`
-    - [ ] Sub-task: Write failing test that verifies `config.theme` can be set and retrieved
-    - [ ] Sub-task: Run test to confirm failure (Red)
+## Phase 1: Core Configuration & Persistence (mygooglib)
+Enhance the existing configuration system to support new personalization options.
 
-- [ ] Task: Implement Theme Configuration Logic
-    - [ ] Sub-task: Update `mygooglib/core/config.py` (or equivalent) to support a `theme` field (defaulting to 'dark' or system default)
-    - [ ] Sub-task: Ensure save/load mechanisms handle this field
-    - [ ] Sub-task: Run tests to confirm pass (Green)
-    - [ ] Sub-task: Refactor if necessary
+- [ ] **Task 1: Update Config Schema**
+    - Add `accent_color` (string) to `Config` dataclass in `mygooglib/core/config.py`.
+    - Update `AppConfig` to support `accent_color` property with auto-save.
+- [ ] **Task 2: Write Config Tests**
+    - Create `tests/test_config.py`.
+    - Verify that `accent_color` persists correctly to `config.json`.
+    - Verify that `Config.from_dict` handles missing or extra keys gracefully.
+- [ ] **Task 3: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)**
 
-- [ ] Task: Conductor - User Manual Verification 'Core Logic & Configuration' (Protocol in workflow.md)
+## Phase 2: Dynamic Theming Engine (mygoog_gui)
+Refactor the styling system to support light/dark modes and dynamic accent colors.
 
-## Phase 2: GUI Implementation
-This phase connects the backend logic to the visual frontend.
+- [ ] **Task 1: Refactor Stylesheet Generation**
+    - Update `mygoog_gui/styles.py` to define multiple palettes (Dark, Light).
+    - Create a function `get_stylesheet(theme: str, accent_color: str) -> str` that generates the QSS.
+- [ ] **Task 2: Implement Theme Manager**
+    - Create `mygoog_gui/theme_manager.py` to centralize theme application.
+    - Implement logic to detect system theme (using PySide6 features).
+    - Provide a signal or callback to notify UI components of theme changes.
+- [ ] **Task 3: Unit Test Theming Logic**
+    - Create `tests/gui/test_theme_manager.py`.
+    - Verify stylesheet generation with different theme/accent combinations.
+- [ ] **Task 4: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
 
-- [ ] Task: Create reproduction test for Settings UI interaction
-    - [ ] Sub-task: Create `tests/gui/test_settings_page.py`
-    - [ ] Sub-task: Write failing test using `pytest-qt` that simulates clicking the theme toggle and verifying the config update
-    - [ ] Sub-task: Run test to confirm failure (Red)
+## Phase 3: Structured Settings UI (mygoog_gui)
+Refactor the Settings page to use a multi-section layout and implement personalization controls.
 
-- [ ] Task: Implement Settings Page UI
-    - [ ] Sub-task: Update `mygoog_gui/pages/settings.py` to include the Theme Switcher widget (e.g., QComboBox or QCheckBox)
-    - [ ] Sub-task: Bind the widget signal to the config update method
-    - [ ] Sub-task: Run tests to confirm pass (Green)
+- [ ] **Task 1: Refactor SettingsPage Layout**
+    - Modify `mygoog_gui/pages/settings.py` to use a `QStackedWidget` for content and a small sidebar (or `QListWidget`) for section navigation (General, Appearance, Accounts, Sync).
+- [ ] **Task 2: Implement Appearance Section**
+    - Create the Appearance UI with:
+        - Theme dropdown (System, Light, Dark).
+        - Accent color picker (Blue, Green, Purple, Orange).
+    - Connect UI signals to `AppConfig` and `ThemeManager` for immediate application.
+- [ ] **Task 3: Add Section Placeholders**
+    - Implement basic layouts for "General", "Accounts", and "Sync" sections as specified.
+- [ ] **Task 4: Functional Tests for Settings UI**
+    - Create `tests/gui/test_settings_page.py`.
+    - Verify that changing theme/accent in the UI updates the `AppConfig`.
+- [ ] **Task 5: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)**
 
-- [ ] Task: Implement Live Theme Switching
-    - [ ] Sub-task: Create a test or manual verification step for global style application
-    - [ ] Sub-task: Implement a `apply_theme(theme_name)` function in `mygoog_gui/styles.py` (or similar)
-    - [ ] Sub-task: Wire the Settings page signal to trigger `apply_theme` immediately
-    - [ ] Sub-task: Ensure main window listens for theme changes (if needed)
+## Phase 4: Integration & Polish
+Ensure the theme is applied globally and consistently.
 
-- [ ] Task: Conductor - User Manual Verification 'GUI Implementation' (Protocol in workflow.md)
+- [ ] **Task 1: Apply Theme on App Startup**
+    - Update `mygoog_gui/main.py` to initialize `ThemeManager` and apply the saved theme before showing the main window.
+- [ ] **Task 2: Final Verification & Cleanup**
+    - Run full test suite.
+    - Verify "Hackability" (manual config edit reflected on restart).
+- [ ] **Task 3: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)**
