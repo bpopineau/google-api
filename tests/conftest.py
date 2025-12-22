@@ -15,7 +15,7 @@ import pytest
 CASSETTES_DIR = Path(__file__).parent / "cassettes"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def vcr_config() -> dict[str, Any]:
     """Configure VCR for pytest-recording.
 
@@ -24,7 +24,6 @@ def vcr_config() -> dict[str, Any]:
     """
     return {
         "cassette_library_dir": str(CASSETTES_DIR),
-        "record_mode": "none",  # Default: replay only, fail if cassette missing
         "match_on": ["method", "scheme", "host", "port", "path", "query"],
         "filter_headers": [
             ("authorization", "<ACCESS_TOKEN>"),
