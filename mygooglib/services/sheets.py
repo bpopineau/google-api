@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, cast
 
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
@@ -123,7 +123,7 @@ def open_by_title(
             f"Pass parent_id to disambiguate, or allow_multiple=True. Matches: {ids}"
         )
 
-    return results[0]["id"]
+    return results[0]["id"]  # type: ignore[no-any-return]
 
 
 def _quote_sheet_name(sheet_name: str) -> str:
@@ -222,7 +222,7 @@ def get_range(
         )
         response = execute_with_retry_http_error(request, is_write=False)
 
-        return response if raw else response.get("values", [])
+        return cast(dict, response) if raw else cast(Any, response.get("values", []))
 
     # Chunked reading logic
     # This is a simplified version that assumes a standard A1 range like "Sheet1!A1:C1000"
@@ -235,7 +235,7 @@ def get_range(
     # For simplicity in v0.1, we'll only chunk if both are provided.
     if end_row is None or end_col is None:
         # Fallback to non-chunked
-        return get_range(
+        return get_range(  # type: ignore[no-any-return]
             sheets,
             spreadsheet_real_id,
             a1_range,
@@ -359,7 +359,7 @@ def update_range(
     response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
     if not response:
         return None
     return {
@@ -443,7 +443,7 @@ def append_row(
     response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
     if not response:
         return None
 
@@ -496,7 +496,7 @@ def get_sheets(
     response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
 
     results = []
     for s in response.get("sheets", []):
@@ -597,7 +597,7 @@ def from_dataframe(
     safe_sheet = _quote_sheet_name(sheet_name)
     target_range = f"{safe_sheet}!{start_cell}"
 
-    return update_range(
+    return update_range(  # type: ignore[no-any-return]
         sheets,
         spreadsheet_id,
         target_range,
@@ -673,7 +673,7 @@ def batch_get(
     response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
 
     # Map each range to its values
     result: dict[str, list[list[Any]]] = {}
@@ -763,7 +763,7 @@ def batch_update(
     response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
 
     return {
         "spreadsheetId": response.get("spreadsheetId"),
@@ -911,7 +911,7 @@ class SheetsClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> list[list[Any]] | dict:
         """Read a range of values from a spreadsheet."""
-        return get_range(
+        return get_range(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             a1_range,
@@ -941,7 +941,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Update a range of values in a spreadsheet."""
-        return update_range(
+        return update_range(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             a1_range,
@@ -970,7 +970,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Append a single row to the end of a sheet."""
-        return append_row(
+        return append_row(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             sheet_name,
@@ -993,7 +993,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> list[dict] | dict:
         """Get metadata for all sheets (tabs) in a spreadsheet."""
-        return get_sheets(
+        return get_sheets(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             drive=self.drive,
@@ -1054,7 +1054,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict[str, list[list[Any]]] | dict:
         """Read multiple ranges from a spreadsheet in a single API call."""
-        return batch_get(
+        return batch_get(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             ranges,
@@ -1081,7 +1081,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict:
         """Update multiple ranges in a spreadsheet in a single API call."""
-        return batch_update(
+        return batch_update(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             updates,
@@ -1137,7 +1137,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict | str:
         """Create a new Google Spreadsheet."""
-        return create_spreadsheet(
+        return create_spreadsheet(  # type: ignore[no-any-return]
             self.service,
             title,
             sheet_name=sheet_name,
@@ -1154,7 +1154,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Clear all values from a specific sheet (tab)."""
-        return clear_sheet(
+        return clear_sheet(  # type: ignore[no-any-return]
             self.service,
             spreadsheet_id,
             sheet_name,
@@ -1252,7 +1252,7 @@ def clear_sheet(
     response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
     if not response:
         return None
 
@@ -1289,9 +1289,9 @@ def create_spreadsheet(
     response = execute_with_retry_http_error(request, is_write=True)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
 
-    return response.get("spreadsheetId", "")
+    return response.get("spreadsheetId", "")  # type: ignore[no-any-return]
 
 
 def batch_write(
@@ -1341,7 +1341,7 @@ def batch_write(
     safe_sheet = _quote_sheet_name(sheet_name)
     target_range = f"{safe_sheet}!{start_cell}"
 
-    return update_range(
+    return update_range(  # type: ignore[no-any-return]
         sheets,
         spreadsheet_id,
         target_range,

@@ -22,11 +22,11 @@ This phase focuses on removing the unused files and ensuring the core applicatio
 ## Phase 2: Static Analysis and Cleanup
 This phase ensures that no broken imports or type issues were introduced.
 
-- [ ] Task: Run Linting Checks
-    - [ ] Sub-task: Run `ruff check .` and fix any issues
-    - [ ] Sub-task: Run `ruff format .`
+- [x] Task: Run Linting Checks
+    - [x] Sub-task: Run `ruff check .` and fix any issues
+    - [x] Sub-task: Run `ruff format .`
 
-- [ ] Task: Run Type Checks
-    - [ ] Sub-task: Run `mypy .` and resolve any type errors resulting from the deletions
+- [x] Task: Run Type Checks
+    - [x] Sub-task: Run `mypy .` and resolve any type errors resulting from the deletions
 
 - [ ] Task: Conductor - User Manual Verification 'Static Analysis and Cleanup' (Protocol in workflow.md)

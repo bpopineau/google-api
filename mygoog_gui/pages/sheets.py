@@ -20,8 +20,8 @@ from mygoog_gui.styles import COLORS
 from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib.core.client import Clients
 
 
 class SheetsPage(QWidget):
@@ -121,7 +121,7 @@ class SheetsPage(QWidget):
         self.status.setText("Loading...")
 
         def fetch():
-            return self.clients.sheets.read(sheet_id, range_name)
+            return self.clients.sheets.get_range(sheet_id, range_name)
 
         worker = ApiWorker(fetch)
         worker.finished.connect(self._on_data_loaded)

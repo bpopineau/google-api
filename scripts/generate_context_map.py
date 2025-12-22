@@ -8,7 +8,6 @@ import importlib
 import inspect
 import pkgutil
 from pathlib import Path
-from types import ModuleType
 
 import mygooglib.services
 from mygooglib.core.client import Clients

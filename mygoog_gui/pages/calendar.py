@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import TYPE_CHECKING
+from datetime import date
+from typing import TYPE_CHECKING, Callable
 
-from PySide6.QtCore import QDate, Qt
+from PySide6.QtCore import QDate, QDateTime, Qt, QTime
 from PySide6.QtGui import QColor, QTextCharFormat
 from PySide6.QtWidgets import (
     QCalendarWidget,
@@ -30,8 +31,8 @@ from mygoog_gui.styles import COLORS
 from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib.core.client import Clients
 
 
 class AddEventDialog(QDialog):
@@ -58,13 +59,21 @@ class AddEventDialog(QDialog):
         # Default start time: selected date at 9:00 AM
         start_dt = dt.datetime.combine(self._start_date, dt.time(9, 0))
         self.start_input = QDateTimeEdit()
-        self.start_input.setDateTime(start_dt)
+        qt_start = QDateTime(
+            QDate(start_dt.year, start_dt.month, start_dt.day),
+            QTime(start_dt.hour, start_dt.minute),
+        )
+        self.start_input.setDateTime(qt_start)
         self.start_input.setCalendarPopup(True)
         form.addRow("Start:", self.start_input)
 
         end_dt = dt.datetime.combine(self._start_date, dt.time(10, 0))
         self.end_input = QDateTimeEdit()
-        self.end_input.setDateTime(end_dt)
+        qt_end = QDateTime(
+            QDate(end_dt.year, end_dt.month, end_dt.day),
+            QTime(end_dt.hour, end_dt.minute),
+        )
+        self.end_input.setDateTime(qt_end)
         self.end_input.setCalendarPopup(True)
         form.addRow("End:", self.end_input)
 
@@ -97,7 +106,7 @@ class EventCard(QFrame):
     def __init__(
         self,
         event: dict,
-        on_delete: callable,
+        on_delete: Callable,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -159,7 +168,7 @@ class EventCard(QFrame):
         delete_action = menu.addAction("🗑️ Delete")
         action = menu.exec(self.mapToGlobal(pos))
         if action == delete_action:
-            self._on_delete(self._event)
+            self._on_delete(self._event)  # type: ignore[misc]
 
 
 class CalendarPage(QWidget):
@@ -371,8 +380,9 @@ class CalendarPage(QWidget):
         # Clear existing event cards
         while self.events_layout.count() > 1:  # Keep the stretch
             item = self.events_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
 
         # Get events for this date
         events = self._events_by_date.get(date_str, [])
@@ -392,7 +402,8 @@ class CalendarPage(QWidget):
 
     def _on_add_event(self) -> None:
         """Open add event dialog with selected date."""
-        selected_date = self.calendar.selectedDate().toPython()
+        selected_qdate = self.calendar.selectedDate()
+        selected_date: date = selected_qdate.toPython()  # type: ignore[assignment]
         dialog = AddEventDialog(self, start_date=selected_date)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             data = dialog.get_event_data()
@@ -422,12 +433,14 @@ class CalendarPage(QWidget):
 
     def _delete_event(self, event: dict) -> None:
         """Delete an event."""
-        event_id = event.get("id")
-        title = event.get("summary", "event")
-        self.status.setText(f"Deleting {title}...")
+        event_id_val = event.get("id")
+        if not event_id_val:
+            self.status.setText("Error: Event ID missing")
+            return
 
         def delete():
-            return self.clients.calendar.delete_event(event_id)
+            assert isinstance(event_id_val, str)
+            return self.clients.calendar.delete_event(event_id_val)
 
         worker = ApiWorker(delete)
         worker.finished.connect(lambda _: self._load_events())

@@ -41,7 +41,7 @@ class DrivePage(QWidget):
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
-        self._workers: list[ApiWorker] = []
+        self._workers: list = []  # type: ignore[var-annotated]
         self._files: list[dict] = []
         self._setup_ui()
         self._load_root()

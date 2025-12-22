@@ -135,7 +135,7 @@ def _get_existing_contact(people_service: Any, resource_name: str) -> dict:
         resourceName=resource_name,
         personFields="names,emailAddresses,phoneNumbers",
     )
-    return execute_with_retry_http_error(get_request, is_write=False)
+    return execute_with_retry_http_error(get_request, is_write=False)  # type: ignore[no-any-return]
 
 
 @api_call("Contacts update", is_write=True)
@@ -224,15 +224,15 @@ class ContactsClient(BaseClient):
         sort_order: str = "FIRST_NAME_ASCENDING",
     ) -> list[dict]:
         """List contacts."""
-        return list_contacts(self.service, page_size=page_size, sort_order=sort_order)
+        return list_contacts(self.service, page_size=page_size, sort_order=sort_order)  # type: ignore[no-any-return]
 
     def search_contacts(self, query: str) -> list[dict]:
         """Search contacts."""
-        return search_contacts(self.service, query)
+        return search_contacts(self.service, query)  # type: ignore[no-any-return]
 
     def get_contact(self, resource_name: str) -> dict:
         """Get a specific contact."""
-        return get_contact_by_resource_name(self.service, resource_name)
+        return get_contact_by_resource_name(self.service, resource_name)  # type: ignore[no-any-return]
 
     def create_contact(
         self,
@@ -243,7 +243,7 @@ class ContactsClient(BaseClient):
         phone: str | None = None,
     ) -> dict:
         """Create a new contact."""
-        return create_contact(
+        return create_contact(  # type: ignore[no-any-return]
             self.service,
             given_name=given_name,
             family_name=family_name,
@@ -261,7 +261,7 @@ class ContactsClient(BaseClient):
         phone: str | None = None,
     ) -> dict:
         """Update an existing contact."""
-        return update_contact(
+        return update_contact(  # type: ignore[no-any-return]
             self.service,
             resource_name,
             given_name=given_name,

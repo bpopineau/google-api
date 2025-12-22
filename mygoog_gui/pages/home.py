@@ -296,8 +296,9 @@ class HomePage(QScrollArea):
     def _clear_layout(self, layout: QVBoxLayout) -> None:
         while layout.count():
             item = layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            widget = item.widget() if item else None
+            if widget:
+                widget.deleteLater()
 
     def _create_drive_card(self, f: dict) -> ItemCard:
         # Handle both raw API results and normalized global_search results

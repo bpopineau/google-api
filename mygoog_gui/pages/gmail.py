@@ -28,8 +28,8 @@ from mygoog_gui.styles import COLORS
 from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib.core.client import Clients
 
 
 class ComposeDialog(QDialog):
@@ -387,8 +387,13 @@ class GmailPage(QWidget):
         )
 
         # Load full message body
+        msg_id = self._selected_message_id
+        if not msg_id:
+            return
+
         def fetch_full():
-            return self.clients.gmail.get_message(self._selected_message_id)
+            assert msg_id is not None
+            return self.clients.gmail.get_message(msg_id)
 
         worker = ApiWorker(fetch_full)
         worker.finished.connect(self._on_full_message_loaded)
@@ -416,12 +421,14 @@ class GmailPage(QWidget):
 
     def _on_mark_read(self) -> None:
         """Mark selected message as read."""
-        if not self._selected_message_id:
+        msg_id = self._selected_message_id
+        if not msg_id:
             return
         self.status.setText("Marking as read...")
 
         def mark():
-            return self.clients.gmail.mark_read(self._selected_message_id)
+            assert msg_id is not None
+            return self.clients.gmail.mark_read(msg_id)
 
         worker = ApiWorker(mark)
         worker.finished.connect(lambda _: self._on_action_complete("Marked as read"))
@@ -431,12 +438,14 @@ class GmailPage(QWidget):
 
     def _on_archive(self) -> None:
         """Archive selected message."""
-        if not self._selected_message_id:
+        msg_id = self._selected_message_id
+        if not msg_id:
             return
         self.status.setText("Archiving...")
 
         def archive():
-            return self.clients.gmail.archive_message(self._selected_message_id)
+            assert msg_id is not None
+            return self.clients.gmail.archive_message(msg_id)
 
         worker = ApiWorker(archive)
         worker.finished.connect(lambda _: self._on_action_complete("Archived"))
@@ -446,12 +455,14 @@ class GmailPage(QWidget):
 
     def _on_trash(self) -> None:
         """Trash selected message."""
-        if not self._selected_message_id:
+        msg_id = self._selected_message_id
+        if not msg_id:
             return
         self.status.setText("Moving to trash...")
 
         def trash():
-            return self.clients.gmail.trash_message(self._selected_message_id)
+            assert msg_id is not None
+            return self.clients.gmail.trash_message(msg_id)
 
         worker = ApiWorker(trash)
         worker.finished.connect(lambda _: self._on_action_complete("Moved to trash"))

@@ -152,7 +152,7 @@ def create_folder(
 
     request = drive.files().create(body=metadata, fields="id")
     folder = execute_with_retry_http_error(request, is_write=True)
-    return folder if raw else folder["id"]
+    return folder if raw else folder["id"]  # type: ignore[no-any-return]
 
 
 def resolve_path(
@@ -265,7 +265,7 @@ def upload_file(
     else:
         result = execute_with_retry_http_error(request, is_write=True)
 
-    return result if raw else result["id"]
+    return result if raw else result["id"]  # type: ignore[no-any-return]
 
 
 @api_call("Drive download_file", is_write=False)
@@ -378,7 +378,7 @@ def _update_file(
 
     request = drive.files().update(fileId=file_id, media_body=media, fields="id")
     result = execute_with_retry_http_error(request, is_write=True)
-    return result["id"]
+    return result["id"]  # type: ignore[no-any-return]
 
 
 def sync_folder(
@@ -436,7 +436,7 @@ def sync_folder(
         )
         for f in existing:
             if f.get("name") == name:
-                return f["id"]
+                return f["id"]  # type: ignore[no-any-return]
 
         if dry_run:
             created += 1
@@ -544,7 +544,7 @@ class DriveClient(BaseClient):
         fields: str = DEFAULT_FIELDS,
     ) -> list[dict]:
         """List files matching criteria with pagination."""
-        return list_files(
+        return list_files(  # type: ignore[no-any-return]
             self.service,
             query=query,
             parent_id=parent_id,
@@ -578,7 +578,7 @@ class DriveClient(BaseClient):
         raw: bool = False,
     ) -> str | dict:
         """Create a folder in Drive."""
-        return create_folder(
+        return create_folder(  # type: ignore[no-any-return]
             self.service,
             name,
             parent_id=parent_id,
@@ -596,7 +596,7 @@ class DriveClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> str | dict:
         """Upload a local file to Drive."""
-        return upload_file(
+        return upload_file(  # type: ignore[no-any-return]
             self.service,
             local_path,
             parent_id=parent_id,
@@ -615,7 +615,7 @@ class DriveClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> Path:
         """Download a file from Drive."""
-        return download_file(
+        return download_file(  # type: ignore[no-any-return]
             self.service,
             file_id,
             dest_path,
@@ -630,7 +630,7 @@ class DriveClient(BaseClient):
         permanent: bool = False,
     ) -> None:
         """Delete a file or move it to trash."""
-        return delete_file(
+        return delete_file(  # type: ignore[no-any-return]
             self.service,
             file_id,
             permanent=permanent,

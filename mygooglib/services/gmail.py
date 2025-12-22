@@ -11,7 +11,7 @@ import mimetypes
 from collections.abc import Iterable, Sequence
 from email.message import EmailMessage
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
@@ -124,7 +124,7 @@ def send_email(
         metadata = json.dumps({"message_id": response.get("id")})
         store.add(idempotency_key, metadata=metadata)
 
-    return response if raw else response.get("id")
+    return cast(dict, response) if raw else cast(Any, response.get("id"))
 
 
 def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]:
@@ -165,7 +165,7 @@ def list_labels(
     request = gmail.users().labels().list(userId=user_id)
     response = execute_with_retry_http_error(request, is_write=False)
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
     labels = response.get("labels", [])
     # Sort: system labels first, then user labels alphabetically
     system = [lbl for lbl in labels if lbl.get("type") == "system"]
@@ -385,7 +385,7 @@ def get_message(
     response = execute_with_retry_http_error(request, is_write=False)
 
     if raw:
-        return response
+        return response  # type: ignore[no-any-return]
 
     payload = response.get("payload") or {}
     headers = _headers_to_dict(payload.get("headers"))
@@ -560,7 +560,7 @@ class GmailClient(BaseClient):
         idempotency_key: str | None = None,
     ) -> str | dict | None:
         """Send a plain-text email with optional file attachments."""
-        return send_email(
+        return send_email(  # type: ignore[no-any-return]
             self.service,
             to=to,
             subject=subject,
@@ -584,7 +584,7 @@ class GmailClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """Search Gmail and return lightweight message dicts."""
-        return search_messages(
+        return search_messages(  # type: ignore[no-any-return]
             self.service,
             query,
             user_id=user_id,
@@ -602,7 +602,7 @@ class GmailClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Mark a message as read by removing the UNREAD label."""
-        return mark_read(
+        return mark_read(  # type: ignore[no-any-return]
             self.service,
             message_id,
             user_id=user_id,
@@ -617,7 +617,7 @@ class GmailClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Move a message to trash."""
-        return trash_message(
+        return trash_message(  # type: ignore[no-any-return]
             self.service,
             message_id,
             user_id=user_id,
@@ -632,7 +632,7 @@ class GmailClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Archive a message by removing the INBOX label."""
-        return archive_message(
+        return archive_message(  # type: ignore[no-any-return]
             self.service,
             message_id,
             user_id=user_id,
@@ -647,7 +647,7 @@ class GmailClient(BaseClient):
         raw: bool = False,
     ) -> dict:
         """Get full message details including body."""
-        return get_message(
+        return get_message(  # type: ignore[no-any-return]
             self.service,
             message_id,
             user_id=user_id,
@@ -662,7 +662,7 @@ class GmailClient(BaseClient):
         user_id: str = "me",
     ) -> bytes:
         """Download a single attachment by ID."""
-        return get_attachment(
+        return get_attachment(  # type: ignore[no-any-return]
             self.service,
             message_id,
             attachment_id,
@@ -697,7 +697,7 @@ class GmailClient(BaseClient):
         raw: bool = False,
     ) -> list[dict] | dict:
         """List all labels in the user's mailbox."""
-        return list_labels(
+        return list_labels(  # type: ignore[no-any-return]
             self.service,
             user_id=user_id,
             raw=raw,

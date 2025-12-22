@@ -27,7 +27,7 @@ def create(docs: Any, title: str) -> str:
     """
     request = docs.documents().create(body={"title": title})
     response = execute_with_retry_http_error(request, is_write=True)
-    return response["documentId"]
+    return response["documentId"]  # type: ignore[no-any-return]
 
 
 @api_call("Docs get_text", is_write=False)
@@ -138,14 +138,14 @@ def render_template(
         )
 
     if not requests:
-        return new_doc if raw else new_doc_id
+        return new_doc if raw else new_doc_id  # type: ignore[no-any-return]
 
     update_request = docs.documents().batchUpdate(
         documentId=new_doc_id, body={"requests": requests}
     )
     response = execute_with_retry_http_error(update_request, is_write=True)
 
-    return response if raw else new_doc_id
+    return response if raw else new_doc_id  # type: ignore[no-any-return]
 
 
 def export_pdf(
@@ -167,7 +167,7 @@ def export_pdf(
     """
     from mygooglib.services.drive import download_file
 
-    return download_file(drive, doc_id, dest_path, export_mime_type="application/pdf")
+    return download_file(drive, doc_id, dest_path, export_mime_type="application/pdf")  # type: ignore[no-any-return]
 
 
 @api_call("Docs insert_table", is_write=True)
@@ -389,7 +389,7 @@ class DocsClient(BaseClient):
         raw: bool = False,
     ) -> str | dict:
         """Create a new document from a template by replacing placeholders."""
-        return render_template(
+        return render_template(  # type: ignore[no-any-return]
             self.service,
             template_id,
             data,
@@ -410,15 +410,15 @@ class DocsClient(BaseClient):
 
     def create(self, title: str) -> str:
         """Create a new empty document."""
-        return create(self.service, title)
+        return create(self.service, title)  # type: ignore[no-any-return]
 
     def get_text(self, doc_id: str) -> str:
         """Get all plain text from a document."""
-        return get_text(self.service, doc_id)
+        return get_text(self.service, doc_id)  # type: ignore[no-any-return]
 
     def append_text(self, doc_id: str, text: str) -> None:
         """Append text to the end of a document."""
-        return append_text(self.service, doc_id, text)
+        return append_text(self.service, doc_id, text)  # type: ignore[no-any-return]
 
     def find_replace(
         self,
@@ -428,7 +428,7 @@ class DocsClient(BaseClient):
         match_case: bool = True,
     ) -> int:
         """Perform multiple find-and-replace operations in a document."""
-        return find_replace(self.service, doc_id, replacements, match_case=match_case)
+        return find_replace(self.service, doc_id, replacements, match_case=match_case)  # type: ignore[no-any-return]
 
     def insert_table(
         self,
@@ -439,7 +439,7 @@ class DocsClient(BaseClient):
         index: int | None = None,
     ) -> int:
         """Insert a table into a document."""
-        return insert_table(self.service, doc_id, rows, headers=headers, index=index)
+        return insert_table(self.service, doc_id, rows, headers=headers, index=index)  # type: ignore[no-any-return]
 
     def render_list(
         self,
