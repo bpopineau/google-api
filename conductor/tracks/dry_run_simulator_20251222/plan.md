@@ -23,5 +23,5 @@ Implementation of a structured dry-run reporting system for destructive and modi
 ## Phase 4: Sync Enhancement and Integration
 - [x] Task: Update `sync_folder` in `mygooglib/services/drive.py` to return a list of `DryRunReport` objects.
 - [x] Task: Update `sync_folder` tests to verify the detailed report instead of just counts.
-- [~] Task: Perform final smoke test of all dry-run enabled functions.
-- [ ] Task: Conductor - User Manual Verification 'Sync Enhancement and Integration' (Protocol in workflow.md)
+- [x] Task: Perform final smoke test of all dry-run enabled functions.
+- [x] Task: Conductor - User Manual Verification 'Sync Enhancement and Integration' (Protocol in workflow.md)
