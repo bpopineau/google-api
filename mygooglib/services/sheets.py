@@ -10,6 +10,15 @@ import re
 from collections.abc import Sequence
 from typing import Any, cast
 
+from mygooglib.core.types import (
+    BatchGetValuesResponseDict,
+    BatchUpdateValuesResponseDict,
+    RangeData,
+    SheetInfoDict,
+    SpreadsheetDict,
+    UpdateValuesResponseDict,
+    ValueRangeDict,
+)
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
 
@@ -166,7 +175,7 @@ def get_range(
     raw: bool = False,
     chunk_size: int | None = None,
     progress_callback: Any | None = None,
-) -> list[list[Any]] | dict:
+) -> RangeData | ValueRangeDict:
     """Read a range of values from a spreadsheet.
 
     Args:
@@ -222,7 +231,11 @@ def get_range(
         )
         response = execute_with_retry_http_error(request, is_write=False)
 
-        return cast(dict, response) if raw else cast(Any, response.get("values", []))
+        return (
+            cast(ValueRangeDict, response)
+            if raw
+            else cast(RangeData, response.get("values", []))
+        )
 
     # Chunked reading logic
     # This is a simplified version that assumes a standard A1 range like "Sheet1!A1:C1000"
@@ -301,7 +314,7 @@ def update_range(
     response_value_render_option: str | None = None,
     response_date_time_render_option: str | None = None,
     raw: bool = False,
-) -> dict | None:
+) -> UpdateValuesResponseDict | None:
     """Update a range of values in a spreadsheet.
 
     Args:
@@ -384,7 +397,7 @@ def append_row(
     insert_data_option: str | None = None,
     include_values_in_response: bool = False,
     raw: bool = False,
-) -> dict | None:
+) -> UpdateValuesResponseDict | None:
     """Append a single row to the end of a sheet.
 
     Args:
@@ -448,12 +461,15 @@ def append_row(
         return None
 
     updates = response.get("updates") or {}
-    return {
-        "updatedRange": updates.get("updatedRange"),
-        "updatedRows": updates.get("updatedRows"),
-        "updatedColumns": updates.get("updatedColumns"),
-        "updatedCells": updates.get("updatedCells"),
-    }
+    return cast(
+        UpdateValuesResponseDict,
+        {
+            "updatedRange": updates.get("updatedRange"),
+            "updatedRows": updates.get("updatedRows"),
+            "updatedColumns": updates.get("updatedColumns"),
+            "updatedCells": updates.get("updatedCells"),
+        },
+    )
 
 
 @api_call("Sheets get_sheets", is_write=False)
@@ -465,7 +481,7 @@ def get_sheets(
     parent_id: str | None = None,
     allow_multiple: bool = False,
     raw: bool = False,
-) -> list[dict] | dict:
+) -> list[SheetInfoDict] | SpreadsheetDict:
     """Get metadata for all sheets (tabs) in a spreadsheet.
 
     Args:
@@ -509,7 +525,7 @@ def get_sheets(
                 "type": props.get("sheetType"),
             }
         )
-    return results
+    return cast(list[SheetInfoDict], results)
 
 
 def to_dataframe(
@@ -620,7 +636,7 @@ def batch_get(
     value_render_option: str | None = None,
     date_time_render_option: str | None = None,
     raw: bool = False,
-) -> dict[str, list[list[Any]]] | dict:
+) -> dict[str, RangeData] | BatchGetValuesResponseDict:
     """Read multiple ranges from a spreadsheet in a single API call.
 
     Args:
@@ -697,7 +713,7 @@ def batch_update(
     response_value_render_option: str | None = None,
     response_date_time_render_option: str | None = None,
     raw: bool = False,
-) -> dict:
+) -> BatchUpdateValuesResponseDict:
     """Update multiple ranges in a spreadsheet in a single API call.
 
     Args:

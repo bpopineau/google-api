@@ -17,14 +17,14 @@ Define the central registry and the first set of foundational schemas.
 ## Phase 2: Sheets Service Integration
 Integrate the new types into the Sheets service and enforce strict typing.
 
-- [~] Task: Red Phase - Sheets Typings
-    - [ ] Sub-task: Update `mygooglib/services/sheets.py` with import from `mygooglib.core.types`
-    - [ ] Sub-task: Change return type annotations to the new `TypedDicts`
-    - [ ] Sub-task: Run `uv run mypy mygooglib/services/sheets.py` and confirm failures (Red)
-- [ ] Task: Green Phase - Resolve Sheets Type Errors
-    - [ ] Sub-task: Fix any logic or annotation mismatches in `sheets.py` to satisfy mypy
-    - [ ] Sub-task: Run `pytest tests/test_sheets_exists.py` (and other sheets tests) to ensure zero regressions
-- [ ] Task: Conductor - User Manual Verification 'Sheets Service Integration' (Protocol in workflow.md)
+- [x] Task: Red Phase - Sheets Typings
+    - [x] Sub-task: Update `mygooglib/services/sheets.py` with import from `mygooglib.core.types`
+    - [x] Sub-task: Change return type annotations to the new `TypedDicts`
+    - [x] Sub-task: Run `uv run mypy mygooglib/services/sheets.py` and confirm failures (Red)
+- [x] Task: Green Phase - Resolve Sheets Type Errors
+    - [x] Sub-task: Fix any logic or annotation mismatches in `sheets.py` to satisfy mypy
+    - [x] Sub-task: Run `pytest tests/test_sheets_exists.py` (and other sheets tests) to ensure zero regressions
+- [~] Task: Conductor - User Manual Verification 'Sheets Service Integration' (Protocol in workflow.md)
 
 ## Phase 3: Gmail Service Integration
 Integrate the new types into the Gmail service.

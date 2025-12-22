@@ -202,6 +202,19 @@ class BatchUpdateValuesResponseDict(TypedDict, total=False):
     responses: list[UpdateValuesResponseDict]
 
 
+class SheetInfoDict(TypedDict, total=False):
+    """Simplified sheet metadata returned by get_sheets.
+
+    This is a library-specific type representing the normalized format
+    returned by the get_sheets function (not a raw API type).
+    """
+
+    title: str
+    id: int
+    index: int
+    type: str
+
+
 # =============================================================================
 # Gmail API Types
 # =============================================================================
