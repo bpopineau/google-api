@@ -21,16 +21,22 @@ from PySide6.QtWidgets import (
 from mygoog_gui.styles import COLORS
 from mygoog_gui.widgets.cards import ItemCard, StatCard
 from mygoog_gui.workers import ApiWorker
+from mygooglib.workflows import global_search
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib.core.client import Clients
 
 
 class HomePage(QScrollArea):
     """Dashboard home page with Global Search."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -242,12 +248,7 @@ class HomePage(QScrollArea):
         self._clear_layout(self.search_gmail_list)
 
         def fetch_search():
-            # Parallel-ish (sequential in worker)
-            d_results = self.clients.drive.list_files(
-                query=f"name contains '{query}'", page_size=10
-            )
-            g_results = self.clients.gmail.search_messages(query=query, max_results=10)
-            return d_results, g_results
+            return global_search(self.clients, query, limit=10)
 
         worker = ApiWorker(fetch_search)
         worker.finished.connect(lambda results: self._on_search_results(results, query))
@@ -255,22 +256,24 @@ class HomePage(QScrollArea):
         self._workers.append(worker)
         worker.start()
 
-    def _on_search_results(self, results: tuple[list, list], query: str) -> None:
-        drive_files, gmail_msgs = results
+    def _on_search_results(self, results: list[dict], query: str) -> None:
         self.results_header.setText(f"Results for '{query}'")
 
+        drive_results = [r for r in results if r["type"] == "drive"]
+        gmail_results = [r for r in results if r["type"] == "gmail"]
+
         # Render Drive
-        if not drive_files:
+        if not drive_results:
             self.search_drive_list.addWidget(QLabel("No matching files found."))
         else:
-            for f in drive_files:
+            for f in drive_results:
                 self.search_drive_list.addWidget(self._create_drive_card(f))
 
         # Render Gmail
-        if not gmail_msgs:
+        if not gmail_results:
             self.search_gmail_list.addWidget(QLabel("No matching emails found."))
         else:
-            for msg in gmail_msgs:
+            for msg in gmail_results:
                 self.search_gmail_list.addWidget(self._create_gmail_card(msg))
 
     def _on_search_error(self, e: Exception) -> None:
@@ -290,9 +293,11 @@ class HomePage(QScrollArea):
                 item.widget().deleteLater()
 
     def _create_drive_card(self, f: dict) -> ItemCard:
-        name = f.get("name", "Untitled")
-        mime = f.get("mimeType", "")
+        # Handle both raw API results and normalized global_search results
+        name = f.get("title") or f.get("name", "Untitled")
+        mime = f.get("mime_type") or f.get("mimeType", "")
         file_id = f.get("id", "")
+        snippet = f.get("snippet", "")
         icon = "📄"
         if "folder" in mime:
             icon = "📁"
@@ -304,7 +309,7 @@ class HomePage(QScrollArea):
         card = ItemCard(
             icon,
             name,
-            mime.split(".")[-1] if "." in mime else "",
+            snippet or (mime.split(".")[-1] if "." in mime else ""),
             actions=[("copy_id", "Copy ID")],
         )
         card.action_clicked.connect(
@@ -313,19 +318,26 @@ class HomePage(QScrollArea):
         return card
 
     def _create_gmail_card(self, msg: dict) -> ItemCard:
-        subject = msg.get("subject", "(No Subject)")
-        sender = msg.get("from", "Unknown")
+        # Handle both raw API results and normalized global_search results
+        subject = msg.get("title") or msg.get("subject", "(No Subject)")
+        sender = msg.get("from", "")
         snippet = msg.get("snippet", "")
         msg_id = msg.get("id", "")
 
         # Clean up sender
-        if "<" in sender:
+        if sender and "<" in sender:
             sender = sender.split("<")[0].strip().replace('"', "")
+
+        # Build subtitle
+        if sender:
+            subtitle = f"{sender} - {snippet[:60]}..." if snippet else sender
+        else:
+            subtitle = snippet[:80] + "..." if snippet else ""
 
         card = ItemCard(
             "✉️",
             subject,
-            f"{sender} - {snippet[:60]}...",
+            subtitle,
             actions=[("copy_id", "Copy ID")],
         )
         card.action_clicked.connect(lambda action: self._on_card_action(action, msg_id))
@@ -338,4 +350,3 @@ class HomePage(QScrollArea):
                 clipboard.setText(item_id)
             # Optional: Show toast/status
             pass
-
