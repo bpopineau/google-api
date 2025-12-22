@@ -31,13 +31,13 @@ Integrate the new types into the Gmail service.
 
 - [x] Task: Define Gmail Foundational Types [e9fc118]
     - [x] Sub-task: Define `MessageDict`, `ThreadDict`, and `LabelDict` in `types.py`
-- [~] Task: Red Phase - Gmail Typings
-    - [ ] Sub-task: Update `mygooglib/services/gmail.py` with new type annotations
-    - [ ] Sub-task: Run `uv run mypy mygooglib/services/gmail.py` and confirm failures (Red)
-- [ ] Task: Green Phase - Resolve Gmail Type Errors
-    - [ ] Sub-task: Fix mismatches in `gmail.py`
-    - [ ] Sub-task: Run `pytest tests/test_gmail_attachments.py` to ensure zero regressions
-- [ ] Task: Conductor - User Manual Verification 'Gmail Service Integration' (Protocol in workflow.md)
+- [x] Task: Red Phase - Gmail Typings
+    - [x] Sub-task: Update `mygooglib/services/gmail.py` with new type annotations
+    - [x] Sub-task: Run `uv run mypy mygooglib/services/gmail.py` and confirm failures (Red)
+- [x] Task: Green Phase - Resolve Gmail Type Errors
+    - [x] Sub-task: Fix mismatches in `gmail.py`
+    - [x] Sub-task: Run `pytest tests/test_gmail_attachments.py` to ensure zero regressions
+- [~] Task: Conductor - User Manual Verification 'Gmail Service Integration' (Protocol in workflow.md)
 
 ## Phase 4: Finalization & AI Context Map
 Expose types to the public API and update the agent "cheat sheet".

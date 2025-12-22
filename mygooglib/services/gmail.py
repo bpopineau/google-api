@@ -13,6 +13,14 @@ from email.message import EmailMessage
 from pathlib import Path
 from typing import Any, cast
 
+from mygooglib.core.types import (
+    AttachmentMetadataDict,
+    LabelDict,
+    MessageDict,
+    MessageFullDict,
+    MessageMetadataDict,
+    SendMessageResponseDict,
+)
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
 
@@ -62,7 +70,7 @@ def send_email(
     user_id: str = "me",
     raw: bool = False,
     idempotency_key: str | None = None,
-) -> str | dict | None:
+) -> str | SendMessageResponseDict | None:
     """Send a plain-text email with optional file attachments.
 
     Args:
@@ -124,7 +132,11 @@ def send_email(
         metadata = json.dumps({"message_id": response.get("id")})
         store.add(idempotency_key, metadata=metadata)
 
-    return cast(dict, response) if raw else cast(Any, response.get("id"))
+    return (
+        cast(SendMessageResponseDict, response)
+        if raw
+        else cast(str, response.get("id"))
+    )
 
 
 def _headers_to_dict(headers: Iterable[dict[str, str]] | None) -> dict[str, str]:
@@ -151,7 +163,7 @@ def list_labels(
     *,
     user_id: str = "me",
     raw: bool = False,
-) -> list[dict] | dict:
+) -> list[LabelDict] | dict:
     """List all labels in the user's mailbox.
 
     Args:
@@ -173,7 +185,7 @@ def list_labels(
         [lbl for lbl in labels if lbl.get("type") == "user"],
         key=lambda x: x.get("name", "").lower(),
     )
-    return system + user
+    return cast(list[LabelDict], system + user)
 
 
 @api_call("Gmail search_messages", is_write=False)
@@ -186,7 +198,7 @@ def search_messages(
     include_spam_trash: bool = False,
     raw: bool = False,
     progress_callback: Any | None = None,
-) -> list[dict] | dict:
+) -> list[MessageMetadataDict] | dict:
     """Search Gmail and return lightweight message dicts.
 
     Args:
@@ -301,7 +313,7 @@ def search_messages(
 
     if raw:
         return first_page or {"messages": []}
-    return collected
+    return cast(list[MessageMetadataDict], collected)
 
 
 @api_call("Gmail mark_read", is_write=True)
@@ -311,7 +323,7 @@ def mark_read(
     *,
     user_id: str = "me",
     raw: bool = False,
-) -> dict | None:
+) -> MessageDict | None:
     """Mark a message as read by removing the UNREAD label."""
     request = (
         gmail.users()
@@ -333,7 +345,7 @@ def trash_message(
     *,
     user_id: str = "me",
     raw: bool = False,
-) -> dict | None:
+) -> MessageDict | None:
     """Move a message to trash."""
     request = gmail.users().messages().trash(userId=user_id, id=message_id)
     response = execute_with_retry_http_error(request, is_write=True)
@@ -347,7 +359,7 @@ def archive_message(
     *,
     user_id: str = "me",
     raw: bool = False,
-) -> dict | None:
+) -> MessageDict | None:
     """Archive a message by removing the INBOX label."""
     request = (
         gmail.users()
@@ -369,7 +381,7 @@ def get_message(
     *,
     user_id: str = "me",
     raw: bool = False,
-) -> dict:
+) -> MessageFullDict | MessageDict:
     """Get full message details including body.
 
     Args:
@@ -402,16 +414,19 @@ def get_message(
             if data:
                 body += base64.urlsafe_b64decode(data).decode("utf-8")
 
-    return {
-        "id": response.get("id"),
-        "threadId": response.get("threadId"),
-        "subject": headers.get("subject"),
-        "from": headers.get("from"),
-        "to": headers.get("to"),
-        "date": headers.get("date"),
-        "snippet": response.get("snippet"),
-        "body": body,
-    }
+    return cast(
+        MessageFullDict,
+        {
+            "id": response.get("id"),
+            "threadId": response.get("threadId"),
+            "subject": headers.get("subject"),
+            "from": headers.get("from"),
+            "to": headers.get("to"),
+            "date": headers.get("date"),
+            "snippet": response.get("snippet"),
+            "body": body,
+        },
+    )
 
 
 @api_call("Gmail get_attachment", is_write=False)
@@ -444,12 +459,12 @@ def get_attachment(
     return base64.urlsafe_b64decode(data)
 
 
-def _extract_attachments(payload: dict) -> list[dict]:
+def _extract_attachments(payload: dict) -> list[AttachmentMetadataDict]:
     """Extract attachment metadata from message payload (internal helper).
 
     Returns list of dicts with keys: filename, attachment_id, mime_type, size
     """
-    attachments = []
+    attachments: list[AttachmentMetadataDict] = []
     parts = [payload]
     while parts:
         part = parts.pop(0)
@@ -466,7 +481,7 @@ def _extract_attachments(payload: dict) -> list[dict]:
                 {
                     "filename": filename,
                     "attachment_id": attachment_id,
-                    "mime_type": part.get("mimeType"),
+                    "mime_type": part.get("mimeType") or "",
                     "size": body.get("size", 0),
                 }
             )
