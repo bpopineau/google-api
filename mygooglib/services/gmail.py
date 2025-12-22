@@ -573,7 +573,7 @@ class GmailClient(BaseClient):
         user_id: str = "me",
         raw: bool = False,
         idempotency_key: str | None = None,
-    ) -> str | dict | None:
+    ) -> str | SendMessageResponseDict | None:
         """Send a plain-text email with optional file attachments."""
         return send_email(  # type: ignore[no-any-return]
             self.service,
@@ -597,7 +597,7 @@ class GmailClient(BaseClient):
         include_spam_trash: bool = False,
         raw: bool = False,
         progress_callback: Any | None = None,
-    ) -> list[dict] | dict:
+    ) -> list[MessageMetadataDict] | dict:
         """Search Gmail and return lightweight message dicts."""
         return search_messages(  # type: ignore[no-any-return]
             self.service,
@@ -615,7 +615,7 @@ class GmailClient(BaseClient):
         *,
         user_id: str = "me",
         raw: bool = False,
-    ) -> dict | None:
+    ) -> MessageDict | None:
         """Mark a message as read by removing the UNREAD label."""
         return mark_read(  # type: ignore[no-any-return]
             self.service,
@@ -630,7 +630,7 @@ class GmailClient(BaseClient):
         *,
         user_id: str = "me",
         raw: bool = False,
-    ) -> dict | None:
+    ) -> MessageDict | None:
         """Move a message to trash."""
         return trash_message(  # type: ignore[no-any-return]
             self.service,
@@ -645,7 +645,7 @@ class GmailClient(BaseClient):
         *,
         user_id: str = "me",
         raw: bool = False,
-    ) -> dict | None:
+    ) -> MessageDict | None:
         """Archive a message by removing the INBOX label."""
         return archive_message(  # type: ignore[no-any-return]
             self.service,
@@ -660,7 +660,7 @@ class GmailClient(BaseClient):
         *,
         user_id: str = "me",
         raw: bool = False,
-    ) -> dict:
+    ) -> MessageFullDict | MessageDict:
         """Get full message details including body."""
         return get_message(  # type: ignore[no-any-return]
             self.service,
@@ -710,7 +710,7 @@ class GmailClient(BaseClient):
         *,
         user_id: str = "me",
         raw: bool = False,
-    ) -> list[dict] | dict:
+    ) -> list[LabelDict] | dict:
         """List all labels in the user's mailbox."""
         return list_labels(  # type: ignore[no-any-return]
             self.service,

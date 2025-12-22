@@ -42,9 +42,9 @@ Integrate the new types into the Gmail service.
 ## Phase 4: Finalization & AI Context Map
 Expose types to the public API and update the agent "cheat sheet".
 
-- [~] Task: Public API Export
-    - [ ] Sub-task: Re-export core types in `mygooglib/__init__.py`
-- [ ] Task: Update Context Map
-    - [ ] Sub-task: Run `python scripts/generate_context_map.py`
-    - [ ] Sub-task: Verify `conductor/context_map.md` shows the new strict signatures
-- [ ] Task: Conductor - User Manual Verification 'Finalization & AI Context Map' (Protocol in workflow.md)
+- [x] Task: Public API Export
+    - [x] Sub-task: Re-export core types in `mygooglib/__init__.py`
+- [x] Task: Update Context Map
+    - [x] Sub-task: Run `python scripts/generate_context_map.py`
+    - [x] Sub-task: Verify `conductor/context_map.md` shows the new strict signatures
+- [~] Task: Conductor - User Manual Verification 'Finalization & AI Context Map' (Protocol in workflow.md)

@@ -94,36 +94,36 @@ def upload_file(self, local_path: 'str | os.PathLike', *, parent_id: 'str | None
 ## Service: `GmailClient`
 Defined in: `mygooglib.services.gmail`
 ```python
-def archive_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'dict | None':
+def archive_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'MessageDict | None':
     """Archive a message by removing the INBOX label."""
 def get_attachment(self, message_id: 'str', attachment_id: 'str', *, user_id: 'str' = 'me') -> 'bytes':
     """Download a single attachment by ID."""
-def get_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'dict':
+def get_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'MessageFullDict | MessageDict':
     """Get full message details including body."""
-def list_labels(self, *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'list[dict] | dict':
+def list_labels(self, *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'list[LabelDict] | dict':
     """List all labels in the user's mailbox."""
-def mark_read(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'dict | None':
+def mark_read(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'MessageDict | None':
     """Mark a message as read by removing the UNREAD label."""
 def save_attachments(self, query: 'str', dest_folder: 'str | Path', *, user_id: 'str' = 'me', max_messages: 'int' = 50, filename_filter: 'str | None' = None, progress_callback: 'Any | None' = None) -> 'list[Path]':
     """Save all attachments from messages matching a query to a folder."""
-def search_messages(self, query: 'str', *, user_id: 'str' = 'me', max_results: 'int' = 50, include_spam_trash: 'bool' = False, raw: 'bool' = False, progress_callback: 'Any | None' = None) -> 'list[dict] | dict':
+def search_messages(self, query: 'str', *, user_id: 'str' = 'me', max_results: 'int' = 50, include_spam_trash: 'bool' = False, raw: 'bool' = False, progress_callback: 'Any | None' = None) -> 'list[MessageMetadataDict] | dict':
     """Search Gmail and return lightweight message dicts."""
-def send_email(self, *, to: 'str | Sequence[str]', subject: 'str', body: 'str', attachments: 'Sequence[str | Path] | None' = None, cc: 'str | Sequence[str] | None' = None, bcc: 'str | Sequence[str] | None' = None, user_id: 'str' = 'me', raw: 'bool' = False, idempotency_key: 'str | None' = None) -> 'str | dict | None':
+def send_email(self, *, to: 'str | Sequence[str]', subject: 'str', body: 'str', attachments: 'Sequence[str | Path] | None' = None, cc: 'str | Sequence[str] | None' = None, bcc: 'str | Sequence[str] | None' = None, user_id: 'str' = 'me', raw: 'bool' = False, idempotency_key: 'str | None' = None) -> 'str | SendMessageResponseDict | None':
     """Send a plain-text email with optional file attachments."""
-def trash_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'dict | None':
+def trash_message(self, message_id: 'str', *, user_id: 'str' = 'me', raw: 'bool' = False) -> 'MessageDict | None':
     """Move a message to trash."""
 ```
 
 ## Service: `SheetsClient`
 Defined in: `mygooglib.services.sheets`
 ```python
-def append_row(self, spreadsheet_id: 'str', sheet_name: 'str', values: 'Sequence[Any]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', insert_data_option: 'str | None' = None, include_values_in_response: 'bool' = False, raw: 'bool' = False) -> 'dict | None':
+def append_row(self, spreadsheet_id: 'str', sheet_name: 'str', values: 'Sequence[Any]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', insert_data_option: 'str | None' = None, include_values_in_response: 'bool' = False, raw: 'bool' = False) -> 'UpdateValuesResponseDict | None':
     """Append a single row to the end of a sheet."""
 def batch(self, spreadsheet_id: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW') -> 'BatchUpdater':
     """Create a batch context manager for efficient bulk updates."""
-def batch_get(self, spreadsheet_id: 'str', ranges: 'list[str]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, major_dimension: 'str | None' = None, value_render_option: 'str | None' = None, date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'dict[str, list[list[Any]]] | dict':
+def batch_get(self, spreadsheet_id: 'str', ranges: 'list[str]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, major_dimension: 'str | None' = None, value_render_option: 'str | None' = None, date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'dict[str, RangeData] | BatchGetValuesResponseDict':
     """Read multiple ranges from a spreadsheet in a single API call."""
-def batch_update(self, spreadsheet_id: 'str', updates: 'list[dict[str, Any]]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', include_values_in_response: 'bool' = False, response_value_render_option: 'str | None' = None, response_date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'dict':
+def batch_update(self, spreadsheet_id: 'str', updates: 'list[dict[str, Any]]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', include_values_in_response: 'bool' = False, response_value_render_option: 'str | None' = None, response_date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'BatchUpdateValuesResponseDict':
     """Update multiple ranges in a spreadsheet in a single API call."""
 def batch_write(self, spreadsheet_id: 'str', sheet_name: 'str', rows: 'Sequence[Sequence[Any]]', *, headers: 'Sequence[str] | None' = None, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, clear: 'bool' = False, start_cell: 'str' = 'A1') -> 'dict | None':
     """Write a batch of rows to a sheet, optionally clearing it first."""
@@ -135,9 +135,9 @@ def exists(self, identifier: 'str') -> 'bool':
     """Check if a spreadsheet exists by ID, Title, or URL."""
 def from_dataframe(self, spreadsheet_id: 'str', sheet_name: 'str', df: "'pd.DataFrame'", *, start_cell: 'str' = 'A1', include_header: 'bool' = True, include_index: 'bool' = False, resize: 'bool' = False) -> 'dict | None':
     """Write a Pandas DataFrame to a sheet."""
-def get_range(self, spreadsheet_id: 'str', a1_range: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, major_dimension: 'str | None' = None, value_render_option: 'str | None' = None, date_time_render_option: 'str | None' = None, raw: 'bool' = False, chunk_size: 'int | None' = None, progress_callback: 'Any | None' = None) -> 'list[list[Any]] | dict':
+def get_range(self, spreadsheet_id: 'str', a1_range: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, major_dimension: 'str | None' = None, value_render_option: 'str | None' = None, date_time_render_option: 'str | None' = None, raw: 'bool' = False, chunk_size: 'int | None' = None, progress_callback: 'Any | None' = None) -> 'RangeData | ValueRangeDict':
     """Read a range of values from a spreadsheet."""
-def get_sheets(self, spreadsheet_id: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, raw: 'bool' = False) -> 'list[dict] | dict':
+def get_sheets(self, spreadsheet_id: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, raw: 'bool' = False) -> 'list[SheetInfoDict] | SpreadsheetDict':
     """Get metadata for all sheets (tabs) in a spreadsheet."""
 def open_by_title(self, title: 'str', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False) -> 'str':
     """Find a Google Sheet by title using the Drive API."""
@@ -145,7 +145,7 @@ def resolve_spreadsheet(self, identifier: 'str', *, parent_id: 'str | None' = No
     """Resolve a spreadsheet identifier (ID, title, or URL) to an ID."""
 def to_dataframe(self, spreadsheet_id: 'str', a1_range: 'str', *, header: 'bool' = True) -> "'pd.DataFrame'":
     """Read a range into a Pandas DataFrame."""
-def update_range(self, spreadsheet_id: 'str', a1_range: 'str', values: 'Sequence[Sequence[Any]]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', include_values_in_response: 'bool' = False, response_value_render_option: 'str | None' = None, response_date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'dict | None':
+def update_range(self, spreadsheet_id: 'str', a1_range: 'str', values: 'Sequence[Sequence[Any]]', *, parent_id: 'str | None' = None, allow_multiple: 'bool' = False, value_input_option: 'str' = 'RAW', include_values_in_response: 'bool' = False, response_value_render_option: 'str | None' = None, response_date_time_render_option: 'str | None' = None, raw: 'bool' = False) -> 'UpdateValuesResponseDict | None':
     """Update a range of values in a spreadsheet."""
 ```
 

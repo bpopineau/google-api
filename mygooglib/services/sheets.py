@@ -925,7 +925,7 @@ class SheetsClient(BaseClient):
         raw: bool = False,
         chunk_size: int | None = None,
         progress_callback: Any | None = None,
-    ) -> list[list[Any]] | dict:
+    ) -> RangeData | ValueRangeDict:
         """Read a range of values from a spreadsheet."""
         return get_range(  # type: ignore[no-any-return]
             self.service,
@@ -955,7 +955,7 @@ class SheetsClient(BaseClient):
         response_value_render_option: str | None = None,
         response_date_time_render_option: str | None = None,
         raw: bool = False,
-    ) -> dict | None:
+    ) -> UpdateValuesResponseDict | None:
         """Update a range of values in a spreadsheet."""
         return update_range(  # type: ignore[no-any-return]
             self.service,
@@ -984,7 +984,7 @@ class SheetsClient(BaseClient):
         insert_data_option: str | None = None,
         include_values_in_response: bool = False,
         raw: bool = False,
-    ) -> dict | None:
+    ) -> UpdateValuesResponseDict | None:
         """Append a single row to the end of a sheet."""
         return append_row(  # type: ignore[no-any-return]
             self.service,
@@ -1007,7 +1007,7 @@ class SheetsClient(BaseClient):
         parent_id: str | None = None,
         allow_multiple: bool = False,
         raw: bool = False,
-    ) -> list[dict] | dict:
+    ) -> list[SheetInfoDict] | SpreadsheetDict:
         """Get metadata for all sheets (tabs) in a spreadsheet."""
         return get_sheets(  # type: ignore[no-any-return]
             self.service,
@@ -1068,7 +1068,7 @@ class SheetsClient(BaseClient):
         value_render_option: str | None = None,
         date_time_render_option: str | None = None,
         raw: bool = False,
-    ) -> dict[str, list[list[Any]]] | dict:
+    ) -> dict[str, RangeData] | BatchGetValuesResponseDict:
         """Read multiple ranges from a spreadsheet in a single API call."""
         return batch_get(  # type: ignore[no-any-return]
             self.service,
@@ -1095,7 +1095,7 @@ class SheetsClient(BaseClient):
         response_value_render_option: str | None = None,
         response_date_time_render_option: str | None = None,
         raw: bool = False,
-    ) -> dict:
+    ) -> BatchUpdateValuesResponseDict:
         """Update multiple ranges in a spreadsheet in a single API call."""
         return batch_update(  # type: ignore[no-any-return]
             self.service,

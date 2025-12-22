@@ -14,11 +14,29 @@ from mygooglib.core.client import Clients, get_clients
 from mygooglib.core.config import AppConfig
 from mygooglib.core.exceptions import GoogleApiError
 
+# Re-export high-value types for strict typing
+from mygooglib.core.types import (
+    # Gmail types
+    AttachmentMetadataDict,
+    LabelDict,
+    MessageDict,
+    MessageFullDict,
+    MessageMetadataDict,
+    # Sheets types
+    RangeData,
+    SendMessageResponseDict,
+    SheetInfoDict,
+    SpreadsheetDict,
+    UpdateValuesResponseDict,
+    ValueRangeDict,
+)
+
 # Non-breaking aliases for a cleaner public API.
 create = get_clients
 create_clients = get_clients
 
 __all__ = [
+    # Core API
     "get_creds",
     "get_clients",
     "Clients",
@@ -26,4 +44,17 @@ __all__ = [
     "create_clients",
     "GoogleApiError",
     "AppConfig",
+    # Sheets Types
+    "RangeData",
+    "SheetInfoDict",
+    "SpreadsheetDict",
+    "UpdateValuesResponseDict",
+    "ValueRangeDict",
+    # Gmail Types
+    "AttachmentMetadataDict",
+    "LabelDict",
+    "MessageDict",
+    "MessageFullDict",
+    "MessageMetadataDict",
+    "SendMessageResponseDict",
 ]
