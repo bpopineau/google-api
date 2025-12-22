@@ -4,6 +4,45 @@ from __future__ import annotations
 
 from typing import Any
 
+from mygooglib.core.types import DryRunReport
+
+
+def make_dry_run_report(
+    action: str,
+    resource_id: str,
+    details: dict[str, Any] | None = None,
+    reason: str | None = None,
+) -> DryRunReport:
+    """Create a DryRunReport for a dry-run operation.
+
+    This factory function ensures consistent structure across all dry-run
+    operations in the library.
+
+    Args:
+        action: Operation identifier (e.g., "drive.delete", "sheets.update").
+        resource_id: The ID or identifier of the affected resource.
+        details: Dictionary of proposed changes. Defaults to empty dict.
+        reason: Optional explanation for the operation.
+
+    Returns:
+        A DryRunReport TypedDict with the specified fields.
+
+    Example:
+        >>> report = make_dry_run_report(
+        ...     "drive.delete",
+        ...     "abc123",
+        ...     {"file_name": "test.txt", "permanent": False}
+        ... )
+    """
+    report: DryRunReport = {
+        "action": action,
+        "resource_id": resource_id,
+        "details": details or {},
+    }
+    if reason is not None:
+        report["reason"] = reason
+    return report
+
 
 class BaseClient:
     """Base class for Google API service wrappers.

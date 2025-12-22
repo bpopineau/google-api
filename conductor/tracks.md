@@ -22,3 +22,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: Integration Test Recording (VHS)
 
 *Link: [./conductor/tracks/vcr_integration_20251222/](./conductor/tracks/vcr_integration_20251222/)*
+
+---
+
+## [~] Track: Verbose Dry Run Simulator
+*Link: [./conductor/tracks/dry_run_simulator_20251222/](./conductor/tracks/dry_run_simulator_20251222/)*

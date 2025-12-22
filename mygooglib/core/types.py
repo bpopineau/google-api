@@ -368,3 +368,32 @@ class SendMessageResponseDict(TypedDict, total=False):
 CellValue = str | int | float | bool | None
 RowData = list[CellValue]
 RangeData = list[RowData]
+
+
+# =============================================================================
+# Dry Run Types
+# =============================================================================
+
+
+class DryRunReport(TypedDict, total=False):
+    """Report returned when an operation is run with dry_run=True.
+
+    This provides a structured preview of what the operation would do
+    without actually performing it.
+
+    Attributes:
+        action: Operation identifier (e.g., "drive.delete", "sheets.update").
+        resource_id: The ID or name of the affected resource.
+        details: Dictionary of proposed changes. Contents vary by operation:
+            - drive.delete: {"file_name": "...", "permanent": bool}
+            - drive.upload: {"local_path": "...", "parent_id": "...", "name": "..."}
+            - drive.create_folder: {"name": "...", "parent_id": "..."}
+            - sheets.update: {"range": "...", "values_preview": [...], "total_cells": int}
+            - sheets.append: {"range": "...", "row_count": int}
+        reason: Optional explanation (useful for sync operations).
+    """
+
+    action: str
+    resource_id: str
+    details: dict[str, Any]
+    reason: str
