@@ -39,7 +39,7 @@ Integrate the new types into the Gmail service.
     - [x] Sub-task: Run `pytest tests/test_gmail_attachments.py` to ensure zero regressions
 - [x] Task: Conductor - User Manual Verification 'Gmail Service Integration' [9b20304]
 
-## Phase 4: Finalization & AI Context Map
+## Phase 4: Finalization & AI Context Map [checkpoint: 5815d8e]
 Expose types to the public API and update the agent "cheat sheet".
 
 - [x] Task: Public API Export
@@ -47,4 +47,4 @@ Expose types to the public API and update the agent "cheat sheet".
 - [x] Task: Update Context Map
     - [x] Sub-task: Run `python scripts/generate_context_map.py`
     - [x] Sub-task: Verify `conductor/context_map.md` shows the new strict signatures
-- [~] Task: Conductor - User Manual Verification 'Finalization & AI Context Map' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Finalization & AI Context Map' [5815d8e]
