@@ -6,12 +6,12 @@ Implementation of a structured dry-run reporting system for destructive and modi
 - [x] Task: Define `DryRunReport` TypedDict in `mygooglib/core/types.py`.
 - [x] Task: Create `tests/test_dry_run_foundation.py` to verify report structure.
 - [x] Task: Implement a helper or base logic in `mygooglib/core/utils/base.py` (or similar) to handle the dry-run return pattern.
-- [ ] Task: Conductor - User Manual Verification 'Foundation and Shared Logic' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Foundation and Shared Logic' (Protocol in workflow.md)
 
 ## Phase 2: Drive API Implementation
-- [ ] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `delete_file`.
-- [ ] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `upload_file` and `create_folder`.
-- [ ] Task: Implement unit tests in `tests/services/test_drive_dry_run.py` (mocking Google API calls).
+- [x] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `delete_file`.
+- [x] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `upload_file` and `create_folder`.
+- [x] Task: Implement unit tests in `tests/services/test_drive_dry_run.py` (mocking Google API calls).
 - [ ] Task: Conductor - User Manual Verification 'Drive API Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Sheets API Implementation

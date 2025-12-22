@@ -9,7 +9,8 @@ from typing import Any
 
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
 
-from mygooglib.core.utils.base import BaseClient
+from mygooglib.core.types import DryRunReport
+from mygooglib.core.utils.base import BaseClient, make_dry_run_report
 from mygooglib.core.utils.logging import get_logger
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
 
@@ -132,17 +133,28 @@ def create_folder(
     *,
     parent_id: str | None = None,
     raw: bool = False,
-) -> str | dict:
+    dry_run: bool = False,
+) -> str | dict | DryRunReport:
     """Create a folder in Drive.
 
     Args:
         drive: Drive API Resource
         name: Folder name
         parent_id: Parent folder ID (None = root)
+        raw: If True, return full API response
+        dry_run: If True, return DryRunReport without creating folder
 
     Returns:
         The new folder's ID by default. If raw=True, returns the full API response.
+        If dry_run=True, returns a DryRunReport.
     """
+    if dry_run:
+        return make_dry_run_report(
+            "drive.create_folder",
+            "pending",
+            {"name": name, "parent_id": parent_id or "root"},
+        )
+
     metadata: dict = {
         "name": name,
         "mimeType": FOLDER_MIME_TYPE,
@@ -223,8 +235,9 @@ def upload_file(
     name: str | None = None,
     mime_type: str | None = None,
     raw: bool = False,
+    dry_run: bool = False,
     progress_callback: Any | None = None,
-) -> str | dict:
+) -> str | dict | DryRunReport:
     """Upload a local file to Drive.
 
     Args:
@@ -233,10 +246,13 @@ def upload_file(
         parent_id: Destination folder ID (None = root)
         name: Name in Drive (None = use local filename)
         mime_type: Override MIME type (None = auto-detect)
+        raw: If True, return full API response
+        dry_run: If True, return DryRunReport without uploading
         progress_callback: Optional callable(bytes_sent, total_bytes)
 
     Returns:
         The uploaded file's ID by default. If raw=True, returns the full API response.
+        If dry_run=True, returns a DryRunReport.
     """
     path = Path(local_path)
     if not path.exists():
@@ -246,6 +262,19 @@ def upload_file(
     detected_mime = (
         mime_type or mimetypes.guess_type(str(path))[0] or "application/octet-stream"
     )
+
+    if dry_run:
+        return make_dry_run_report(
+            "drive.upload",
+            "pending",
+            {
+                "local_path": str(path),
+                "name": file_name,
+                "parent_id": parent_id or "root",
+                "mime_type": detected_mime,
+                "size_bytes": path.stat().st_size,
+            },
+        )
 
     metadata: dict = {"name": file_name}
     if parent_id:
@@ -333,19 +362,40 @@ def delete_file(
     file_id: str,
     *,
     permanent: bool = False,
-) -> None:
+    dry_run: bool = False,
+) -> None | DryRunReport:
     """Delete a file or move it to trash.
 
     Args:
         drive: Drive API Resource
         file_id: ID of file to delete
         permanent: If True, delete permanently. If False (default), move to trash.
+        dry_run: If True, return DryRunReport without deleting
+
+    Returns:
+        None on success. If dry_run=True, returns a DryRunReport.
     """
+    if dry_run:
+        # Try to get the file name for a better report
+        try:
+            request = drive.files().get(fileId=file_id, fields="name")
+            file_meta = execute_with_retry_http_error(request, is_write=False)
+            file_name = file_meta.get("name", "unknown")
+        except Exception:
+            file_name = "unknown"
+
+        return make_dry_run_report(
+            "drive.delete",
+            file_id,
+            {"file_name": file_name, "permanent": permanent},
+        )
+
     if permanent:
         request = drive.files().delete(fileId=file_id)
     else:
         request = drive.files().update(fileId=file_id, body={"trashed": True})
     execute_with_retry_http_error(request, is_write=True)
+    return None
 
 
 @api_call("Drive _update_file", is_write=True)
@@ -576,13 +626,15 @@ class DriveClient(BaseClient):
         *,
         parent_id: str | None = None,
         raw: bool = False,
-    ) -> str | dict:
+        dry_run: bool = False,
+    ) -> str | dict | DryRunReport:
         """Create a folder in Drive."""
         return create_folder(  # type: ignore[no-any-return]
             self.service,
             name,
             parent_id=parent_id,
             raw=raw,
+            dry_run=dry_run,
         )
 
     def upload_file(
@@ -593,8 +645,9 @@ class DriveClient(BaseClient):
         name: str | None = None,
         mime_type: str | None = None,
         raw: bool = False,
+        dry_run: bool = False,
         progress_callback: Any | None = None,
-    ) -> str | dict:
+    ) -> str | dict | DryRunReport:
         """Upload a local file to Drive."""
         return upload_file(  # type: ignore[no-any-return]
             self.service,
@@ -603,6 +656,7 @@ class DriveClient(BaseClient):
             name=name,
             mime_type=mime_type,
             raw=raw,
+            dry_run=dry_run,
             progress_callback=progress_callback,
         )
 
@@ -628,12 +682,14 @@ class DriveClient(BaseClient):
         file_id: str,
         *,
         permanent: bool = False,
-    ) -> None:
+        dry_run: bool = False,
+    ) -> None | DryRunReport:
         """Delete a file or move it to trash."""
         return delete_file(  # type: ignore[no-any-return]
             self.service,
             file_id,
             permanent=permanent,
+            dry_run=dry_run,
         )
 
     def sync_folder(
