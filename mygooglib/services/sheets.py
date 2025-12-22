@@ -13,13 +13,14 @@ from typing import Any, cast
 from mygooglib.core.types import (
     BatchGetValuesResponseDict,
     BatchUpdateValuesResponseDict,
+    DryRunReport,
     RangeData,
     SheetInfoDict,
     SpreadsheetDict,
     UpdateValuesResponseDict,
     ValueRangeDict,
 )
-from mygooglib.core.utils.base import BaseClient
+from mygooglib.core.utils.base import BaseClient, make_dry_run_report
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
 
 try:
@@ -314,7 +315,8 @@ def update_range(
     response_value_render_option: str | None = None,
     response_date_time_render_option: str | None = None,
     raw: bool = False,
-) -> UpdateValuesResponseDict | None:
+    dry_run: bool = False,
+) -> UpdateValuesResponseDict | DryRunReport | None:
     """Update a range of values in a spreadsheet.
 
     Args:
@@ -330,11 +332,30 @@ def update_range(
             response_value_render_option: Optional render option for returned values
             response_date_time_render_option: Optional datetime render option
             raw: If True, return the full API response dict
+            dry_run: If True, return DryRunReport without writing
 
     Returns:
             Small summary dict by default, or full response if raw=True.
-            Returns None if the API returns an empty response.
+            If dry_run=True, returns a DryRunReport.
     """
+    # Calculate cell count for dry_run report
+    total_cells = sum(len(row) for row in values) if values else 0
+    total_rows = len(values) if values else 0
+
+    if dry_run:
+        # Preview: show first few rows/values
+        preview = [list(row)[:5] for row in values[:3]] if values else []
+        return make_dry_run_report(
+            "sheets.update",
+            spreadsheet_id,
+            {
+                "range": a1_range,
+                "total_rows": total_rows,
+                "total_cells": total_cells,
+                "values_preview": preview,
+            },
+        )
+
     spreadsheet_real_id = (
         resolve_spreadsheet(
             drive,
@@ -397,7 +418,8 @@ def append_row(
     insert_data_option: str | None = None,
     include_values_in_response: bool = False,
     raw: bool = False,
-) -> UpdateValuesResponseDict | None:
+    dry_run: bool = False,
+) -> UpdateValuesResponseDict | DryRunReport | None:
     """Append a single row to the end of a sheet.
 
     Args:
@@ -412,10 +434,25 @@ def append_row(
             insert_data_option: "INSERT_ROWS" or "OVERWRITE" (optional)
             include_values_in_response: If True, response includes written values
             raw: If True, return full API response
+            dry_run: If True, return DryRunReport without appending
 
     Returns:
             Small summary dict by default, or full response if raw=True.
+            If dry_run=True, returns a DryRunReport.
     """
+    if dry_run:
+        # Preview: show first few values
+        preview = list(values)[:10] if values else []
+        return make_dry_run_report(
+            "sheets.append",
+            spreadsheet_id,
+            {
+                "sheet_name": sheet_name,
+                "column_count": len(values) if values else 0,
+                "values_preview": preview,
+            },
+        )
+
     spreadsheet_real_id = (
         resolve_spreadsheet(
             drive,
@@ -713,7 +750,8 @@ def batch_update(
     response_value_render_option: str | None = None,
     response_date_time_render_option: str | None = None,
     raw: bool = False,
-) -> BatchUpdateValuesResponseDict:
+    dry_run: bool = False,
+) -> BatchUpdateValuesResponseDict | DryRunReport:
     """Update multiple ranges in a spreadsheet in a single API call.
 
     Args:
@@ -729,11 +767,35 @@ def batch_update(
         response_value_render_option: Optional render option for returned values
         response_date_time_render_option: Optional datetime render option
         raw: If True, return the full API response dict
+        dry_run: If True, return DryRunReport without writing
 
     Returns:
         Summary dict with totalUpdatedRows, totalUpdatedCells, etc.
         If raw=True, returns the full API response.
+        If dry_run=True, returns a DryRunReport.
     """
+    if dry_run:
+        # Calculate totals and build preview
+        total_cells = sum(
+            sum(len(row) for row in update.get("values", [])) for update in updates
+        )
+        ranges_preview = [
+            {
+                "range": update.get("range"),
+                "rows": len(update.get("values", [])),
+            }
+            for update in updates[:5]  # Show first 5 ranges
+        ]
+        return make_dry_run_report(
+            "sheets.batch_update",
+            spreadsheet_id,
+            {
+                "range_count": len(updates),
+                "total_cells": total_cells,
+                "ranges_preview": ranges_preview,
+            },
+        )
+
     spreadsheet_real_id = (
         resolve_spreadsheet(
             drive,

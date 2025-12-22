@@ -12,12 +12,12 @@ Implementation of a structured dry-run reporting system for destructive and modi
 - [x] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `delete_file`.
 - [x] Task: Add `dry_run` support to `mygooglib/services/drive.py`: `upload_file` and `create_folder`.
 - [x] Task: Implement unit tests in `tests/services/test_drive_dry_run.py` (mocking Google API calls).
-- [ ] Task: Conductor - User Manual Verification 'Drive API Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Drive API Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Sheets API Implementation
-- [ ] Task: Add `dry_run` support to `mygooglib/services/sheets.py`: `update_values` and `batch_update_values`.
-- [ ] Task: Add `dry_run` support to `mygooglib/services/sheets.py`: `append_values`.
-- [ ] Task: Implement unit tests in `tests/services/test_sheets_dry_run.py`.
+- [x] Task: Add `dry_run` support to `mygooglib/services/sheets.py`: `update_values` and `batch_update_values`.
+- [x] Task: Add `dry_run` support to `mygooglib/services/sheets.py`: `append_values`.
+- [x] Task: Implement unit tests in `tests/services/test_sheets_dry_run.py`.
 - [ ] Task: Conductor - User Manual Verification 'Sheets API Implementation' (Protocol in workflow.md)
 
 ## Phase 4: Sync Enhancement and Integration
