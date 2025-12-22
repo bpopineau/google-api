@@ -21,7 +21,7 @@ This guide covers how to set up Google OAuth credentials and configure the `mygo
 
 The Desktop Application stores your preferences (Theme, Window Size, etc.) in a JSON file:
 
-- **Path**: `~/.mygooglib/config.json`
+- **Path**: `~/.mygoog/config.json`
 - **Format**:
   ```json
   {
@@ -51,3 +51,6 @@ The library automatically handles transient errors (like "Rate Limit Exceeded").
 
 - `MYGOOGLIB_RETRY_ENABLED`: `1` (default)
 - `MYGOOGLIB_RETRY_ATTEMPTS_READ`: `4` (default)
+
+
+

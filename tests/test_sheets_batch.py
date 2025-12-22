@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.sheets import BatchUpdater
+from mygooglib.services.sheets import BatchUpdater
 
 
 @pytest.fixture
@@ -38,7 +38,7 @@ def test_batch_updater_append_method(mock_sheets):
     }
 
 
-@patch("mygooglib.sheets.batch_update")
+@patch("mygooglib.services.sheets.batch_update")
 def test_batch_updater_commits_on_exit(mock_batch_update, mock_sheets):
     """Test that updates are committed on context exit."""
     mock_batch_update.return_value = {"totalUpdatedCells": 8}
@@ -56,7 +56,7 @@ def test_batch_updater_commits_on_exit(mock_batch_update, mock_sheets):
     assert len(args[2]) == 2  # Two updates
 
 
-@patch("mygooglib.sheets.batch_update")
+@patch("mygooglib.services.sheets.batch_update")
 def test_batch_updater_no_commit_on_exception(mock_batch_update, mock_sheets):
     """Test that updates are NOT committed if an exception occurs."""
     try:
@@ -70,10 +70,12 @@ def test_batch_updater_no_commit_on_exception(mock_batch_update, mock_sheets):
     mock_batch_update.assert_not_called()
 
 
-@patch("mygooglib.sheets.batch_update")
+@patch("mygooglib.services.sheets.batch_update")
 def test_batch_updater_no_commit_if_empty(mock_batch_update, mock_sheets):
     """Test that batch_update is not called if no updates were queued."""
     with BatchUpdater(mock_sheets, "test-spreadsheet-id"):
         pass  # No updates
 
     mock_batch_update.assert_not_called()
+
+

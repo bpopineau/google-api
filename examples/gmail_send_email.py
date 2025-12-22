@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mygooglib import get_clients
-from mygooglib.gmail import send_email
+from mygooglib.services.gmail import send_email
 
 TO = "you@example.com"  # replace
 
@@ -22,3 +22,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

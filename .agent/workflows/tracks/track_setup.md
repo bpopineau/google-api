@@ -158,3 +158,4 @@ description: One-time project scaffolding - creates conductor context files
 **Output:** Present summary of all created artifacts to user.
 
 **Gate:** Confirm user reviews and approves context files before first track.
+

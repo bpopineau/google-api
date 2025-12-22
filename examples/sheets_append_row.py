@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mygooglib import get_clients
-from mygooglib.sheets import append_row
+from mygooglib.services.sheets import append_row
 
 # Replace with your spreadsheet title, ID, or full URL.
 SPREADSHEET = "Your Sheet Title"
@@ -25,3 +25,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

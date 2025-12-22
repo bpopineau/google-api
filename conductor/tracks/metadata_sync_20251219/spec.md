@@ -17,7 +17,7 @@ This track implements a core automation workflow: syncing local file metadata to
 
 ### 3.2. Backend Logic
 *   **File Scanner:** A utility to read a directory and extract `filename`, `absolute_path`, and `last_modified_timestamp` for each file.
-*   **Sheets Adapter:** Extensions to the existing `mygooglib.sheets` module to handle batch writing (clearing old data or appending new rows).
+*   **Sheets Adapter:** Extensions to the existing `mygooglib.services.sheets` module to handle batch writing (clearing old data or appending new rows).
 *   **Workflow Engine:** A controller that coordinates the scanning and uploading process in a background thread to keep the UI responsive.
 
 ## 4. Non-Functional Requirements
@@ -29,3 +29,5 @@ This track implements a core automation workflow: syncing local file metadata to
 *   Use `PySide6` for all UI components.
 *   Use `QThread` or `QRunnable` for background processing.
 *   Reuse `mygooglib` for Google API interactions.
+
+

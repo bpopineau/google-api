@@ -43,7 +43,7 @@ python scripts/check_token_refresh.py
 List a few files:
 ```python
 from mygooglib import get_clients
-from mygooglib.drive import list_files
+from mygooglib.services.drive import list_files
 
 clients = get_clients()
 files = list_files(clients.drive, page_size=5)
@@ -73,5 +73,7 @@ python scripts/smoke_test.py drive-sync --local-path "C:\path\to\folder" --drive
 ### Desktop GUI
 Verify the application launches and renders (requires display):
 ```bash
-mygoog gui run
+mg gui run
 ```
+
+

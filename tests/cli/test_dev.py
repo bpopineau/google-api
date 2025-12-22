@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from typer.testing import CliRunner
 
-from mygooglib.cli.dev import app
+from mygoog_cli.dev import app
 
 runner = CliRunner()
 
@@ -12,8 +12,8 @@ runner = CliRunner()
 def mock_task_file(tmp_path):
     """Fixture to patch TASK_FILE with a temp path."""
     p = tmp_path / "task.md"
-    with patch("mygooglib.cli.dev.TASK_FILE", p):
-        with patch("mygooglib.cli.dev._get_task_file", return_value=p):
+    with patch("mygoog_cli.dev.TASK_FILE", p):
+        with patch("mygoog_cli.dev._get_task_file", return_value=p):
             yield p
 
 
@@ -66,7 +66,7 @@ def test_next_advances_state(mock_task_file):
     assert "- [/] Next Task" in new_content
 
 
-@patch("mygooglib.cli.dev.subprocess.run")
+@patch("mygoog_cli.dev.subprocess.run")
 def test_next_runs_verification(mock_run, mock_task_file):
     content = """# Task
 - [/] Active (`pytest`)
@@ -89,7 +89,7 @@ def test_next_runs_verification(mock_run, mock_task_file):
     assert "- [x] Active" in mock_task_file.read_text("utf-8")
 
 
-@patch("mygooglib.cli.dev.subprocess.run")
+@patch("mygoog_cli.dev.subprocess.run")
 def test_next_fails_verification(mock_run, mock_task_file):
     content = """# Task
 - [/] Active (`pytest`)
@@ -108,7 +108,7 @@ def test_next_fails_verification(mock_run, mock_task_file):
     assert "- [/] Active" in mock_task_file.read_text("utf-8")
 
 
-@patch("mygooglib.cli.dev.subprocess.run")
+@patch("mygoog_cli.dev.subprocess.run")
 def test_check_runs_command(mock_run, mock_task_file):
     content = """# Task
 - [/] Active (`echo check`)
@@ -123,3 +123,5 @@ def test_check_runs_command(mock_run, mock_task_file):
     # Check args
     args, _ = mock_run.call_args
     assert args[0] == ["echo", "check"]
+
+

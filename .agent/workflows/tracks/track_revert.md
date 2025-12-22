@@ -93,3 +93,4 @@ Original checkpoint: <sha>" $REVERT_SHA
 - Confirm what was reverted
 - Show current state of plan.md
 - Provide next steps (e.g., "Run /track_implement to restart")
+

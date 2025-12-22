@@ -33,3 +33,5 @@ Track the progress of `mygooglib` features and future plans.
 - **System Tray Icon**: Minimized background runner for notifications.
 - **Drag & Drop**: Upload files to Drive via drag-and-drop.
 - **Dashboard Widgets**: Customizable widgets for the Home Screen.
+
+

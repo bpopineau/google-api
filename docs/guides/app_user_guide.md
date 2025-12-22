@@ -46,3 +46,5 @@ Customize your experience.
 
 - **App Freezes on "Authenticating..."**: Check your internet connection. If the issue persists, try deleting the credentials file manually (see [Configuration](configuration.md)) and relaunching.
 - **Window Size Not Saving**: Ensure you are closing the app normally (X button or File -> Exit).
+
+

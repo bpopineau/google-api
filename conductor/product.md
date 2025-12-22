@@ -25,3 +25,5 @@ MyGoog is a unified desktop application and automation hub designed to bridge th
 ## Non-Functional Requirements
 *   **Performance:** The application must launch instantly and remain highly responsive, even when background automation tasks are running.
 *   **Extensibility:** The architecture is designed to be modular, allowing for the easy addition of new automation "recipes" and workflows as needs evolve.
+
+

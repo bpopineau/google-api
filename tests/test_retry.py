@@ -1,4 +1,4 @@
-"""Unit tests for mygooglib.utils.retry module."""
+"""Unit tests for mygooglib.core.utils.retry module."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ class TestExecuteWithRetry:
 
     def test_successful_request_returns_result(self):
         """A successful request should return the result without retrying."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_request.execute.return_value = {"status": "ok"}
@@ -26,7 +26,7 @@ class TestExecuteWithRetry:
 
     def test_retries_on_429_status(self):
         """Should retry on 429 (rate limit) errors."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -38,7 +38,7 @@ class TestExecuteWithRetry:
             {"status": "ok"},
         ]
 
-        with patch("mygooglib.utils.retry.time.sleep"):
+        with patch("mygooglib.core.utils.retry.time.sleep"):
             result = execute_with_retry_http_error(mock_request, attempts=2)
 
         assert result == {"status": "ok"}
@@ -46,7 +46,7 @@ class TestExecuteWithRetry:
 
     def test_retries_on_500_status(self):
         """Should retry on 500 (server error) errors."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -57,7 +57,7 @@ class TestExecuteWithRetry:
             {"status": "ok"},
         ]
 
-        with patch("mygooglib.utils.retry.time.sleep"):
+        with patch("mygooglib.core.utils.retry.time.sleep"):
             result = execute_with_retry_http_error(mock_request, attempts=2)
 
         assert result == {"status": "ok"}
@@ -65,7 +65,7 @@ class TestExecuteWithRetry:
 
     def test_no_retry_on_400_status(self):
         """Should NOT retry on 400 (client error) - not in retry_statuses."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -83,7 +83,7 @@ class TestExecuteWithRetry:
 
     def test_write_operations_default_to_one_attempt(self):
         """Write operations should default to 1 attempt to prevent duplicates."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -101,7 +101,7 @@ class TestExecuteWithRetry:
 
     def test_exhausted_retries_raises_error(self):
         """Should raise the error after exhausting all retries."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -111,7 +111,7 @@ class TestExecuteWithRetry:
             resp=mock_resp, content=b"Service unavailable"
         )
 
-        with patch("mygooglib.utils.retry.time.sleep"):
+        with patch("mygooglib.core.utils.retry.time.sleep"):
             with pytest.raises(HttpError):
                 execute_with_retry_http_error(mock_request, attempts=3)
 
@@ -123,7 +123,7 @@ class TestRetryAfterHeader:
 
     def test_respects_retry_after_header(self):
         """Should use Retry-After header value for backoff when present."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -135,7 +135,7 @@ class TestRetryAfterHeader:
             {"status": "ok"},
         ]
 
-        with patch("mygooglib.utils.retry.time.sleep") as mock_sleep:
+        with patch("mygooglib.core.utils.retry.time.sleep") as mock_sleep:
             result = execute_with_retry_http_error(mock_request, attempts=2)
 
         assert result == {"status": "ok"}
@@ -149,7 +149,7 @@ class TestEnvConfiguration:
 
     def test_retry_disabled_via_env(self):
         """MYGOOGLIB_RETRY_ENABLED=0 should disable retries."""
-        from mygooglib.utils.retry import execute_with_retry_http_error
+        from mygooglib.core.utils.retry import execute_with_retry_http_error
 
         mock_request = MagicMock()
         mock_resp = MagicMock()
@@ -172,7 +172,7 @@ class TestEnvHelpers:
 
     def test_env_bool_true_values(self):
         """_env_bool should recognize various true values."""
-        from mygooglib.utils.retry import _env_bool
+        from mygooglib.core.utils.retry import _env_bool
 
         with patch.dict(os.environ, {"TEST_VAR": "1"}):
             assert _env_bool("TEST_VAR", False) is True
@@ -185,7 +185,7 @@ class TestEnvHelpers:
 
     def test_env_bool_false_values(self):
         """_env_bool should return default for unset or false values."""
-        from mygooglib.utils.retry import _env_bool
+        from mygooglib.core.utils.retry import _env_bool
 
         with patch.dict(os.environ, {"TEST_VAR": "0"}):
             assert _env_bool("TEST_VAR", True) is False
@@ -197,21 +197,23 @@ class TestEnvHelpers:
 
     def test_env_int_valid(self):
         """_env_int should parse valid integers."""
-        from mygooglib.utils.retry import _env_int
+        from mygooglib.core.utils.retry import _env_int
 
         with patch.dict(os.environ, {"TEST_INT": "42"}):
             assert _env_int("TEST_INT", 0) == 42
 
     def test_env_int_invalid_returns_default(self):
         """_env_int should return default for invalid values."""
-        from mygooglib.utils.retry import _env_int
+        from mygooglib.core.utils.retry import _env_int
 
         with patch.dict(os.environ, {"TEST_INT": "not_a_number"}):
             assert _env_int("TEST_INT", 99) == 99
 
     def test_env_float_valid(self):
         """_env_float should parse valid floats."""
-        from mygooglib.utils.retry import _env_float
+        from mygooglib.core.utils.retry import _env_float
 
         with patch.dict(os.environ, {"TEST_FLOAT": "3.14"}):
             assert _env_float("TEST_FLOAT", 0.0) == 3.14
+
+

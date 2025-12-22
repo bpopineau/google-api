@@ -248,9 +248,9 @@ print(f"Created {result['created']} events.")
 Prevent duplicate operations when running scripts multiple times:
 
 ```python
-from mygooglib.utils.idempotency import IdempotencyStore, idempotent
+from mygooglib.core.utils.idempotency import IdempotencyStore, idempotent
 
-store = IdempotencyStore()  # Uses ~/.mygooglib/idempotency.db
+store = IdempotencyStore()  # Uses ~/.mygoog/idempotency.db
 
 # Check if already processed
 if not store.check("unique-operation-key"):
@@ -272,33 +272,33 @@ Common CLI commands:
 
 ```bash
 # Drive
-mygoog drive list --query "name contains 'report'"
-mygoog drive upload ./file.pdf
-mygoog drive sync ./local/folder "Remote/Path"
+mg drive list --query "name contains 'report'"
+mg drive upload ./file.pdf
+mg drive sync ./local/folder "Remote/Path"
 
 # Sheets
-mygoog sheets get "My Sheet" "Sheet1!A1:C10"
-mygoog sheets append "My Sheet" "Sheet1" "val1" "val2"
-mygoog sheets to-df "My Sheet" "Data!A:Z"  # Requires pandas
+mg sheets get "My Sheet" "Sheet1!A1:C10"
+mg sheets append "My Sheet" "Sheet1" "val1" "val2"
+mg sheets to-df "My Sheet" "Data!A:Z"  # Requires pandas
 
 # Gmail
-mygoog gmail send --to user@example.com --subject "Test" --body "Hello"
-mygoog gmail search "newer_than:1d"
-mygoog gmail save-attachments --query "has:attachment" --dest ./downloads
+mg gmail send --to user@example.com --subject "Test" --body "Hello"
+mg gmail search "newer_than:1d"
+mg gmail save-attachments --query "has:attachment" --dest ./downloads
 
 # Calendar
-mygoog calendar list
-mygoog calendar add "Meeting" --start "2025-12-20 10:00"
+mg calendar list
+mg calendar add "Meeting" --start "2025-12-20 10:00"
 
 # Tasks
-mygoog tasks list
-mygoog tasks add "Buy groceries"
-mygoog tasks complete <task_id>
+mg tasks list
+mg tasks add "Buy groceries"
+mg tasks complete <task_id>
 
 # Contacts
-mygoog contacts list
-mygoog contacts search "john"
-mygoog contacts add --given-name John --email john@example.com
+mg contacts list
+mg contacts search "john"
+mg contacts add --given-name John --email john@example.com
 ```
 
 ---
@@ -322,7 +322,7 @@ pip install -e ".[gui]"
 Run the GUI from the command line:
 
 ```bash
-mygoog gui run
+mgui
 ```
 
 ### Features
@@ -339,3 +339,6 @@ mygoog gui run
 ## See Also
 
 For more examples, check the [examples/](../../examples/) directory in the repository.
+
+
+

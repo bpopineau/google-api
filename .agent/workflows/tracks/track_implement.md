@@ -112,7 +112,7 @@ Present step-by-step verification appropriate to the change:
 
 **Backend Example:**
 ```
-1. Run command: `uv run mygoog <command>`
+1. Run command: `uv run mg <command>`
 2. Expected output: [description]
 ```
 
@@ -157,3 +157,4 @@ When all phases are complete:
 3. Final commit: `conductor(track): Complete <track_id>`
 
 **Output:** Summary of all completed tasks, tests passed, and files changed.
+

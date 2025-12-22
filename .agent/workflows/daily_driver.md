@@ -58,3 +58,4 @@ description: Initializes the workspace for a new session
 **Constraints:**
 - Do NOT start new work automatically.
 - Present options and let user decide.
+

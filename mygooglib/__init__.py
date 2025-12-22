@@ -9,11 +9,22 @@ Quick start:
     clients.gmail.send_email(to="me@example.com", subject="Hello", body="World")
 """
 
-from mygooglib.auth import get_creds
-from mygooglib.client import get_clients
+from mygooglib.core.auth import get_creds
+from mygooglib.core.client import Clients, get_clients
+from mygooglib.core.config import AppConfig
+from mygooglib.core.exceptions import GoogleApiError
 
 # Non-breaking aliases for a cleaner public API.
 create = get_clients
 create_clients = get_clients
 
-__all__ = ["get_creds", "get_clients", "create", "create_clients"]
+__all__ = [
+    "get_creds",
+    "get_clients",
+    "Clients",
+    "create",
+    "create_clients",
+    "GoogleApiError",
+    "AppConfig",
+]
+

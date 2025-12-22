@@ -13,3 +13,4 @@ description: Deep clean mygooglib project and reinstall dependencies
 3. Verify clean state
 // turbo
    - `python -c "from mygooglib import get_clients; print('Import OK')"`
+

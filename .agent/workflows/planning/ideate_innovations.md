@@ -47,10 +47,11 @@ description: Generate creative, outside-the-box feature ideas for mygooglib
      **How it Works**:
        - Services: [Drive, Sheets, Gmail, etc.]
        - New methods: `mygooglib.[service].[method]()`
-       - CLI: `mygoog [command]`
+       - CLI: `mg [command]`
      **Why it's "Outside the Box"**: [What makes this special?]
      ```
 
 6. Request Approval
    - Use `notify_user` to present `creative_proposals.md`.
    - **Constraint**: Do NOT implement until explicitly approved.
+

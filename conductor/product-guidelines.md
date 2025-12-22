@@ -15,3 +15,5 @@
 ## Visual Identity
 *   **Dark Mode Priority:** As a developer-centric tool, the interface should prioritize a high-quality dark mode that reduces eye strain and fits into a professional workspace.
 *   **Status Colors:** Use a consistent color palette for status indicators (e.g., Green for success, Yellow for warning/pending input, Red for error).
+
+

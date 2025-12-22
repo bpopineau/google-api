@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mygooglib import get_clients
-from mygooglib.drive import sync_folder
+from mygooglib.services.drive import sync_folder
 
 # Replace with a real local folder path on your machine.
 LOCAL_PATH = r"C:\path\to\folder"
@@ -25,3 +25,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

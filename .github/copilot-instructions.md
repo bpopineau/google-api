@@ -105,13 +105,13 @@ ruff format .
 ### CLI Usage
 ```bash
 # See available commands
-mygoog --help
+mg --help
 
 # Example: List Drive files
-mygoog drive list
+mg drive list
 
 # Example: Read from Sheets
-mygoog sheets get --identifier "SHEET_ID" --range "Sheet1!A1:B10"
+mg sheets get --identifier "SHEET_ID" --range "Sheet1!A1:B10"
 ```
 
 ## Key documentation
@@ -127,3 +127,4 @@ mygoog sheets get --identifier "SHEET_ID" --range "Sheet1!A1:B10"
 - Functions should be clear and self-documenting
 - Prefer composition over inheritance
 - Keep functions small and focused on single responsibility
+

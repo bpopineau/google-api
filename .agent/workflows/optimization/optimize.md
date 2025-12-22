@@ -54,3 +54,4 @@
 ## Phase 6: Documentation
 **Task:**
 - Update docstring of optimized function to explain *why* the complex implementation exists (e.g., "Unrolled loop for performance").
+

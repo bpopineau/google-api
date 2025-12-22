@@ -16,7 +16,7 @@ description: Bootstrap the tests directory for mygooglib with pytest fixtures
      @pytest.fixture
      def mock_clients():
          """Return a mocked ClientCollection for unit tests."""
-         with patch("mygooglib.client.get_clients") as mock:
+         with patch("mygooglib.core.client.get_clients") as mock:
              clients = MagicMock()
              clients.drive = MagicMock()
              clients.sheets = MagicMock()
@@ -61,3 +61,4 @@ description: Bootstrap the tests directory for mygooglib with pytest fixtures
 6. Run first test
 // turbo
    - `pytest tests/test_smoke.py -v`
+

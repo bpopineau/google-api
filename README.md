@@ -2,7 +2,7 @@
 
 **MyGoog** is a desktop application for managing your Google Workspace life. It brings your Drive, Gmail, Calendar, Tasks, and Sheets together in a unified, fast, and hackable interface.
 
-> **For Developers**: MyGoog is also a powerful Python library. See the [Developer Guide](#developer-library) below.
+> **For Developers**: mg is also a powerful Python library. See the [Developer Guide](#developer-library) below.
 
 ## Quick Start (Desktop App)
 
@@ -12,7 +12,7 @@
     ```
 2.  **Launch**:
     ```bash
-    mygoog
+    mgui
     ```
     *The App will open immediately. On first run, it will open your browser to authenticate with Google.*
 
@@ -66,3 +66,4 @@ clients.calendar.create_event(
 
 - **[API Reference](docs/guides/usage.md)**: Detailed Python API usage.
 - **[Roadmap](docs/development/roadmap.md)**: Future plans and contribution opportunities.
+

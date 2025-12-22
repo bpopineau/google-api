@@ -33,7 +33,7 @@ def main():
 
 def using_idempotency_store_directly():
     """Alternative: Use IdempotencyStore directly for custom logic."""
-    from mygooglib.utils.idempotency import IdempotencyStore
+    from mygooglib.core.utils.idempotency import IdempotencyStore
 
     store = IdempotencyStore()
 
@@ -55,3 +55,5 @@ if __name__ == "__main__":
     main()
     print("\n--- Direct store usage ---")
     using_idempotency_store_directly()
+
+

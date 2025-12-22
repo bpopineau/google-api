@@ -58,3 +58,4 @@ If user asks for details on a specific track:
 - Show full plan.md contents
 - List all checkpoints with commit SHAs
 - Show spec.md acceptance criteria status
+

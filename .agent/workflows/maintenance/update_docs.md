@@ -37,7 +37,7 @@ description: Meticulously update mygooglib documentation to ensure accuracy
    - **CHANGELOG.md**: Ensure version is current.
 
 6. Check CLI Documentation
-   - `mygoog --help`
+   - `mg --help`
    - **Gate**:
      - **IF NEW CMD LISTED**: Proceed.
      - **IF MISSING**: Stop. Fix Typer registration. Recurse.
@@ -45,3 +45,4 @@ description: Meticulously update mygooglib documentation to ensure accuracy
 ---
 
 **Result**: Mark `[x]` in `task.md`.
+

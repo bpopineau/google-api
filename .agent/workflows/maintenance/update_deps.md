@@ -24,3 +24,4 @@ description: Update mygooglib dependencies using uv
 
 6. (Optional) Security Audit
    - `pip install pip-audit && pip-audit`
+

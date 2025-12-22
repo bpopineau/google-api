@@ -1,8 +1,6 @@
 """Tests for ActivityModel."""
 
-import pytest
-from PySide6.QtCore import Qt
-from mygooglib.gui.widgets.activity import ActivityModel, ActivityItem, ActivityStatus
+from mygoog_gui.widgets.activity import ActivityModel, ActivityItem, ActivityStatus
 
 def test_activity_model_initial_empty():
     """Test that model is initially empty."""
@@ -35,3 +33,5 @@ def test_update_nonexistent_activity():
     model = ActivityModel()
     model.update_status("none", ActivityStatus.SUCCESS)
     assert model.rowCount() == 0
+
+

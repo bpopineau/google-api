@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.gmail import _extract_attachments, get_attachment, save_attachments
+from mygooglib.services.gmail import _extract_attachments, get_attachment, save_attachments
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def test_get_attachment_returns_bytes(mock_gmail):
 
     # Call the function
     with patch(
-        "mygooglib.gmail.execute_with_retry_http_error", return_value=mock_response
+        "mygooglib.services.gmail.execute_with_retry_http_error", return_value=mock_response
     ):
         result = get_attachment(mock_gmail, "msg123", "att456")
 
@@ -60,9 +60,9 @@ def test_extract_attachments_finds_parts():
     assert result[1]["filename"] == "image.png"
 
 
-@patch("mygooglib.gmail.get_attachment")
-@patch("mygooglib.gmail.search_messages")
-@patch("mygooglib.gmail.execute_with_retry_http_error")
+@patch("mygooglib.services.gmail.get_attachment")
+@patch("mygooglib.services.gmail.search_messages")
+@patch("mygooglib.services.gmail.execute_with_retry_http_error")
 def test_save_attachments_creates_files(
     mock_execute, mock_search, mock_get_att, mock_gmail, tmp_path
 ):
@@ -96,9 +96,9 @@ def test_save_attachments_creates_files(
     assert result[0].read_bytes() == b"File content here"
 
 
-@patch("mygooglib.gmail.get_attachment")
-@patch("mygooglib.gmail.search_messages")
-@patch("mygooglib.gmail.execute_with_retry_http_error")
+@patch("mygooglib.services.gmail.get_attachment")
+@patch("mygooglib.services.gmail.search_messages")
+@patch("mygooglib.services.gmail.execute_with_retry_http_error")
 def test_save_attachments_applies_filter(
     mock_execute, mock_search, mock_get_att, mock_gmail, tmp_path
 ):
@@ -132,3 +132,5 @@ def test_save_attachments_applies_filter(
 
     assert len(result) == 1
     assert result[0].name == "invoice.pdf"
+
+

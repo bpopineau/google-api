@@ -1,7 +1,7 @@
-# MyGoog Project Context
+# mg Project Context
 
 ## Overview
-MyGoog is a unified desktop application and automation hub for Google Workspace integration.
+mg is a unified desktop application and automation hub for Google Workspace integration.
 
 ## Context Files
 | File | Purpose |
@@ -35,3 +35,4 @@ MyGoog is a unified desktop application and automation hub for Google Workspace 
 - **Testing:** Pytest
 - **Linting:** Ruff
 - **Types:** Mypy
+

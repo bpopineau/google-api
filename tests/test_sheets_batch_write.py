@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.sheets import batch_write
+from mygooglib.services.sheets import batch_write
 
 
 @pytest.fixture
@@ -13,8 +13,8 @@ def mock_sheets():
     return MagicMock()
 
 
-@patch("mygooglib.sheets.update_range")
-@patch("mygooglib.sheets.clear_sheet")
+@patch("mygooglib.services.sheets.update_range")
+@patch("mygooglib.services.sheets.clear_sheet")
 def test_batch_write_basic(mock_clear, mock_update, mock_sheets):
     """Test basic batch write without clearing or headers."""
     rows = [[1, 2], [3, 4]]
@@ -33,8 +33,8 @@ def test_batch_write_basic(mock_clear, mock_update, mock_sheets):
     )
 
 
-@patch("mygooglib.sheets.update_range")
-@patch("mygooglib.sheets.clear_sheet")
+@patch("mygooglib.services.sheets.update_range")
+@patch("mygooglib.services.sheets.clear_sheet")
 def test_batch_write_with_clear(mock_clear, mock_update, mock_sheets):
     """Test batch write with clear option."""
     rows = [[1, 2]]
@@ -51,8 +51,8 @@ def test_batch_write_with_clear(mock_clear, mock_update, mock_sheets):
     mock_update.assert_called_once()
 
 
-@patch("mygooglib.sheets.update_range")
-@patch("mygooglib.sheets.clear_sheet")
+@patch("mygooglib.services.sheets.update_range")
+@patch("mygooglib.services.sheets.clear_sheet")
 def test_batch_write_with_headers(mock_clear, mock_update, mock_sheets):
     """Test batch write with headers."""
     headers = ["Col1", "Col2"]
@@ -71,8 +71,8 @@ def test_batch_write_with_headers(mock_clear, mock_update, mock_sheets):
     )
 
 
-@patch("mygooglib.sheets.update_range")
-@patch("mygooglib.sheets.clear_sheet")
+@patch("mygooglib.services.sheets.update_range")
+@patch("mygooglib.services.sheets.clear_sheet")
 def test_batch_write_custom_start_cell(mock_clear, mock_update, mock_sheets):
     """Test batch write with custom start cell."""
     rows = [[1, 2]]
@@ -88,3 +88,5 @@ def test_batch_write_custom_start_cell(mock_clear, mock_update, mock_sheets):
         allow_multiple=False,
         value_input_option="USER_ENTERED",
     )
+
+

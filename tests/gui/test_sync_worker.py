@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 import pytest
-from mygooglib.gui.workers import SyncWorker
+from mygoog_gui.workers import SyncWorker
 
 @pytest.fixture
 def mock_clients():
@@ -46,8 +46,10 @@ def test_sync_worker_error(qtbot, mock_clients, tmp_path):
     worker = SyncWorker(mock_clients, str(tmp_path), spreadsheet_id, "Sheet1")
     
     # Patch FileScanner.scan to fail
-    with patch("mygooglib.utils.file_scanner.FileScanner.scan", side_effect=Exception("Scan failed")):
+    with patch("mygooglib.core.utils.file_scanner.FileScanner.scan", side_effect=Exception("Scan failed")):
         with qtbot.waitSignal(worker.error, timeout=5000) as blocker:
             worker.start()
             
     assert "Scan failed" in blocker.args[0]
+
+

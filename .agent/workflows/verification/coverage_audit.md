@@ -53,3 +53,4 @@ description: Compare implementation vs AUTOMATION_GOALS.md and identify gaps
 ---
 
 **Result**: If artifact exists, mark "Coverage Audit" as `[x]` in `task.md`.
+

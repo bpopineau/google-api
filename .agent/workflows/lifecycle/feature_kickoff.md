@@ -27,7 +27,7 @@ description: End-to-end workflow from idea to mygooglib implementation
 5. Add CLI Support (if applicable)
    - **File**: `mygooglib/cli/[service].py`
    - **Pattern**: Follow existing Typer commands in the same file.
-   - **Test**: `mygoog [service] [command] --help`
+   - **Test**: `mg [service] [command] --help`
 
 6. Polish Documentation
 // turbo
@@ -45,3 +45,4 @@ description: End-to-end workflow from idea to mygooglib implementation
 8. Final Verification
 // turbo
    - `/ci_local`
+

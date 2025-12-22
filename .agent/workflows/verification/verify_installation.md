@@ -26,7 +26,8 @@ description: Verify mygooglib installation and API connectivity
 
 5. Verify CLI interface
 // turbo
-   - `mygoog --help`
-   - `mygoog drive --help`
-   - `mygoog sheets --help`
-   - `mygoog gmail --help`
+   - `mg --help`
+   - `mg drive --help`
+   - `mg sheets --help`
+   - `mg gmail --help`
+

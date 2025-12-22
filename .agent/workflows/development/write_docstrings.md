@@ -37,3 +37,4 @@ description: Write and enforce Google-style docstrings for mygooglib
 ---
 
 **Result**: Mark `[x]` in `task.md` ONLY if Ruff passes.
+

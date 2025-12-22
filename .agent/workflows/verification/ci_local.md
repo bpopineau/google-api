@@ -71,7 +71,7 @@ description: Simulate a full CI run locally for mygooglib
 
 **Task:**
 // turbo
-   - `mygoog --help`
+   - `mg --help`
 
 **Gate:**
 - **IF WORKS**: Proceed.
@@ -95,3 +95,4 @@ description: Simulate a full CI run locally for mygooglib
   "failed_gate": "<null | gate name>"
 }
 ```
+

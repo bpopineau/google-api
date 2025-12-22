@@ -28,3 +28,4 @@ description: Run unit tests with pytest and return structured results
   "critical_failures": ["<list of failed test names>"]
 }
 ```
+

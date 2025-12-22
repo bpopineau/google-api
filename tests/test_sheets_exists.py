@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 import pytest
 from googleapiclient.errors import HttpError
-from mygooglib.sheets import SheetsClient
+from mygooglib.services.sheets import SheetsClient
 
 @pytest.fixture
 def mock_service():
@@ -43,7 +43,7 @@ def test_exists_with_title_resolution(client, mock_service, mock_drive):
     spreadsheet_id = "resolved_id"
     
     # Mock resolve_spreadsheet (called by SheetsClient.exists via self.resolve_spreadsheet)
-    with patch("mygooglib.sheets.resolve_spreadsheet", return_value=spreadsheet_id):
+    with patch("mygooglib.services.sheets.resolve_spreadsheet", return_value=spreadsheet_id):
         mock_service.spreadsheets.return_value.get.return_value.execute.return_value = {"spreadsheetId": spreadsheet_id}
         
         assert client.exists(title) is True
@@ -52,5 +52,7 @@ def test_exists_resolution_fails(client, mock_service):
     # Setup
     title = "Unknown Sheet"
     
-    with patch("mygooglib.sheets.resolve_spreadsheet", side_effect=ValueError("Not found")):
+    with patch("mygooglib.services.sheets.resolve_spreadsheet", side_effect=ValueError("Not found")):
         assert client.exists(title) is False
+
+

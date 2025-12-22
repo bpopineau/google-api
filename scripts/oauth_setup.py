@@ -5,7 +5,7 @@ from pathlib import Path
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from mygooglib.auth import SCOPES
+from mygooglib.core.auth import SCOPES
 
 
 def _default_secrets_dir() -> Path:
@@ -57,3 +57,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

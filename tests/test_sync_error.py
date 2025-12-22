@@ -1,9 +1,8 @@
 """Reproduction test for SyncWorker 404 error fix."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import pytest
-from googleapiclient.errors import HttpError
-from mygooglib.gui.workers import SyncWorker
+from mygoog_gui.workers import SyncWorker
 
 @pytest.fixture
 def mock_clients():
@@ -39,3 +38,5 @@ def test_sync_worker_handles_missing_spreadsheet(qtbot, mock_clients, tmp_path):
     # Verify it used the new_id
     args, kwargs = mock_clients.sheets.batch_write.call_args
     assert args[0] == new_id
+
+

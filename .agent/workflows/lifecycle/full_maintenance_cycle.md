@@ -30,3 +30,4 @@ description: Perform a full clean, upgrade, and verification cycle for mygooglib
 6. Update Roadmap (if applicable)
    - If dependencies enable new features, update `docs/development/roadmap.md`.
    - Consider adding new feature ideas from `AUTOMATION_GOALS.md` Section 6.
+

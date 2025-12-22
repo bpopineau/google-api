@@ -22,3 +22,4 @@ description: Setup mygooglib OAuth authentication and verify token refresh
 5. Full write verification (optional, mutates real data)
    - `python scripts/smoke_test.py all --write`
    - **Warning**: This sends a test email and writes to your test spreadsheet.
+

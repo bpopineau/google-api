@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mygooglib import get_clients
-from mygooglib.sheets import get_range
+from mygooglib.services.sheets import get_range
 
 # Replace with your spreadsheet title, ID, or full URL.
 SPREADSHEET = "Your Sheet Title"
@@ -24,3 +24,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

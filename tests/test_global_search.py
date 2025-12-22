@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.gui.pages.home import HomePage
+from mygoog_gui.pages.home import HomePage
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def test_on_search_calls_apis(qapp, mock_clients):
     The qapp fixture ensures QApplication exists (required for QWidgets).
     """
     # We mock ApiWorker to run synchronously for testing
-    with patch("mygooglib.gui.pages.home.ApiWorker") as MockWorker:
+    with patch("mygoog_gui.pages.home.ApiWorker") as MockWorker:
         # A cleaner way: Mock the worker instance returned by the class
         mock_worker_instance = MockWorker.return_value
 
@@ -74,3 +74,5 @@ def test_on_search_calls_apis(qapp, mock_clients):
             mock_clients.gmail.search_messages.assert_called_with(
                 query="test", max_results=10
             )
+
+

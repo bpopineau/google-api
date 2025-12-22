@@ -5,7 +5,7 @@ import datetime as dt
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
-from mygooglib.auth import SCOPES, get_auth_paths
+from mygooglib.core.auth import SCOPES, get_auth_paths
 
 
 def _fmt_dt(value: dt.datetime | None) -> str:
@@ -47,3 +47,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

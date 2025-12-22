@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from mygooglib.docs import find_replace
+from mygooglib.services.docs import find_replace
 
 
 class TestDocsFindReplace(unittest.TestCase):
@@ -46,3 +46,5 @@ class TestDocsFindReplace(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+

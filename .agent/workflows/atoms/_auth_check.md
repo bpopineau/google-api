@@ -26,3 +26,4 @@ description: Verify authentication token
   "action_required": "<null | 'Run /maintenance/setup_auth'>"
 }
 ```
+

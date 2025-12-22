@@ -36,10 +36,11 @@ gui = [
 ]
 
 [project.scripts]
-mygoog = "mygooglib.app:main"
+mg = "mygoog_cli.main:main"
+mgui = "mygoog_gui.main:main"
 
 [tool.setuptools.packages.find]
-include = ["mygooglib*"]
+include = ["mygooglib*", "mygoog_cli*", "mygoog_gui*"]
 
 [tool.mypy]
 ignore_missing_imports = true

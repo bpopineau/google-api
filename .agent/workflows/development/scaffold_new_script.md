@@ -53,3 +53,4 @@ description: Create a new mygooglib automation script with boilerplate
 ---
 
 **Result**: Mark `[x]` for the scaffold task in `task.md`.
+

@@ -22,7 +22,7 @@ description: Create a rigorous implementation plan with ambiguity checks
    - **Must Include**:
      - Exact file paths (e.g., `mygooglib/drive.py`).
      - Exact function signatures (inputs/outputs).
-     - CLI command signatures (`mygoog service command --arg`).
+     - CLI command signatures (`mg service command --arg`).
    - **Gate**:
      - **IF VAGUE** (e.g., "Add helper"): Stop. Define signature. Recurse.
      - **IF CONCRETE** (e.g., `def get_id(url: str) -> str`): Proceed.
@@ -60,3 +60,4 @@ description: Create a rigorous implementation plan with ambiguity checks
 ---
 
 **Result**: Mark `[x]` in `task.md` only after User Approval.
+

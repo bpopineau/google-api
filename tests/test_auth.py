@@ -1,4 +1,4 @@
-"""Unit tests for mygooglib.auth module."""
+"""Unit tests for mygooglib.core.auth module."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.auth import SCOPES, get_auth_paths, get_creds
+from mygooglib.core.auth import SCOPES, get_auth_paths, get_creds
 
 
 class TestGetAuthPaths:
@@ -69,7 +69,7 @@ class TestGetCreds:
 
         # Mock the Credentials to appear valid
         with patch(
-            "mygooglib.auth.Credentials.from_authorized_user_file"
+            "mygooglib.core.auth.Credentials.from_authorized_user_file"
         ) as mock_from_file:
             mock_creds = MagicMock()
             mock_creds.valid = True
@@ -97,7 +97,7 @@ class TestGetCreds:
         monkeypatch.setenv("MYGOOGLIB_CREDENTIALS_PATH", str(tmp_path / "creds.json"))
 
         with patch(
-            "mygooglib.auth.Credentials.from_authorized_user_file"
+            "mygooglib.core.auth.Credentials.from_authorized_user_file"
         ) as mock_from_file:
             mock_creds = MagicMock()
             mock_creds.valid = False
@@ -106,7 +106,7 @@ class TestGetCreds:
             mock_creds.to_json.return_value = '{"refreshed": true}'
             mock_from_file.return_value = mock_creds
 
-            with patch("mygooglib.auth.Request"):
+            with patch("mygooglib.core.auth.Request"):
                 result = get_creds()
 
                 mock_creds.refresh.assert_called_once()
@@ -127,3 +127,5 @@ class TestScopes:
         required = ["drive", "spreadsheets", "gmail.send", "calendar", "tasks"]
         for req in required:
             assert any(req in s for s in scope_prefixes), f"Missing scope for {req}"
+
+

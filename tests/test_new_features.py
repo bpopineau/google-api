@@ -11,7 +11,7 @@ class TestContactsCRUD:
 
     def test_create_contact_builds_correct_request(self):
         """create_contact should build a valid People API request."""
-        from mygooglib.contacts import create_contact
+        from mygooglib.services.contacts import create_contact
 
         mock_service = MagicMock()
         mock_service.people().createContact().execute.return_value = {
@@ -21,7 +21,7 @@ class TestContactsCRUD:
         }
 
         with patch(
-            "mygooglib.contacts.execute_with_retry_http_error",
+            "mygooglib.services.contacts.execute_with_retry_http_error",
             return_value={
                 "resourceName": "people/c123",
                 "names": [{"displayName": "John Doe"}],
@@ -39,11 +39,11 @@ class TestContactsCRUD:
 
     def test_delete_contact_calls_api(self):
         """delete_contact should call the People API deleteContact."""
-        from mygooglib.contacts import delete_contact
+        from mygooglib.services.contacts import delete_contact
 
         mock_service = MagicMock()
 
-        with patch("mygooglib.contacts.execute_with_retry_http_error", return_value={}):
+        with patch("mygooglib.services.contacts.execute_with_retry_http_error", return_value={}):
             delete_contact(mock_service, "people/c123")
 
         mock_service.people().deleteContact.assert_called_once()
@@ -54,7 +54,7 @@ class TestSheetsBatch:
 
     def test_batch_get_multiple_ranges(self):
         """batch_get should return a dict mapping ranges to values."""
-        from mygooglib.sheets import batch_get
+        from mygooglib.services.sheets import batch_get
 
         mock_service = MagicMock()
         mock_response = {
@@ -65,7 +65,7 @@ class TestSheetsBatch:
         }
 
         with patch(
-            "mygooglib.sheets.execute_with_retry_http_error",
+            "mygooglib.services.sheets.execute_with_retry_http_error",
             return_value=mock_response,
         ):
             result = batch_get(
@@ -80,7 +80,7 @@ class TestSheetsBatch:
 
     def test_batch_update_multiple_ranges(self):
         """batch_update should send multiple range updates in one call."""
-        from mygooglib.sheets import batch_update
+        from mygooglib.services.sheets import batch_update
 
         mock_service = MagicMock()
         mock_response = {
@@ -92,7 +92,7 @@ class TestSheetsBatch:
         }
 
         with patch(
-            "mygooglib.sheets.execute_with_retry_http_error",
+            "mygooglib.services.sheets.execute_with_retry_http_error",
             return_value=mock_response,
         ):
             result = batch_update(
@@ -113,7 +113,7 @@ class TestIdempotencyStore:
 
     def test_store_check_and_add(self, tmp_path):
         """IdempotencyStore should track processed keys."""
-        from mygooglib.utils.idempotency import IdempotencyStore
+        from mygooglib.core.utils.idempotency import IdempotencyStore
 
         db_path = tmp_path / "test_idem.db"
         store = IdempotencyStore(db_path)
@@ -124,7 +124,7 @@ class TestIdempotencyStore:
 
     def test_store_check_and_add_atomic(self, tmp_path):
         """check_and_add should be atomic."""
-        from mygooglib.utils.idempotency import IdempotencyStore
+        from mygooglib.core.utils.idempotency import IdempotencyStore
 
         db_path = tmp_path / "test_idem.db"
         store = IdempotencyStore(db_path)
@@ -136,8 +136,8 @@ class TestIdempotencyStore:
 
     def test_send_email_with_idempotency_key_skips_duplicate(self, tmp_path):
         """send_email should skip if idempotency_key was already used."""
-        from mygooglib.gmail import send_email
-        from mygooglib.utils.idempotency import IdempotencyStore
+        from mygooglib.services.gmail import send_email
+        from mygooglib.core.utils.idempotency import IdempotencyStore
 
         # Set up a store with a pre-existing key
         db_path = tmp_path / "test_idem.db"
@@ -147,7 +147,7 @@ class TestIdempotencyStore:
         mock_service = MagicMock()
 
         # Patch the IdempotencyStore at the import location inside gmail.send_email
-        with patch("mygooglib.utils.idempotency.IdempotencyStore", return_value=store):
+        with patch("mygooglib.core.utils.idempotency.IdempotencyStore", return_value=store):
             result = send_email(
                 mock_service,
                 to="test@example.com",
@@ -159,3 +159,5 @@ class TestIdempotencyStore:
         # Should return None without calling API
         assert result is None
         mock_service.users().messages().send.assert_not_called()
+
+

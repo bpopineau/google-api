@@ -48,7 +48,7 @@ description: Quick project health verification before any work
 
 6. Verify CLI
 // turbo
-   - `mygoog --help`
+   - `mg --help`
    - **Gate**:
      - **IF SHOWS HELP**: proceeding.
      - **IF ERROR**: Stop. Fix entry point. Recurse.
@@ -56,3 +56,4 @@ description: Quick project health verification before any work
 ---
 
 **Result**: If all gates passed, mark "Health Check" as `[x]` in `task.md`.
+

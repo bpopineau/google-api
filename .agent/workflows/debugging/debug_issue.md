@@ -94,3 +94,4 @@ description: Systematically identify, reproduce, and fix mygooglib issues
 
 **Finalize:**
 - Execute Atom: `atoms/_checkpoint.md` (message: "fix: resolved issue in [module]")
+

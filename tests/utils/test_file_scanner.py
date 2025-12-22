@@ -1,7 +1,5 @@
-import os
-import time
 import pytest
-from mygooglib.utils.file_scanner import FileScanner
+from mygooglib.core.utils.file_scanner import FileScanner
 
 def test_scan_directory_with_files(tmp_path):
     # Setup: Create temporary files
@@ -54,3 +52,5 @@ def test_scan_skips_directories(tmp_path):
     
     assert len(results) == 1
     assert results[0]['filename'] == "root.txt"
+
+

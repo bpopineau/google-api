@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mygooglib import get_clients
-from mygooglib.drive import list_files
+from mygooglib.services.drive import list_files
 
 # Optional query examples:
 # - "name contains 'report'"
@@ -29,3 +29,5 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

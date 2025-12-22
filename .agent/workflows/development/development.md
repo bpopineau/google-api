@@ -34,7 +34,7 @@ description: Run mygooglib development workflow (install, lint, test)
 
 4. Verify CLI
 // turbo
-   - `mygoog --help`
+   - `mg --help`
    - **Gate**:
      - **IF WORKS**: Proceed.
      - **IF CRASHES**: Stop. Fix entrypoint. Recurse.
@@ -48,3 +48,4 @@ description: Run mygooglib development workflow (install, lint, test)
 ---
 
 **Result**: Mark `[x]` for the check in `task.md`.
+
