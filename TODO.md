@@ -1,33 +1,49 @@
 # Project Roadmap & Tracks
 
-## Proposed Tracks
+## Active Tracks
 
-### Track 2: Gmail Attachments
-**Goal:** Enable attaching local files when composing emails.
-**Reference:** W6 — "Send a clean email + attachments"
+### Reliability First (Offline & Error Handling)
+**Goal:** Elevate error handling and offline caching to ensure dependability.
+**Source:** High-level Assessment
 
-- [ ] **UI:** Add "📎 Attach File" button to `ComposeDialog`
-- [ ] **UI:** Display selected attachments
-- [ ] **Logic:** Pass `attachments` list to `send_email`
-- [ ] **Files:** `mygoog_gui/pages/gmail.py`
+- [ ] **UI:** Implement dedicated key-press/action error dialogs
+- [ ] **Logic:** Basic offline cache for Drive/Gmail listings
+- [ ] **Logic:** "Retry" mechanism for failed API calls (connectivity resilience)
+- [ ] **Files:** `mygooglib/utils/errors.py`, `mygoog_gui/main.py`
 
-### Track 3: Google Docs Interface
+### Automation Workflows (Templates)
+**Goal:** Surface ready-to-run automation templates in GUI and CLI.
+**Source:** High-level Assessment
+
+- [ ] **Feature:** "Backup Local Folder to Drive" template
+- [ ] **Feature:** "Sync Sheet -> Calendar" template
+- [ ] **UI:** "Automations" tab in GUI to trigger these workflows
+- [ ] **CLI:** `mg workflow run <template_name>` command
+
+### Google Docs Interface
 **Goal:** Create UI for template generation and PDF export.
 **Reference:** W3 — "Generate a doc from data"
 
-- [ ] **UI:** Create `DocsPage` and add to Sidebar
+- [ ] **UI:** Create `DocsPage` and navigate there from Sidebar
 - [ ] **Feature:** Template Generator (ID + Key/Value inputs)
-- [ ] **Feature:** PDF Export (Context menu in Drive tree)
-- [ ] **Files:** `mygoog_gui/pages/docs.py`, `mygoog_gui/widgets/sidebar.py`
+- [ ] **Feature:** PDF Export
+- [ ] **Files:** `mygoog_gui/pages/docs.py`
 
 ---
 
 ## Future Backlog
 
+### Proactive Productivity
+- [ ] System tray icon / background agent
+- [ ] Notification layer (meetings, new emails)
+
+### Trust & Onboarding
+- [ ] First-run checklist (credentials, sync status)
+- [ ] In-app recovery steps/troubleshooting
+
 ### Gmail
-- [ ] Expose bulk attachment download/save
-- [ ] Add attachment preview
+- [ ] Attachment support in Compose
+- [ ] Bulk attachment download
 
 ### Drive
-- [ ] Export Docs/Sheets to `.docx`/`.xlsx`
-- [ ] Add "Open in Browser" context action
+- [ ] Export Docs to common formats
