@@ -26,7 +26,7 @@ Integrate the new types into the Sheets service and enforce strict typing.
     - [x] Sub-task: Run `pytest tests/test_sheets_exists.py` (and other sheets tests) to ensure zero regressions
 - [x] Task: Conductor - User Manual Verification 'Sheets Service Integration' [4022393]
 
-## Phase 3: Gmail Service Integration
+## Phase 3: Gmail Service Integration [checkpoint: 9b20304]
 Integrate the new types into the Gmail service.
 
 - [x] Task: Define Gmail Foundational Types [e9fc118]
@@ -37,12 +37,12 @@ Integrate the new types into the Gmail service.
 - [x] Task: Green Phase - Resolve Gmail Type Errors
     - [x] Sub-task: Fix mismatches in `gmail.py`
     - [x] Sub-task: Run `pytest tests/test_gmail_attachments.py` to ensure zero regressions
-- [~] Task: Conductor - User Manual Verification 'Gmail Service Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Gmail Service Integration' [9b20304]
 
 ## Phase 4: Finalization & AI Context Map
 Expose types to the public API and update the agent "cheat sheet".
 
-- [ ] Task: Public API Export
+- [~] Task: Public API Export
     - [ ] Sub-task: Re-export core types in `mygooglib/__init__.py`
 - [ ] Task: Update Context Map
     - [ ] Sub-task: Run `python scripts/generate_context_map.py`
