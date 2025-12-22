@@ -6,8 +6,6 @@ and can be used for static type checking with mypy.
 
 from __future__ import annotations
 
-import pytest
-
 from mygooglib.core.types import (
     AppendValuesResponseDict,
     AttachmentMetadataDict,

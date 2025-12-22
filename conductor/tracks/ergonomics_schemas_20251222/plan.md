@@ -3,16 +3,16 @@
 ## Phase 1: Setup & Basic Types
 Define the central registry and the first set of foundational schemas.
 
-- [ ] Task: Create Type Registry
-    - [ ] Sub-task: Create `mygooglib/core/types.py`
-    - [ ] Sub-task: Define basic shared types (e.g., `DateDict`, `ColorDict`)
-- [ ] Task: Define Sheets Foundational Types
-    - [ ] Sub-task: Define `ValueRangeDict` (for range values)
-    - [ ] Sub-task: Define `SpreadsheetDict` and `SheetDict` (for metadata)
-- [ ] Task: Verify Phase 1 Types
-    - [ ] Sub-task: Write unit tests in `tests/utils/test_types.py` that instantiate these TypedDicts with valid/invalid data
-    - [ ] Sub-task: Run `uv run mypy mygooglib/core/types.py`
-- [ ] Task: Conductor - User Manual Verification 'Setup & Basic Types' (Protocol in workflow.md)
+- [x] Task: Create Type Registry [e9fc118]
+    - [x] Sub-task: Create `mygooglib/core/types.py`
+    - [x] Sub-task: Define basic shared types (e.g., `DateDict`, `ColorDict`)
+- [x] Task: Define Sheets Foundational Types [e9fc118]
+    - [x] Sub-task: Define `ValueRangeDict` (for range values)
+    - [x] Sub-task: Define `SpreadsheetDict` and `SheetDict` (for metadata)
+- [x] Task: Verify Phase 1 Types [e9fc118]
+    - [x] Sub-task: Write unit tests in `tests/utils/test_types.py` that instantiate these TypedDicts with valid/invalid data
+    - [x] Sub-task: Run `uv run mypy mygooglib/core/types.py`
+- [~] Task: Conductor - User Manual Verification 'Setup & Basic Types' (Protocol in workflow.md)
 
 ## Phase 2: Sheets Service Integration
 Integrate the new types into the Sheets service and enforce strict typing.
