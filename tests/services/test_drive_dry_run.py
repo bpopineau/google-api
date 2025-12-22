@@ -141,3 +141,55 @@ class TestCreateFolderDryRun:
         create_folder(mock_drive, "Test Folder", dry_run=True)
 
         mock_drive.files().create.assert_not_called()
+
+
+class TestSyncFolderDryRunReports:
+    """Tests for sync_folder returning DryRunReport objects."""
+
+    def test_sync_folder_dry_run_returns_reports_key(self, tmp_path: Path) -> None:
+        """sync_folder with dry_run=True should include 'reports' key."""
+        from mygooglib.services.drive import sync_folder
+
+        # Create a test file
+        (tmp_path / "new_file.txt").write_text("content")
+
+        mock_drive = MagicMock()
+        # Mock empty remote folder
+        mock_drive.files().list().execute.return_value = {"files": []}
+
+        result = sync_folder(mock_drive, tmp_path, "folder_id", dry_run=True)
+
+        assert "reports" in result
+        assert isinstance(result["reports"], list)
+        assert len(result["reports"]) == 1  # One new file
+
+    def test_sync_folder_dry_run_report_has_reason(self, tmp_path: Path) -> None:
+        """sync_folder dry_run reports should include reason."""
+        from mygooglib.services.drive import sync_folder
+
+        (tmp_path / "file.txt").write_text("test")
+
+        mock_drive = MagicMock()
+        mock_drive.files().list().execute.return_value = {"files": []}
+
+        result = sync_folder(mock_drive, tmp_path, "folder_id", dry_run=True)
+
+        report = result["reports"][0]
+        assert report["action"] == "drive.upload"
+        assert "reason" in report
+        assert "not found" in report["reason"].lower()
+
+    def test_sync_folder_dry_run_no_api_modify(self, tmp_path: Path) -> None:
+        """sync_folder with dry_run=True should not upload/update files."""
+        from mygooglib.services.drive import sync_folder
+
+        (tmp_path / "file.txt").write_text("content")
+
+        mock_drive = MagicMock()
+        mock_drive.files().list().execute.return_value = {"files": []}
+
+        sync_folder(mock_drive, tmp_path, "folder_id", dry_run=True)
+
+        # Should not call create (upload) for files
+        # Note: files().list() is called to check existing files
+        mock_drive.files().create.assert_not_called()

@@ -450,11 +450,13 @@ def sync_folder(
         local_path: Local folder to sync
         drive_folder_id: Target Drive folder ID
         recursive: If True (default), sync subfolders recursively.
-        dry_run: If True, don't actually perform any changes.
+        dry_run: If True, don't actually perform any changes. Returns detailed
+            DryRunReport objects in the 'reports' key.
         progress_callback: Optional callable(current_count, total_count, item_name)
 
     Returns:
-        Summary dict: {created: int, updated: int, skipped: int, errors: list[str]}
+        Summary dict: {created: int, updated: int, skipped: int, errors: list[str], dry_run: bool}
+        When dry_run=True, also includes 'reports': list[DryRunReport] with detailed actions.
     """
     local_dir = Path(local_path)
     if not local_dir.is_dir():
@@ -464,6 +466,7 @@ def sync_folder(
     updated = 0
     skipped = 0
     errors: list[str] = []
+    dry_run_reports: list[DryRunReport] = []
     logger = get_logger("mygooglib.services.drive")
 
     from datetime import datetime, timezone
@@ -477,7 +480,7 @@ def sync_folder(
     current_item_idx = 0
 
     def _ensure_remote_folder(parent_id: str, name: str) -> str:
-        nonlocal created
+        nonlocal created, dry_run_reports
         # List once per lookup; keeps behavior simple and predictable.
         existing = list_files(
             drive,
@@ -489,6 +492,14 @@ def sync_folder(
                 return f["id"]  # type: ignore[no-any-return]
 
         if dry_run:
+            dry_run_reports.append(
+                make_dry_run_report(
+                    "drive.create_folder",
+                    "pending",
+                    {"name": name, "parent_id": parent_id},
+                    reason="Folder does not exist in Drive",
+                )
+            )
             created += 1
             return "DRY_RUN_FOLDER_ID"
 
@@ -497,7 +508,7 @@ def sync_folder(
         return folder_id
 
     def _sync_dir(local_current: Path, remote_parent_id: str) -> None:
-        nonlocal created, updated, skipped, errors, current_item_idx
+        nonlocal created, updated, skipped, errors, current_item_idx, dry_run_reports
 
         # Get existing items in this Drive folder.
         remote_items = list_files(drive, parent_id=remote_parent_id)
@@ -533,6 +544,7 @@ def sync_folder(
                     continue
 
                 # Local file
+                relative_path = str(entry.relative_to(local_dir))
                 remote = remote_files_by_name.get(entry.name)
                 if remote:
                     remote_modified = remote.get("modifiedTime", "")
@@ -547,18 +559,55 @@ def sync_folder(
                         )
 
                         if local_dt > remote_dt:
-                            if not dry_run:
+                            if dry_run:
+                                dry_run_reports.append(
+                                    make_dry_run_report(
+                                        "drive.update",
+                                        remote["id"],
+                                        {
+                                            "local_path": relative_path,
+                                            "file_name": entry.name,
+                                        },
+                                        reason="Local file newer than remote",
+                                    )
+                                )
+                            else:
                                 _update_file(drive, remote["id"], entry)
                             updated += 1
                         else:
                             skipped += 1
                     except (ValueError, KeyError):
                         # Can't parse time, update to be safe.
-                        if not dry_run:
+                        if dry_run:
+                            dry_run_reports.append(
+                                make_dry_run_report(
+                                    "drive.update",
+                                    remote["id"],
+                                    {
+                                        "local_path": relative_path,
+                                        "file_name": entry.name,
+                                    },
+                                    reason="Cannot compare timestamps, updating to be safe",
+                                )
+                            )
+                        else:
                             _update_file(drive, remote["id"], entry)
                         updated += 1
                 else:
-                    if not dry_run:
+                    if dry_run:
+                        dry_run_reports.append(
+                            make_dry_run_report(
+                                "drive.upload",
+                                "pending",
+                                {
+                                    "local_path": relative_path,
+                                    "file_name": entry.name,
+                                    "parent_id": remote_parent_id,
+                                },
+                                reason="File not found in Drive",
+                            )
+                        )
+                    else:
                         upload_file(drive, entry, parent_id=remote_parent_id)
                     created += 1
 
@@ -570,13 +619,18 @@ def sync_folder(
 
     _sync_dir(local_dir, drive_folder_id)
 
-    return {
+    result = {
         "created": created,
         "updated": updated,
         "skipped": skipped,
         "errors": errors,
         "dry_run": dry_run,
     }
+
+    if dry_run:
+        result["reports"] = dry_run_reports
+
+    return result
 
 
 class DriveClient(BaseClient):
