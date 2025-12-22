@@ -1351,4 +1351,3 @@ def batch_write(
         allow_multiple=allow_multiple,
         value_input_option="USER_ENTERED",
     )
-

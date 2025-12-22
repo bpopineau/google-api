@@ -209,4 +209,3 @@ QToolTip {{
     padding: 4px 8px;
 }}
 """
-

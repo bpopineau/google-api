@@ -37,7 +37,6 @@ class AsyncLoginWorker(QThread):
     def run(self) -> None:
         try:
             # This can block safely here
-            from mygoog_gui.main import main
 
             # (Wait, this is an entry point, we probably want get_clients directly)
             from mygooglib import get_clients
@@ -140,6 +139,9 @@ class MainWindow(QMainWindow):
 
     def _create_pages(self) -> None:
         """Create all page widgets."""
+        if not self.clients:
+            return  # Should not happen via flow, but satisfies type checker
+
         # Import pages here to avoid circular imports
         from mygoog_gui.pages.calendar import CalendarPage
         from mygoog_gui.pages.drive import DrivePage
@@ -220,4 +222,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

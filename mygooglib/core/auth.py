@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import cast
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -122,7 +123,7 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
 
     logger.info("Saved new token to %s", token_path)
 
-    return new_creds  # type: ignore[return-value]
+    return cast(Credentials, new_creds)
 
 
 def verify_creds_exist() -> bool:
@@ -136,4 +137,3 @@ def verify_creds_exist() -> bool:
     """
     _, token_path = _get_paths()
     return token_path.exists()
-

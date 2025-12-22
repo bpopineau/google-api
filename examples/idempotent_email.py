@@ -55,5 +55,3 @@ if __name__ == "__main__":
     main()
     print("\n--- Direct store usage ---")
     using_idempotency_store_directly()
-
-

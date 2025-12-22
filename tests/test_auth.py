@@ -127,5 +127,3 @@ class TestScopes:
         required = ["drive", "spreadsheets", "gmail.send", "calendar", "tasks"]
         for req in required:
             assert any(req in s for s in scope_prefixes), f"Missing scope for {req}"
-
-

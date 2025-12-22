@@ -13,6 +13,14 @@ def col_to_a1(col: int) -> str:
 
     Raises:
         ValueError: If col is out of valid range.
+
+    Examples:
+        >>> col_to_a1(1)
+        'A'
+        >>> col_to_a1(27)
+        'AA'
+        >>> col_to_a1(28)
+        'AB'
     """
     if col < 1:
         raise ValueError("Column must be >= 1")
@@ -29,7 +37,16 @@ def col_to_a1(col: int) -> str:
 
 
 def a1_to_col(letters: str) -> int:
-    """Convert A1 column letters to 1-indexed number. 'A' -> 1, 'AA' -> 27."""
+    """Convert A1 column letters to 1-indexed number. 'A' -> 1, 'AA' -> 27.
+
+    Examples:
+        >>> a1_to_col('A')
+        1
+        >>> a1_to_col('AA')
+        27
+        >>> a1_to_col('Z')
+        26
+    """
     letters = letters.upper()
     result = 0
     for char in letters:
@@ -51,9 +68,12 @@ def a1_to_range(
         end_row and end_col are None if it's a single cell.
 
     Examples:
-        a1_to_range("A1") -> (None, 1, 1, None, None)
-        a1_to_range("A1:C10") -> (None, 1, 1, 10, 3)
-        a1_to_range("Sheet1!A1:C10") -> ("Sheet1", 1, 1, 10, 3)
+        >>> a1_to_range("A1")
+        (None, 1, 1, None, None)
+        >>> a1_to_range("A1:C10")
+        (None, 1, 1, 10, 3)
+        >>> a1_to_range("Sheet1!A1:C10")
+        ('Sheet1', 1, 1, 10, 3)
     """
     sheet_name: str | None = None
     cell_range = a1_range
@@ -96,9 +116,12 @@ def range_to_a1(
     """Build an A1 range string from 1-indexed row/col coordinates.
 
     Examples:
-        range_to_a1(1, 1) -> 'A1'
-        range_to_a1(1, 1, 10, 3) -> 'A1:C10'
-        range_to_a1(1, 1, 10, 3, sheet_name='Data') -> "'Data'!A1:C10"
+        >>> range_to_a1(None, 1, 1)
+        'A1'
+        >>> range_to_a1(None, 1, 1, 10, 3)
+        'A1:C10'
+        >>> range_to_a1('Data', 1, 1, 10, 3)
+        'Data!A1:C10'
     """
     start = f"{col_to_a1(start_col)}{start_row}"
     if end_row is None and end_col is None:
@@ -113,4 +136,3 @@ def range_to_a1(
             sheet_name = f"'{sheet_name}'"
         return f"{sheet_name}!{cell}"
     return cell
-

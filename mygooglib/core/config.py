@@ -120,4 +120,3 @@ class AppConfig:
     @property
     def log_level(self) -> str:
         return self._config.log_level
-

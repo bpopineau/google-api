@@ -43,4 +43,3 @@ if __name__ == "__main__":
 
     print("\nProfiling results saved to profiling_results.txt")
     print(s.getvalue())
-

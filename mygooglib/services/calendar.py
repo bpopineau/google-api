@@ -7,7 +7,7 @@ They return plain Python types by default, with a `raw=True` escape hatch.
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any
+from typing import Any, cast
 
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.datetime import from_rfc3339, to_rfc3339
@@ -78,7 +78,7 @@ def add_event(
 
     request = calendar.events().insert(calendarId=calendar_id, body=event)
     response = execute_with_retry_http_error(request, is_write=True)
-    return response if raw else response.get("id")
+    return cast(dict, response) if raw else cast(str, response.get("id"))
 
 
 @api_call("Calendar list_events", is_write=False)
@@ -163,16 +163,19 @@ class CalendarClient(BaseClient):
         raw: bool = False,
     ) -> str | dict:
         """Add an event to a Google Calendar."""
-        return add_event(
-            self.service,
-            summary=summary,
-            start=start,
-            end=end,
-            duration_minutes=duration_minutes,
-            description=description,
-            location=location,
-            calendar_id=calendar_id,
-            raw=raw,
+        return cast(
+            str | dict,
+            add_event(
+                self.service,
+                summary=summary,
+                start=start,
+                end=end,
+                duration_minutes=duration_minutes,
+                description=description,
+                location=location,
+                calendar_id=calendar_id,
+                raw=raw,
+            ),
         )
 
     def list_events(
@@ -186,14 +189,17 @@ class CalendarClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """List events from a calendar."""
-        return list_events(
-            self.service,
-            calendar_id=calendar_id,
-            time_min=time_min,
-            time_max=time_max,
-            max_results=max_results,
-            raw=raw,
-            progress_callback=progress_callback,
+        return cast(
+            list[dict] | dict,
+            list_events(
+                self.service,
+                calendar_id=calendar_id,
+                time_min=time_min,
+                time_max=time_max,
+                max_results=max_results,
+                raw=raw,
+                progress_callback=progress_callback,
+            ),
         )
 
     def delete_event(
@@ -203,5 +209,5 @@ class CalendarClient(BaseClient):
         calendar_id: str = "primary",
     ) -> None:
         """Delete an event from a Google Calendar."""
-        return delete_event(self.service, event_id, calendar_id=calendar_id)
-
+        delete_event(self.service, event_id, calendar_id=calendar_id)
+        return None

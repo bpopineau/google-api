@@ -1,2 +1,1 @@
 """Service-specific page widgets."""
-

@@ -29,7 +29,12 @@ if TYPE_CHECKING:
 class TasksPage(QWidget):
     """Google Tasks manager."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -261,4 +266,3 @@ class TasksPage(QWidget):
         worker.error.connect(self._on_error)
         self._workers.append(worker)
         worker.start()
-

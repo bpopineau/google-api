@@ -68,4 +68,3 @@ def sheets_to_calendar(
         state.err_console.print(f"[red]Errors ({len(result['errors'])}):[/red]")
         for err in result["errors"]:
             state.err_console.print(f"- {err}")
-

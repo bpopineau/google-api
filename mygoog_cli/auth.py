@@ -154,4 +154,3 @@ def status_cmd(ctx: typer.Context) -> None:
     table.add_row("expired", str(payload["expired"]))
     table.add_row("expiry (UTC)", str(payload["expiry"]))
     state.console.print(table)
-

@@ -80,7 +80,12 @@ class ComposeDialog(QDialog):
 class GmailPage(QWidget):
     """Gmail inbox viewer and composer."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -492,4 +497,3 @@ class GmailPage(QWidget):
         self.status.setText("Email sent!")
         # Auto-refresh to update the message list
         self._load_messages()
-

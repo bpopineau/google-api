@@ -296,4 +296,3 @@ def save_attachments_cmd(
     print_success(state.console, f"Saved {len(saved_files)} attachments")
     for f in saved_files:
         print_kv(state.console, "File", str(f))
-

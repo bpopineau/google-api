@@ -182,4 +182,3 @@ def replace_cmd(
         return
 
     print_success(state.console, f"Replaced {count} occurrences")
-

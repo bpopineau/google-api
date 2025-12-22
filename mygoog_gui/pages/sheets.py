@@ -27,7 +27,12 @@ if TYPE_CHECKING:
 class SheetsPage(QWidget):
     """Google Sheets browser."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -185,4 +190,3 @@ class SheetsPage(QWidget):
             self.status.setText(f"Exported to {file_path}")
         except Exception as e:
             self.status.setText(f"Export error: {e}")
-

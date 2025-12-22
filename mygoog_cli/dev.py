@@ -319,4 +319,3 @@ def todo():
                 "Select-String -Path .\\* -Pattern 'TODO' -Recurse -Exclude .venv,.git",
             ]
         )
-

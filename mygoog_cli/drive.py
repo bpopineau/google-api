@@ -407,4 +407,3 @@ def open_cmd(
 
     state.console.print(f"Opening: {link}")
     webbrowser.open(link)
-

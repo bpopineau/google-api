@@ -69,4 +69,3 @@ def run_cmd(
             console.print_json(json.dumps(result, indent=2, default=str))
         else:
             console.print(str(result))
-

@@ -165,7 +165,12 @@ class EventCard(QFrame):
 class CalendarPage(QWidget):
     """Google Calendar with visual calendar view."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -429,4 +434,3 @@ class CalendarPage(QWidget):
         worker.error.connect(self._on_error)
         self._workers.append(worker)
         worker.start()
-

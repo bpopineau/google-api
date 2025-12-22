@@ -123,5 +123,3 @@ def test_check_runs_command(mock_run, mock_task_file):
     # Check args
     args, _ = mock_run.call_args
     assert args[0] == ["echo", "check"]
-
-

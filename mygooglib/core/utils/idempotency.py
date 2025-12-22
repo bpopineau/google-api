@@ -133,4 +133,3 @@ def idempotent(
         return wrapper
 
     return decorator
-

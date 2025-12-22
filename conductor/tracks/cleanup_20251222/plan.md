@@ -10,12 +10,14 @@ This phase focuses on removing the unused files and ensuring the core applicatio
     - [x] Sub-task: Delete `test_temp.md` file
     - [x] Sub-task: Delete `pytest_output.txt` file
 
-- [ ] Task: Verify Core Functionality
-    - [ ] Sub-task: Run standard test suite (`pytest`)
-    - [ ] Sub-task: Verify CLI help command (`mg --help`)
-    - [ ] Sub-task: Verify GUI package import (`python -c "import mygoog_gui.main"`)
+- [x] Task: Verify Core Functionality
+    - [x] Sub-task: Run standard test suite (`pytest`)
+    - [x] Sub-task: Verify CLI help command (`mg --help`)
+    - [x] Sub-task: Verify GUI package import (`python -c "import mygoog_gui.main"`)
 
-- [ ] Task: Conductor - User Manual Verification 'Deletion and Core Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Deletion and Core Verification' [a81207c]
+
+## Phase 1: Deletion and Core Verification [checkpoint: a81207c]
 
 ## Phase 2: Static Analysis and Cleanup
 This phase ensures that no broken imports or type issues were introduced.

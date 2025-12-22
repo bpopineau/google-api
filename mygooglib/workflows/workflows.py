@@ -75,4 +75,3 @@ def import_events_from_sheets(
             errors.append(f"Row {i + 1} ({row[0]}): {e}")
 
     return {"created": created, "skipped": skipped, "errors": errors}
-

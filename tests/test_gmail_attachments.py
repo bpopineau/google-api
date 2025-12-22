@@ -5,7 +5,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mygooglib.services.gmail import _extract_attachments, get_attachment, save_attachments
+from mygooglib.services.gmail import (
+    _extract_attachments,
+    get_attachment,
+    save_attachments,
+)
 
 
 @pytest.fixture
@@ -26,7 +30,8 @@ def test_get_attachment_returns_bytes(mock_gmail):
 
     # Call the function
     with patch(
-        "mygooglib.services.gmail.execute_with_retry_http_error", return_value=mock_response
+        "mygooglib.services.gmail.execute_with_retry_http_error",
+        return_value=mock_response,
     ):
         result = get_attachment(mock_gmail, "msg123", "att456")
 
@@ -132,5 +137,3 @@ def test_save_attachments_applies_filter(
 
     assert len(result) == 1
     assert result[0].name == "invoice.pdf"
-
-

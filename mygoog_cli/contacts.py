@@ -164,4 +164,3 @@ def delete_cmd(
 
     delete_contact(clients.contacts.service, resource_name)
     state.console.print(f"[green]Deleted contact:[/green] {resource_name}")
-

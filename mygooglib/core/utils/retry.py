@@ -173,7 +173,7 @@ def execute_with_retry_http_error(
     raise AssertionError("execute_with_retry_http_error: fell through")
 
 
-def api_call(context: str, *, is_write: bool = False):
+def api_call(context: str, *, is_write: bool = False) -> Any:
     """Decorator that wraps API calls with retry and error handling.
 
     This decorator eliminates the try/except boilerplate pattern:
@@ -202,9 +202,9 @@ def api_call(context: str, *, is_write: bool = False):
 
     from mygooglib.core.exceptions import raise_for_http_error
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
             except HttpError as e:
@@ -214,4 +214,3 @@ def api_call(context: str, *, is_write: bool = False):
         return wrapper
 
     return decorator
-

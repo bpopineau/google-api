@@ -282,4 +282,3 @@ def complete_cmd(
         return
 
     print_success(state.console, f"Task completed: {task_id}")
-

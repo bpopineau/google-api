@@ -1,7 +1,5 @@
 import os
 
-import pytest
-
 
 def test_streamlit_removed():
     """Verify that the .streamlit directory has been removed."""

@@ -184,4 +184,3 @@ def add_cmd(
 
     print_success(state.console, "Event added")
     print_kv(state.console, "id", event_id)
-

@@ -25,14 +25,19 @@ from mygoog_gui.widgets.drive_tree import FileTreeWidget
 from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib.core.client import Clients
 
 
 class DrivePage(QWidget):
     """Google Drive file browser."""
 
-    def __init__(self, clients: "Clients", parent: QWidget | None = None, activity_model: ActivityModel | None = None) -> None:
+    def __init__(
+        self,
+        clients: "Clients",
+        parent: QWidget | None = None,
+        activity_model: ActivityModel | None = None,
+    ) -> None:
         super().__init__(parent)
         self.clients = clients
         self.activity_model = activity_model
@@ -301,7 +306,9 @@ class DrivePage(QWidget):
     def _on_sync_folder(self) -> None:
         """Handle sync folder to sheets action."""
         if not self.activity_model:
-            QMessageBox.warning(self, "Activity Error", "Activity model not initialized")
+            QMessageBox.warning(
+                self, "Activity Error", "Activity model not initialized"
+            )
             return
 
         # 1. Select local folder
@@ -312,48 +319,60 @@ class DrivePage(QWidget):
         # 2. Select target spreadsheet (simple implementation: ask for ID or use title)
         # For a better UX, we could list sheets, but for now let's ask for ID or title
         spreadsheet_id, ok = QInputDialog.getText(
-            self, "Target Spreadsheet", "Enter Spreadsheet ID or Title:", text="Metadata Sync"
+            self,
+            "Target Spreadsheet",
+            "Enter Spreadsheet ID or Title:",
+            text="Metadata Sync",
         )
         if not ok or not spreadsheet_id.strip():
             return
-        
+
         spreadsheet_id = spreadsheet_id.strip()
+
+        # Capture model in local variable for Mypy narrowing in closures
+        model = self.activity_model
 
         # 3. Start worker
         from uuid import uuid4
-        from mygoog_gui.workers import SyncWorker
+
         from mygoog_gui.widgets.activity import ActivityItem, ActivityStatus
+        from mygoog_gui.workers import SyncWorker
 
         activity_id = str(uuid4())
         activity = ActivityItem(
             id=activity_id,
             title=f"Sync: {Path(directory).name}",
-            details="Initializing..."
+            details="Initializing...",
         )
-        self.activity_model.add_activity(activity)
+        model.add_activity(activity)
 
         worker = SyncWorker(self.clients, directory, spreadsheet_id, "Sheet1")
-        
+
         def on_scan():
-            self.activity_model.update_status(activity_id, ActivityStatus.RUNNING, "Scanning files...")
-        
+            model.update_status(
+                activity_id, ActivityStatus.RUNNING, "Scanning files..."
+            )
+
         def on_upload(count):
-            self.activity_model.update_status(activity_id, ActivityStatus.RUNNING, f"Uploading {count} files...")
-        
+            model.update_status(
+                activity_id, ActivityStatus.RUNNING, f"Uploading {count} files..."
+            )
+
         def on_finished(result):
             rows = result.get("updatedRows", 0)
-            self.activity_model.update_status(activity_id, ActivityStatus.SUCCESS, f"Synced {rows} rows")
+            model.update_status(
+                activity_id, ActivityStatus.SUCCESS, f"Synced {rows} rows"
+            )
             self.status.setText(f"Sync complete: {rows} rows")
 
         def on_error(err):
-            self.activity_model.update_status(activity_id, ActivityStatus.ERROR, err)
+            model.update_status(activity_id, ActivityStatus.ERROR, err)
             QMessageBox.critical(self, "Sync Error", f"Sync failed:\n\n{err}")
 
         worker.started_scan.connect(on_scan)
         worker.started_upload.connect(on_upload)
         worker.finished.connect(on_finished)
         worker.error.connect(on_error)
-        
+
         self._workers.append(worker)
         worker.start()
-

@@ -2,4 +2,3 @@
 
 This package provides a native desktop application for the mygooglib library.
 """
-

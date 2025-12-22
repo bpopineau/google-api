@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, cast
 
 from googleapiclient.discovery import build
 
@@ -38,7 +38,7 @@ class Clients:
         version: str,
         client_class: type,
         needs_drive: bool = False,
-    ):
+    ) -> Any:
         """Helper to lazily build and cache a client."""
         cached = getattr(self, f"_{attr_name}", None)
         if cached is None:
@@ -53,37 +53,58 @@ class Clients:
 
     @property
     def drive(self) -> DriveClient:
-        return self._get_or_build("drive", "drive", "v3", DriveClient)
+        return cast(
+            DriveClient, self._get_or_build("drive", "drive", "v3", DriveClient)
+        )
 
     @property
     def sheets(self) -> SheetsClient:
-        return self._get_or_build(
-            "sheets", "sheets", "v4", SheetsClient, needs_drive=True
+        return cast(
+            SheetsClient,
+            self._get_or_build(
+                "sheets", "sheets", "v4", SheetsClient, needs_drive=True
+            ),
         )
 
     @property
     def docs(self) -> DocsClient:
-        return self._get_or_build("docs", "docs", "v1", DocsClient, needs_drive=True)
+        return cast(
+            DocsClient,
+            self._get_or_build("docs", "docs", "v1", DocsClient, needs_drive=True),
+        )
 
     @property
     def calendar(self) -> CalendarClient:
-        return self._get_or_build("calendar", "calendar", "v3", CalendarClient)
+        return cast(
+            CalendarClient,
+            self._get_or_build("calendar", "calendar", "v3", CalendarClient),
+        )
 
     @property
     def tasks(self) -> TasksClient:
-        return self._get_or_build("tasks", "tasks", "v1", TasksClient)
+        return cast(
+            TasksClient, self._get_or_build("tasks", "tasks", "v1", TasksClient)
+        )
 
     @property
     def gmail(self) -> GmailClient:
-        return self._get_or_build("gmail", "gmail", "v1", GmailClient)
+        return cast(
+            GmailClient, self._get_or_build("gmail", "gmail", "v1", GmailClient)
+        )
 
     @property
     def contacts(self) -> ContactsClient:
-        return self._get_or_build("contacts", "people", "v1", ContactsClient)
+        return cast(
+            ContactsClient,
+            self._get_or_build("contacts", "people", "v1", ContactsClient),
+        )
 
     @property
     def appscript(self) -> AppScriptClient:
-        return self._get_or_build("appscript", "script", "v1", AppScriptClient)
+        return cast(
+            AppScriptClient,
+            self._get_or_build("appscript", "script", "v1", AppScriptClient),
+        )
 
 
 _DEFAULT_CLIENTS: Clients | None = None
@@ -130,4 +151,3 @@ def get_clients(
         _DEFAULT_CLIENTS = clients
 
     return clients
-

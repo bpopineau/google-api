@@ -6,7 +6,14 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from PySide6.QtCore import QAbstractListModel, QModelIndex, QRect, QSize, Qt
+from PySide6.QtCore import (
+    QAbstractListModel,
+    QModelIndex,
+    QPersistentModelIndex,
+    QRect,
+    QSize,
+    Qt,
+)
 from PySide6.QtGui import QColor, QFont, QPainter
 from PySide6.QtWidgets import (
     QLabel,
@@ -45,10 +52,22 @@ class ActivityModel(QAbstractListModel):
         super().__init__(parent)
         self._activities: list[ActivityItem] = []
 
-    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+    def rowCount(
+        self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()
+    ) -> int:
         return len(self._activities)
 
-    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+    def data(
+        self,
+        index: QModelIndex | QPersistentModelIndex,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> Any:
+        if isinstance(index, QPersistentModelIndex):
+            # Should not happen in standard views, but for type safety:
+            if not index.isValid():
+                return None
+            # Conversion logic if needed, but row() works on both
+
         if not index.isValid() or index.row() >= len(self._activities):
             return None
 
@@ -102,7 +121,10 @@ class ActivityDelegate(QStyledItemDelegate):
         }
 
     def paint(
-        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+        self,
+        painter: QPainter,
+        option: QStyleOptionViewItem,
+        index: QModelIndex | QPersistentModelIndex,
     ) -> None:
         if not index.isValid():
             return
@@ -112,11 +134,14 @@ class ActivityDelegate(QStyledItemDelegate):
 
         # Draw selection background
         # Use QStyle.State.State_Selected (PySide6)
-        if option.state & QStyle.State.State_Selected:
-            painter.fillRect(option.rect, QColor("#2d333b"))  # bg_tertiary
+        if option.state & QStyle.State.State_Selected:  # type: ignore
+            painter.fillRect(option.rect, QColor("#2d333b"))  # type: ignore[attr-defined]
 
-        rect = option.rect
+        rect = option.rect  # type: ignore[attr-defined]
         margin = 10
+
+        # ... (rest of data retrieval using index)
+        # Note: index.data works for both types.
 
         # Data
         title = index.data(ActivityModel.TitleRole)
@@ -124,6 +149,8 @@ class ActivityDelegate(QStyledItemDelegate):
         details = index.data(ActivityModel.DetailsRole)
         icon = self.status_icons.get(status, "?")
         status_color = self.status_colors.get(status, "#ffffff")
+
+        # ... (drawing logic unchanged)
 
         # Draw Icon
         icon_font = QFont()
@@ -174,8 +201,10 @@ class ActivityDelegate(QStyledItemDelegate):
 
         painter.restore()
 
-    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
-        return QSize(option.rect.width(), 60)
+    def sizeHint(
+        self, option: QStyleOptionViewItem, index: QModelIndex | QPersistentModelIndex
+    ) -> QSize:
+        return QSize(option.rect.width(), 60)  # type: ignore[attr-defined]
 
 
 class ActivityWidget(QWidget):
@@ -202,4 +231,3 @@ class ActivityWidget(QWidget):
         self.view.setSelectionMode(QListView.SelectionMode.NoSelection)
         self.view.setStyleSheet("background-color: transparent; border: none;")
         layout.addWidget(self.view)
-

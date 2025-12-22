@@ -13,7 +13,7 @@ app = typer.Typer(help="Launch the desktop GUI application.")
 def run_gui() -> None:
     """Launch the PySide6 desktop application."""
     try:
-        from mygoog_gui.main import run_app
+        from mygoog_gui.main import main as run_app
     except ImportError as e:
         console.print(
             "[red]PySide6 is not installed.[/red]\n"
@@ -23,4 +23,3 @@ def run_gui() -> None:
 
     console.print("[green]Launching MyGoog Desktop...[/green]")
     run_app()
-

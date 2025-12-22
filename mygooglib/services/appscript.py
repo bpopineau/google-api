@@ -111,4 +111,3 @@ class AppScriptClient:
             parameters,
             dev_mode=dev_mode,
         )
-

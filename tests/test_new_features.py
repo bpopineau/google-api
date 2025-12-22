@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 
-
 class TestContactsCRUD:
     """Tests for Contacts create, update, delete operations."""
 
@@ -43,7 +42,9 @@ class TestContactsCRUD:
 
         mock_service = MagicMock()
 
-        with patch("mygooglib.services.contacts.execute_with_retry_http_error", return_value={}):
+        with patch(
+            "mygooglib.services.contacts.execute_with_retry_http_error", return_value={}
+        ):
             delete_contact(mock_service, "people/c123")
 
         mock_service.people().deleteContact.assert_called_once()
@@ -147,7 +148,9 @@ class TestIdempotencyStore:
         mock_service = MagicMock()
 
         # Patch the IdempotencyStore at the import location inside gmail.send_email
-        with patch("mygooglib.core.utils.idempotency.IdempotencyStore", return_value=store):
+        with patch(
+            "mygooglib.core.utils.idempotency.IdempotencyStore", return_value=store
+        ):
             result = send_email(
                 mock_service,
                 to="test@example.com",
@@ -159,5 +162,3 @@ class TestIdempotencyStore:
         # Should return None without calling API
         assert result is None
         mock_service.users().messages().send.assert_not_called()
-
-

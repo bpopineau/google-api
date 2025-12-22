@@ -48,4 +48,3 @@ def from_rfc3339(value: str) -> dt.datetime | dt.date:
     if len(value) == 10:
         return dt.date.fromisoformat(value)
     return dt.datetime.fromisoformat(value)
-

@@ -92,4 +92,3 @@ class Sidebar(QFrame):
         """Programmatically select a page."""
         if name in self.buttons:
             self.buttons[name].setChecked(True)
-

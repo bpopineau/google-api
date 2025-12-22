@@ -115,7 +115,7 @@ class SyncWorker(QThread):
         try:
             # 1. Ensure spreadsheet exists
             spreadsheet_id = self.spreadsheet_id
-            
+
             # Check if it exists (handles ID, Title, or URL)
             if not self.clients.sheets.exists(spreadsheet_id):
                 # If it doesn't exist, we assume the input was intended to be a title
@@ -126,7 +126,7 @@ class SyncWorker(QThread):
                 # If it's a long ID that's missing, it's safer to use a descriptive name
                 if len(title) > 40 and " " not in title:
                     title = f"Synced Metadata ({title[:8]})"
-                
+
                 spreadsheet_id = self.clients.sheets.create_spreadsheet(
                     title,
                     sheet_name=self.sheet_name,
@@ -162,4 +162,3 @@ class SyncWorker(QThread):
 
         except Exception as e:
             self.error.emit(str(e))
-

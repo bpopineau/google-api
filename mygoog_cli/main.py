@@ -161,4 +161,3 @@ def main() -> None:
         raise typer.Exit(code=2)
     except KeyboardInterrupt:
         raise typer.Exit(code=130)
-

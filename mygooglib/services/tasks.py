@@ -7,7 +7,7 @@ They return plain Python types by default, with a `raw=True` escape hatch.
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any
+from typing import Any, cast
 
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.datetime import to_rfc3339
@@ -33,7 +33,7 @@ def list_tasklists(
     """
     request = tasks.tasklists().list(maxResults=max_results)
     response = execute_with_retry_http_error(request, is_write=False)
-    return response if raw else response.get("items", [])
+    return cast(dict, response) if raw else cast(list, response.get("items", []))
 
 
 @api_call("Tasks add_task", is_write=True)
@@ -67,7 +67,7 @@ def add_task(
 
     request = tasks.tasks().insert(tasklist=tasklist_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return response if raw else response.get("id")
+    return cast(dict, response) if raw else cast(str, response.get("id"))
 
 
 @api_call("Tasks list_tasks", is_write=False)
@@ -134,7 +134,7 @@ def complete_task(
     body = {"status": "completed"}
     request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return response if raw else None
+    return cast(dict, response) if raw else None
 
 
 @api_call("Tasks delete_task", is_write=True)
@@ -191,7 +191,7 @@ def update_task(
 
     request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return response if raw else None
+    return cast(dict, response) if raw else None
 
 
 class TasksClient(BaseClient):
@@ -201,7 +201,10 @@ class TasksClient(BaseClient):
         self, *, max_results: int = 100, raw: bool = False
     ) -> list[dict] | dict:
         """List the user's task lists."""
-        return list_tasklists(self.service, max_results=max_results, raw=raw)
+        return cast(
+            list[dict] | dict,
+            list_tasklists(self.service, max_results=max_results, raw=raw),
+        )
 
     def add_task(
         self,
@@ -213,13 +216,16 @@ class TasksClient(BaseClient):
         raw: bool = False,
     ) -> str | dict:
         """Add a task to a task list."""
-        return add_task(
-            self.service,
-            title=title,
-            tasklist_id=tasklist_id,
-            notes=notes,
-            due=due,
-            raw=raw,
+        return cast(
+            str | dict,
+            add_task(
+                self.service,
+                title=title,
+                tasklist_id=tasklist_id,
+                notes=notes,
+                due=due,
+                raw=raw,
+            ),
         )
 
     def list_tasks(
@@ -233,14 +239,17 @@ class TasksClient(BaseClient):
         progress_callback: Any | None = None,
     ) -> list[dict] | dict:
         """List tasks in a task list."""
-        return list_tasks(
-            self.service,
-            tasklist_id=tasklist_id,
-            show_completed=show_completed,
-            show_hidden=show_hidden,
-            max_results=max_results,
-            raw=raw,
-            progress_callback=progress_callback,
+        return cast(
+            list[dict] | dict,
+            list_tasks(
+                self.service,
+                tasklist_id=tasklist_id,
+                show_completed=show_completed,
+                show_hidden=show_hidden,
+                max_results=max_results,
+                raw=raw,
+                progress_callback=progress_callback,
+            ),
         )
 
     def complete_task(
@@ -251,11 +260,14 @@ class TasksClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Mark a task as completed."""
-        return complete_task(
-            self.service,
-            task_id,
-            tasklist_id=tasklist_id,
-            raw=raw,
+        return cast(
+            dict | None,
+            complete_task(
+                self.service,
+                task_id,
+                tasklist_id=tasklist_id,
+                raw=raw,
+            ),
         )
 
     def delete_task(
@@ -265,7 +277,8 @@ class TasksClient(BaseClient):
         tasklist_id: str = "@default",
     ) -> None:
         """Delete a task from a task list."""
-        return delete_task(self.service, task_id, tasklist_id=tasklist_id)
+        delete_task(self.service, task_id, tasklist_id=tasklist_id)
+        return None
 
     def update_task(
         self,
@@ -279,14 +292,16 @@ class TasksClient(BaseClient):
         raw: bool = False,
     ) -> dict | None:
         """Update a task's properties."""
-        return update_task(
-            self.service,
-            task_id,
-            tasklist_id=tasklist_id,
-            title=title,
-            notes=notes,
-            status=status,
-            due=due,
-            raw=raw,
+        return cast(
+            dict | None,
+            update_task(
+                self.service,
+                task_id,
+                tasklist_id=tasklist_id,
+                title=title,
+                notes=notes,
+                status=status,
+                due=due,
+                raw=raw,
+            ),
         )
-

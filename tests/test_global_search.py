@@ -70,7 +70,7 @@ def test_on_search_calls_apis(qapp, mock_clients):
                 page.results_header = MagicMock()
                 page.search_drive_list = MagicMock()
                 page.search_gmail_list = MagicMock()
-                page._clear_layout = MagicMock()
+                page._clear_layout = MagicMock()  # type: ignore[method-assign]
                 page._workers = []
 
                 # Trigger search

@@ -33,7 +33,7 @@ def main():
     # Batch update - single API call for all ranges
     result = clients.sheets.batch_update(
         SPREADSHEET_ID,
-        updates,
+        updates,  # type: ignore
         value_input_option="USER_ENTERED",  # Allows formulas, auto-format
     )
 
@@ -50,5 +50,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

@@ -134,4 +134,3 @@ class FileTreeWidget(QTreeWidget):
 
         for f in files:
             self.add_file_item(f, parent_item)
-

@@ -61,4 +61,3 @@ def paginate(
         all_items = all_items[:max_results]
 
     return all_items
-

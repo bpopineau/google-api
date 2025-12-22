@@ -273,4 +273,3 @@ class ContactsClient(BaseClient):
     def delete_contact(self, resource_name: str) -> None:
         """Delete a contact."""
         delete_contact(self.service, resource_name)
-

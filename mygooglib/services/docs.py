@@ -451,4 +451,3 @@ class DocsClient(BaseClient):
     ) -> int:
         """Replace a placeholder tag with a bulleted list."""
         return render_list(self.service, doc_id, tag, items, bullet=bullet)
-

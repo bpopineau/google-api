@@ -96,4 +96,3 @@ def prompt_selection(
                 console.print("[red]Invalid selection.[/red]")
         except ValueError:
             console.print("[red]Invalid input.[/red]")
-

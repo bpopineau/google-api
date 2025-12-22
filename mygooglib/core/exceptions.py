@@ -78,4 +78,3 @@ def raise_for_http_error(http_error: Exception, *, context: str | None = None) -
 
     # Re-raise as generic wrapper for other codes
     raise GoogleApiError(f"{prefix}HTTP {status}: {reason}") from http_error
-

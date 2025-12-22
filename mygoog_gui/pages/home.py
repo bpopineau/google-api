@@ -31,6 +31,13 @@ if TYPE_CHECKING:
 class HomePage(QScrollArea):
     """Dashboard home page with Global Search."""
 
+    # Explicitly typed attributes for Mypy
+    calendar_list: QVBoxLayout
+    tasks_list: QVBoxLayout
+    drive_list: QVBoxLayout
+    search_drive_list: QVBoxLayout
+    search_gmail_list: QVBoxLayout
+
     def __init__(
         self,
         clients: "Clients",

@@ -168,4 +168,3 @@ class ItemCard(QFrame):
     def set_title(self, title: str) -> None:
         """Update the title text."""
         self.title_label.setText(title)
-

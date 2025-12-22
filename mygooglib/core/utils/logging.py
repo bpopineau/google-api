@@ -61,4 +61,3 @@ def get_logger(name: str = "mygooglib") -> logging.Logger:
     """Get a logger, applying env-based config if requested."""
     configure_from_env(logger_name="mygooglib")
     return logging.getLogger(name)
-

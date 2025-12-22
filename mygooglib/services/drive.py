@@ -663,4 +663,3 @@ class DriveClient(BaseClient):
     ) -> dict | None:
         """Resolve a human-readable path string to Drive file metadata."""
         return resolve_path(self.service, path, parent_id=parent_id)
-

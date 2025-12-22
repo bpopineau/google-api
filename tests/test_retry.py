@@ -215,5 +215,3 @@ class TestEnvHelpers:
 
         with patch.dict(os.environ, {"TEST_FLOAT": "3.14"}):
             assert _env_float("TEST_FLOAT", 0.0) == 3.14
-
-

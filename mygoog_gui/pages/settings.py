@@ -142,4 +142,3 @@ class SettingsPage(QWidget):
 
         except OSError as e:
             QMessageBox.critical(self, "Error", f"Failed to delete credentials: {e}")
-

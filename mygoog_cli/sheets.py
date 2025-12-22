@@ -402,4 +402,3 @@ def batch_update_cmd(
     for k, v in result.items():
         if v is not None:
             print_kv(state.console, k, v)
-

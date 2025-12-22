@@ -77,5 +77,3 @@ def test_batch_updater_no_commit_if_empty(mock_batch_update, mock_sheets):
         pass  # No updates
 
     mock_batch_update.assert_not_called()
-
-

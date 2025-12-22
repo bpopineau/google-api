@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from mygooglib.workflows.search import global_search
 

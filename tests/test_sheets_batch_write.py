@@ -88,5 +88,3 @@ def test_batch_write_custom_start_cell(mock_clear, mock_update, mock_sheets):
         allow_multiple=False,
         value_input_option="USER_ENTERED",
     )
-
-

@@ -17,14 +17,14 @@ def main() -> NoReturn:
     # However, standard CLI usually has 'mg command ...'
     # So if len(args) == 0, run GUI.
     if not args:
-        from mygoog_gui.main import run_app
+        from mygoog_gui.main import main as run_app
 
         run_app()
         sys.exit(0)
 
     # Allow explicit GUI launch flag
     if args[0] in ("--gui", "-g"):
-        from mygoog_gui.main import run_app
+        from mygoog_gui.main import main as run_app
 
         run_app()
         sys.exit(0)
@@ -32,9 +32,9 @@ def main() -> NoReturn:
     # Otherwise run CLI
     from mygoog_cli import main as cli_main
 
-    sys.exit(cli_main())
+    cli_main.main()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
     main()
-

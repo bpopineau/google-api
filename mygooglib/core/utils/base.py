@@ -19,4 +19,3 @@ class BaseClient:
             service: The raw API service Resource from googleapiclient.discovery.build()
         """
         self.service = service
-
