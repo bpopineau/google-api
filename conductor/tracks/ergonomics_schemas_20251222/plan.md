@@ -1,6 +1,6 @@
 # Implementation Plan: Ergonomics - Strict Schemas
 
-## Phase 1: Setup & Basic Types
+## Phase 1: Setup & Basic Types [checkpoint: 2975e91]
 Define the central registry and the first set of foundational schemas.
 
 - [x] Task: Create Type Registry [e9fc118]
@@ -12,12 +12,12 @@ Define the central registry and the first set of foundational schemas.
 - [x] Task: Verify Phase 1 Types [e9fc118]
     - [x] Sub-task: Write unit tests in `tests/utils/test_types.py` that instantiate these TypedDicts with valid/invalid data
     - [x] Sub-task: Run `uv run mypy mygooglib/core/types.py`
-- [~] Task: Conductor - User Manual Verification 'Setup & Basic Types' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Setup & Basic Types' [2975e91]
 
 ## Phase 2: Sheets Service Integration
 Integrate the new types into the Sheets service and enforce strict typing.
 
-- [ ] Task: Red Phase - Sheets Typings
+- [~] Task: Red Phase - Sheets Typings
     - [ ] Sub-task: Update `mygooglib/services/sheets.py` with import from `mygooglib.core.types`
     - [ ] Sub-task: Change return type annotations to the new `TypedDicts`
     - [ ] Sub-task: Run `uv run mypy mygooglib/services/sheets.py` and confirm failures (Red)
