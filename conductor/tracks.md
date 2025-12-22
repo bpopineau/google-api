@@ -14,5 +14,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Sheets Write-Back: Transform Sheets page from read-only to functional editor
-*Link: [./conductor/tracks/sheets_write_back_20251222/](./conductor/tracks/sheets_write_back_20251222/)*
+## [ ] Track: Ergonomics - Strict Schemas
+*Link: [./conductor/tracks/ergonomics_schemas_20251222/](./conductor/tracks/ergonomics_schemas_20251222/)*
