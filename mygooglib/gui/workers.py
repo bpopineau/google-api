@@ -110,31 +110,27 @@ class SyncWorker(QThread):
         self.sheet_name = sheet_name
 
     def run(self) -> None:
-        from mygooglib.drive import GOOGLE_SHEET_MIME, find_by_name
-        from mygooglib.sheets import batch_write, create_spreadsheet
         from mygooglib.utils.file_scanner import FileScanner
 
         try:
-            # 1. Resolve or create spreadsheet
+            # 1. Ensure spreadsheet exists
             spreadsheet_id = self.spreadsheet_id
-
-            # Check if input looks like a title (not a long ID)
-            if len(spreadsheet_id) < 20 or " " in spreadsheet_id:
-                # Try to find existing spreadsheet by name
-                existing = find_by_name(
-                    self.clients.drive.service,
-                    spreadsheet_id,
-                    mime_type=GOOGLE_SHEET_MIME,
+            
+            # Check if it exists (handles ID, Title, or URL)
+            if not self.clients.sheets.exists(spreadsheet_id):
+                # If it doesn't exist, we assume the input was intended to be a title
+                # or it was a deleted ID. In both cases, we create a new one.
+                # Use the provided spreadsheet_id as the title if it doesn't look like an ID,
+                # otherwise maybe use a default name or just the ID string as title.
+                title = spreadsheet_id
+                # If it's a long ID that's missing, it's safer to use a descriptive name
+                if len(title) > 40 and " " not in title:
+                    title = f"Synced Metadata ({title[:8]})"
+                
+                spreadsheet_id = self.clients.sheets.create_spreadsheet(
+                    title,
+                    sheet_name=self.sheet_name,
                 )
-                if existing:
-                    spreadsheet_id = existing["id"]
-                else:
-                    # Create new spreadsheet with this title
-                    spreadsheet_id = create_spreadsheet(
-                        self.clients.sheets.service,
-                        spreadsheet_id,
-                        sheet_name=self.sheet_name,
-                    )
 
             # 2. Scan
             self.started_scan.emit()
@@ -154,8 +150,7 @@ class SyncWorker(QThread):
             ]
 
             # 4. Upload
-            result = batch_write(
-                self.clients.sheets.service,
+            result = self.clients.sheets.batch_write(
                 spreadsheet_id,
                 self.sheet_name,
                 rows,

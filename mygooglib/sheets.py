@@ -1129,6 +1129,80 @@ class SheetsClient(BaseClient):
             value_input_option=value_input_option,
         )
 
+    def create_spreadsheet(
+        self,
+        title: str,
+        *,
+        sheet_name: str = "Sheet1",
+        raw: bool = False,
+    ) -> dict | str:
+        """Create a new Google Spreadsheet."""
+        return create_spreadsheet(
+            self.service,
+            title,
+            sheet_name=sheet_name,
+            raw=raw,
+        )
+
+    def clear_sheet(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        *,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        raw: bool = False,
+    ) -> dict | None:
+        """Clear all values from a specific sheet (tab)."""
+        return clear_sheet(
+            self.service,
+            spreadsheet_id,
+            sheet_name,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            raw=raw,
+        )
+
+    def batch_write(
+        self,
+        spreadsheet_id: str,
+        sheet_name: str,
+        rows: Sequence[Sequence[Any]],
+        *,
+        headers: Sequence[str] | None = None,
+        parent_id: str | None = None,
+        allow_multiple: bool = False,
+        clear: bool = False,
+        start_cell: str = "A1",
+    ) -> dict | None:
+        """Write a batch of rows to a sheet, optionally clearing it first."""
+        return batch_write(
+            self.service,
+            spreadsheet_id,
+            sheet_name,
+            rows,
+            headers=headers,
+            drive=self.drive,
+            parent_id=parent_id,
+            allow_multiple=allow_multiple,
+            clear=clear,
+            start_cell=start_cell,
+        )
+
+    def exists(self, identifier: str) -> bool:
+        """Check if a spreadsheet exists by ID, Title, or URL."""
+        try:
+            real_id = self.resolve_spreadsheet(identifier)
+            # If resolve_spreadsheet succeeds, it might still be a non-existent ID
+            # if it was passed directly. We verify with a minimal fetch.
+            self.service.spreadsheets().get(
+                spreadsheetId=real_id, fields="spreadsheetId"
+            ).execute()
+            return True
+        except Exception:
+            return False
+
 
 @api_call("Sheets clear_sheet", is_write=True)
 def clear_sheet(
