@@ -47,5 +47,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Systemic Project Audit and Documentation
-*Link: [./conductor/tracks/codebase_audit_20251223/](./conductor/tracks/codebase_audit_20251223/)*
+## [x] Track: Systemic Project Audit and Documentation
+*Link: [./conductor/archive/codebase_audit_20251223/](./conductor/archive/codebase_audit_20251223/)*

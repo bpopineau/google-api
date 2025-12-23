@@ -2,14 +2,14 @@
 
 Systemic file-by-file audit and documentation synchronization.
 
-## Phase 1: Preparation and Scaffolding [checkpoint: pending]
+## Phase 1: Preparation and Scaffolding [checkpoint: 071ae8f]
 - [x] Task: Create `docs/audit/` directory.
 - [x] Task: Generate `docs/audit/progress.md` containing a full file checklist (excluding ignored dirs).
 - [x] Task: Create the audit `.md` template in `docs/audit/template.md`.
 - [x] Task: Conductor - User Manual Verification 'Preparation and Scaffolding' (Protocol in workflow.md)
 
-## Phase 2: Core Library Audit (`mygooglib/`)
-- [ ] Task: Audit `mygooglib/core/` directory and create summaries.
+## Phase 2: Core Library Audit (`mygooglib/`) [~]
+- [~] Task: Audit `mygooglib/core/` directory and create summaries.
 - [ ] Task: Audit `mygooglib/services/` directory and create summaries.
 - [ ] Task: Audit `mygooglib/workflows/` directory and create summaries.
 - [ ] Task: Conductor - User Manual Verification 'Core Library Audit' (Protocol in workflow.md)

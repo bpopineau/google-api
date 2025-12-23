@@ -70,6 +70,10 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     If token.json exists and is valid/refreshable, returns those credentials.
     Otherwise runs InstalledAppFlow (opens browser) and saves token.json.
 
+    Environment Variables:
+        MYGOOGLIB_CREDENTIALS_PATH: Override path to credentials.json
+        MYGOOGLIB_TOKEN_PATH: Override path to token.json
+
     Args:
         scopes: Override default scopes if needed.
 
@@ -89,11 +93,13 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     if creds and creds.valid:
         return creds
 
+    # Ensure secrets directory exists for saving tokens
+    token_path.parent.mkdir(parents=True, exist_ok=True)
+
     if creds and creds.expired and creds.refresh_token:
         logger.info("Refreshing OAuth token (token path: %s)", token_path)
         try:
             creds.refresh(Request())
-            token_path.parent.mkdir(parents=True, exist_ok=True)
             token_path.write_text(creds.to_json(), encoding="utf-8")
             logger.info("Saved refreshed token to %s", token_path)
             return creds
@@ -118,7 +124,6 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     flow = InstalledAppFlow.from_client_secrets_file(str(creds_path), scopes=scopes)
     new_creds = flow.run_local_server(port=0)
 
-    token_path.parent.mkdir(parents=True, exist_ok=True)
     token_path.write_text(new_creds.to_json(), encoding="utf-8")
 
     logger.info("Saved new token to %s", token_path)

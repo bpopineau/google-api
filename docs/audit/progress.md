@@ -3,116 +3,114 @@
 This file tracks the status of the systemic codebase audit.
 
 ## Core Library (`mygooglib/`)
-- [ ] mygooglib/core/auth.py
-- [ ] mygooglib/core/config.py
-- [ ] mygooglib/core/dry_run.py
-- [ ] mygooglib/core/exceptions.py
-- [ ] mygooglib/core/logging.py
-- [ ] mygooglib/core/MANIFEST.md
-- [ ] mygooglib/core/retry.py
-- [ ] mygooglib/core/types.py
-- [ ] mygooglib/core/__init__.py
-- [ ] mygooglib/services/appscript.py
-- [ ] mygooglib/services/calendar.py
-- [ ] mygooglib/services/common.py
-- [ ] mygooglib/services/contacts.py
-- [ ] mygooglib/services/docs.py
-- [ ] mygooglib/services/drive.py
-- [ ] mygooglib/services/gmail.py
-- [ ] mygooglib/services/MANIFEST.md
-- [ ] mygooglib/services/sheets.py
-- [ ] mygooglib/services/tasks.py
-- [ ] mygooglib/services/__init__.py
-- [ ] mygooglib/utils/file_scanner.py
-- [ ] mygooglib/utils/helpers.py
-- [ ] mygooglib/utils/MANIFEST.md
-- [ ] mygooglib/utils/__init__.py
-- [ ] mygooglib/workflows/global_search.py
-- [ ] mygooglib/workflows/MANIFEST.md
-- [ ] mygooglib/workflows/__init__.py
-- [ ] mygooglib/__init__.py
+- [x] mygooglib/core/auth.py
+- [x] mygooglib/core/client.py
+- [x] mygooglib/core/config.py
+- [x] mygooglib/core/exceptions.py
+- [x] mygooglib/core/utils/logging.py
+- [x] mygooglib/core/utils/retry.py
+- [x] mygooglib/core/utils/a1.py
+- [x] mygooglib/core/utils/base.py
+- [x] mygooglib/core/utils/datetime.py
+- [x] mygooglib/core/utils/file_scanner.py
+- [x] mygooglib/core/utils/idempotency.py
+- [x] mygooglib/core/utils/pagination.py
+- [x] mygooglib/core/MANIFEST.md
+- [x] mygooglib/core/types.py
+- [x] mygooglib/core/__init__.py
+- [x] mygooglib/services/appscript.py
+- [x] mygooglib/services/calendar.py
+- [x] mygooglib/services/contacts.py
+- [x] mygooglib/services/docs.py
+- [x] mygooglib/services/drive.py
+- [x] mygooglib/services/gmail.py
+- [x] mygooglib/services/MANIFEST.md
+- [x] mygooglib/services/sheets.py
+- [x] mygooglib/services/tasks.py
+- [x] mygooglib/services/__init__.py
+- [x] mygooglib/__init__.py
+- [x] mygooglib/workflows/search.py
+- [x] mygooglib/workflows/workflows.py
+- [x] mygooglib/workflows/MANIFEST.md
+- [x] mygooglib/workflows/__init__.py
 
 ## Application CLI (`mygoog_cli/`)
-- [ ] mygoog_cli/appscript.py
-- [ ] mygoog_cli/auth.py
-- [ ] mygoog_cli/calendar.py
-- [ ] mygoog_cli/cli_entry.py
-- [ ] mygoog_cli/common.py
-- [ ] mygoog_cli/contacts.py
-- [ ] mygoog_cli/dev.py
-- [ ] mygoog_cli/docs.py
-- [ ] mygoog_cli/drive.py
-- [ ] mygoog_cli/gmail.py
-- [ ] mygoog_cli/gui.py
-- [ ] mygoog_cli/main.py
-- [ ] mygoog_cli/MANIFEST.md
-- [ ] mygoog_cli/sheets.py
-- [ ] mygoog_cli/tasks.py
-- [ ] mygoog_cli/workflows.py
-- [ ] mygoog_cli/__init__.py
-- [ ] mygoog_cli/__main__.py
+- [x] mygoog_cli/appscript.py
+- [x] mygoog_cli/auth.py
+- [x] mygoog_cli/calendar.py
+- [x] mygoog_cli/cli_entry.py
+- [x] mygoog_cli/common.py
+- [x] mygoog_cli/contacts.py
+- [x] mygoog_cli/dev.py
+- [x] mygoog_cli/docs.py
+- [x] mygoog_cli/drive.py
+- [x] mygoog_cli/gmail.py
+- [x] mygoog_cli/gui.py
+- [x] mygoog_cli/main.py
+- [x] mygoog_cli/MANIFEST.md
+- [x] mygoog_cli/sheets.py
+- [x] mygoog_cli/tasks.py
+- [x] mygoog_cli/workflows.py
+- [x] mygoog_cli/__init__.py
+- [x] mygoog_cli/__main__.py
 
 ## Application GUI (`mygoog_gui/`)
-- [ ] mygoog_gui/main.py
-- [ ] mygoog_gui/MANIFEST.md
-- [ ] mygoog_gui/styles.py
-- [ ] mygoog_gui/theme_manager.py
-- [ ] mygoog_gui/workers.py
-- [ ] mygoog_gui/__init__.py
-- [ ] mygoog_gui/pages/calendar.py
-- [ ] mygoog_gui/pages/drive.py
-- [ ] mygoog_gui/pages/gmail.py
-- [ ] mygoog_gui/pages/home.py
-- [ ] mygoog_gui/pages/settings.py
-- [ ] mygoog_gui/pages/sheets.py
-- [ ] mygoog_gui/pages/tasks.py
-- [ ] mygoog_gui/pages/__init__.py
-- [ ] mygoog_gui/widgets/activity.py
-- [ ] mygoog_gui/widgets/cards.py
-- [ ] mygoog_gui/widgets/drive_tree.py
-- [ ] mygoog_gui/widgets/sidebar.py
-- [ ] mygoog_gui/widgets/__init__.py
+- [x] mygoog_gui/MANIFEST.md
+- [x] mygoog_gui/__init__.py
+- [~] mygoog_gui/main.py
+- [x] mygoog_gui/pages/calendar.py
+- [x] mygoog_gui/pages/drive.py
+- [x] mygoog_gui/pages/gmail.py
+- [x] mygoog_gui/pages/home.py
+- [x] mygoog_gui/pages/settings.py
+- [x] mygoog_gui/pages/sheets.py
+- [x] mygoog_gui/pages/tasks.py
+- [x] mygoog_gui/pages/__init__.py
+- [x] mygoog_gui/widgets/activity.py
+- [x] mygoog_gui/widgets/cards.py
+- [x] mygoog_gui/widgets/drive_tree.py
+- [x] mygoog_gui/widgets/sidebar.py
+- [x] mygoog_gui/widgets/__init__.py
 
 ## Scripts (`scripts/`)
-- [ ] scripts/benchmarker.py
-- [ ] scripts/check_token_refresh.py
-- [ ] scripts/generate_context_map.py
-- [ ] scripts/MANIFEST.md
-- [ ] scripts/oauth_setup.py
-- [ ] scripts/profile_smoke_test.py
-- [ ] scripts/scaffold_cli.py
-- [ ] scripts/scaffold_service.py
-- [ ] scripts/scaffold_utils.py
-- [ ] scripts/smoke_test.py
-- [ ] scripts/verify_manifests.py
+- [x] scripts/benchmarker.py
+- [x] scripts/check_token_refresh.py
+- [x] scripts/generate_context_map.py
+- [x] scripts/MANIFEST.md
+- [x] scripts/oauth_setup.py
+- [x] scripts/profile_smoke_test.py
+- [x] scripts/scaffold_cli.py
+- [x] scripts/scaffold_service.py
+- [x] scripts/scaffold_utils.py
+- [x] scripts/smoke_test.py
 
 ## Tests (`tests/`)
-- [ ] tests/conftest.py
-- [ ] tests/MANIFEST.md
-- [ ] tests/test_auth.py
-- [ ] tests/test_cleanup_verification.py
-- [ ] tests/test_config.py
-- [ ] tests/test_docs_features.py
-- [ ] tests/test_dry_run_foundation.py
-- [ ] tests/test_global_search.py
-- [ ] tests/test_gmail_attachments.py
-- [ ] tests/test_new_features.py
-- [ ] tests/test_retry.py
-- [ ] tests/test_sheets_batch.py
-- [ ] tests/test_sheets_batch_write.py
-- [ ] tests/test_sheets_exists.py
-- [ ] tests/test_sync_error.py
-- [ ] tests/test_vcr_integration.py
-- [ ] tests/test_workflow_search.py
-- [ ] tests/cli/test_dev.py
-- [ ] tests/gui/conftest.py
-- [ ] tests/gui/test_activity_model.py
-- [ ] tests/gui/test_sync_worker.py
-- [ ] tests/gui/test_theme_manager.py
-- [ ] tests/gui/__init__.py
-- [ ] tests/scripts/test_scaffolding.py
-- [ ] tests/services/test_drive_dry_run.py
-- [ ] tests/services/test_sheets_dry_run.py
-- [ ] tests/services/__init__.py
-- [ ] tests/utils/test_file_scanner.py
-- [ ] tests/utils/test_types.py
+- [x] tests/conftest.py
+- [x] tests/MANIFEST.md
+- [x] tests/test_auth.py
+- [x] tests/test_cleanup_verification.py
+- [x] tests/test_config.py
+- [x] tests/test_docs_features.py
+- [x] tests/test_dry_run_foundation.py
+- [x] tests/test_global_search.py
+- [x] tests/test_gmail_attachments.py
+- [x] tests/test_new_features.py
+- [x] tests/test_retry.py
+- [x] tests/test_sheets_batch.py
+- [x] tests/test_sheets_batch_write.py
+- [x] tests/test_sheets_exists.py
+- [x] tests/test_sync_error.py
+- [x] tests/test_vcr_integration.py
+- [x] tests/test_workflow_search.py
+- [x] tests/cli/test_dev.py
+- [x] tests/gui/conftest.py
+- [x] tests/gui/test_activity_model.py
+- [x] tests/gui/test_sync_worker.py
+- [x] tests/gui/test_theme_manager.py
+- [x] tests/gui/__init__.py
+- [x] tests/scripts/test_scaffolding.py
+- [x] tests/services/test_drive_dry_run.py
+- [x] tests/services/test_sheets_dry_run.py
+- [x] tests/services/__init__.py
+- [x] tests/utils/test_file_scanner.py
+- [x] tests/utils/test_types.py

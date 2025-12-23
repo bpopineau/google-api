@@ -12,8 +12,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any, Callable
 
-# Default location: ~/.mygooglib/idempotency.db
-DEFAULT_DB_PATH = Path.home() / ".mygooglib" / "idempotency.db"
+# Default location: ~/.mygoog/idempotency.db
+DEFAULT_DB_PATH = Path.home() / ".mygoog" / "idempotency.db"
 
 
 class IdempotencyStore:
