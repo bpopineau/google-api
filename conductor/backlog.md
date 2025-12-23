@@ -53,6 +53,41 @@ This file tracks potential future tracks and feature ideas. These are "promoted"
 
 ---
 
+## 🧠 Brainstormed Strategic Tracks
+
+### 10. 👻 Ghost Mode (Offline Data Factories)
+**Concept:** A dedicated `mg --ghost` mode that disconnects all APIs and serves high-fidelity fake data (via `faker`) for Drive, Gmail, Sheets, etc.
+*   **Strategic Impact:**
+    *   **Speed First:** Enables creating/testing complex workflows on an airplane.
+    *   **AI Ergonomics:** Allows AI agents to write & run code fearlessly without risk of deleting real files or emailing the CEO.
+    *   **Reference:** Promotes the "Data Factories" concept to a core architecture pillar.
+
+### 11. 🔐 Unified Identity & Session Manager
+**Concept:** A robust `AuthManager` that handles multiple Google accounts (Personal vs Work), incremental scope upgrades, and background token refreshing.
+*   **Strategic Impact:**
+    *   **Foundation:** Essential for the "Unified Command Center" vision.
+    *   **UX:** Solves the "re-login" friction.
+    *   **Security:** "Least privilege" by requesting scopes only when needed.
+
+### 12. 🧠 "Smart Context" Service (Local RAG)
+**Concept:** A background service that indexes `conductor/`, `docs/`, and local data to provide a semantic search API (`mg.ask("how do I add a new track?")`).
+*   **Strategic Impact:**
+    *   **AI Ergonomics:** The ultimate "Self-Documenting" feature.
+    *   **Automation Hub:** Enables "Natural Language to Workflow" features later.
+
+### 13. 📜 Activity Journal (The "Black Box")
+**Concept:** A structured, immutable log (SQLite/JSONL) of every "write" action taken by `mygooglib`.
+*   **Strategic Impact:**
+    *   **Trust:** Critical for an "Automation Hub". User needs to know *exactly* what the script deleted.
+    *   **Refinement:** "Undo" functionality becomes possible if we have the diffs.
+
+### 14. 🗺️ Re-establish AI Ergonomics Roadmap
+**Concept:** `conductor/ai_ergonomics.md` is missing but referenced in `strategy.md`. This track involves auditing the current "AI friendliness" and documenting the missing pieces (Context Maps, Doctests, etc.).
+*   **Strategic Impact:**
+    *   **Strategy:** Realigns the project with its core "AI First" philosophy.
+
+---
+
 ## 💡 Quick Notes / Brainstorming
 - *Idea: "Context-Aware" Gmail replies using local project data.*
 - *Idea: Desktop widgets for Google Tasks.*
