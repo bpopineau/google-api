@@ -24,3 +24,13 @@ forbidden_modules =
     mygoog_cli
     mygoog_gui
 
+[importlinter:contract:3]
+name = Core Encapsulation
+type = forbidden
+source_modules =
+    mygoog_cli
+    mygoog_gui
+forbidden_modules =
+    mygooglib.core
+allow_indirect_imports = True
+
