@@ -16,11 +16,11 @@ This plan outlines the steps to audit the current codebase and formalize the AI 
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Audit' (Protocol in workflow.md) [bc331a1]
 
 ## Phase 3: Standards Formalization & Strategic Planning
-- [~] Task: Formalize the "AI-Friendly" standard in `conductor/code_styleguides/ai_standards.md`.
-- [ ] Task: Identify and prioritize 5+ high-impact "Ergonomic Epics" based on audit findings.
-- [ ] Task: Propose automated tooling (ruff rules, custom scripts) to enforce ergonomic standards.
-- [ ] Task: Update `conductor/context_map.md` to reflect the current and desired future state.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Standards & Strategy' (Protocol in workflow.md)
+- [x] Task: Formalize the "AI-Friendly" standard in `conductor/code_styleguides/ai_standards.md`.
+- [x] Task: Identify and prioritize 5+ high-impact "Ergonomic Epics" based on audit findings.
+- [x] Task: Propose automated tooling (ruff rules, custom scripts) to enforce ergonomic standards.
+- [x] Task: Update `conductor/context_map.md` to reflect the current and desired future state.
+- [~] Task: Conductor - User Manual Verification 'Phase 3: Standards & Strategy' (Protocol in workflow.md)
 
 ## Phase 4: Finalization & Handover
 - [ ] Task: Final review of `conductor/ai_ergonomics.md` for clarity and actionability.
