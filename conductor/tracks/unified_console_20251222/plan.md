@@ -18,5 +18,5 @@ Implementation of an interactive IPython-based console with pre-loaded context.
 ## Phase 3: Verification and UX
 - [x] Task: Verify tab-completion works for nested Google API calls. e0b2480
 - [x] Task: Ensure the console respects the current project configuration (e.g., custom scopes). 52318a9
-- [ ] Task: Perform a "Smoke Test" by running a few common commands in the console.
+- [x] Task: Perform a "Smoke Test" by running a few common commands in the console. 58d0f9d
 - [ ] Task: Conductor - User Manual Verification 'Verification and UX' (Protocol in workflow.md)
