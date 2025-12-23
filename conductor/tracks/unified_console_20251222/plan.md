@@ -9,7 +9,7 @@ Implementation of an interactive IPython-based console with pre-loaded context.
 - [x] Task: Conductor - User Manual Verification 'Environment and Core Logic' (Protocol in workflow.md) 4bf0a0c
 - [ ] Task: Conductor - User Manual Verification 'Environment and Core Logic' (Protocol in workflow.md)
 
-## Phase 2: CLI Integration
+## Phase 2: CLI Integration [checkpoint: 9b285c5]
 - [x] Task: Add the `console` command to `mygoog_cli/main.py` (or the relevant entry point). 292c41f
 - [x] Task: Ensure the console correctly handles authentication errors (redirecting to oauth if needed). 292c41f
 - [x] Task: Add a "Help" banner that prints on startup, listing the available pre-loaded objects. 292c41f
