@@ -13,5 +13,6 @@
 ## Key Features
 -   **Desktop GUI:** Modern, dark-mode PySide6 interface for rapid interaction.
 -   **Scripting Library (`mygooglib`):** Robust Python wrapper for easy API interactions.
+-   **Unified Debug Console (REPL):** Pre-configured IPython environment for instant API experimentation and debugging.
 -   **Data Pipelines:** Workflows to parse local data and sync/push results to Google Sheets or Drive.
 -   **Instant Access:** Fast startup and background credential management.

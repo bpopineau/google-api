@@ -16,6 +16,7 @@
 ## Development Tools
 - **Testing:** Pytest
 - **Testing Extensions:** `pytest-qt` (GUI), `vcrpy` (API Recording)
+- **Interactive Debugging:** IPython
 - **Linting & Formatting:** Ruff
 - **Architectural Linting:** `import-linter`
 - **Static Type Checking:** Mypy
