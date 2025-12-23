@@ -2,11 +2,11 @@
 
 This plan outlines the steps to audit the current codebase and formalize the AI Ergonomics Roadmap to improve AI agent performance and developer experience.
 
-## Phase 1: Foundation & Framework Definition
+## Phase 1: Foundation & Framework Definition [checkpoint: f606a55]
 - [x] Task: Initialize `conductor/ai_ergonomics.md` with core vision and philosophy. [126b55c]
 - [x] Task: Define the "AI Friction" classification system (Context, Type, Structure, Logic). [126b55c]
 - [x] Task: Establish the "Definition of AI-Done" for ergonomic improvements. [126b55c]
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md) [f606a55]
 
 ## Phase 2: Comprehensive Codebase Audit
 - [ ] Task: Audit `mygooglib/` for type hint coverage and documentation depth.
