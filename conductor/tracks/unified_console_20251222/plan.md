@@ -15,7 +15,7 @@ Implementation of an interactive IPython-based console with pre-loaded context.
 - [x] Task: Add a "Help" banner that prints on startup, listing the available pre-loaded objects. 292c41f
 - [x] Task: Conductor - User Manual Verification 'CLI Integration' (Protocol in workflow.md)
 
-## Phase 3: Verification and UX
+## Phase 3: Verification and UX [checkpoint: 5f133e2]
 - [x] Task: Verify tab-completion works for nested Google API calls. e0b2480
 - [x] Task: Ensure the console respects the current project configuration (e.g., custom scopes). 52318a9
 - [x] Task: Perform a "Smoke Test" by running a few common commands in the console. 58d0f9d
