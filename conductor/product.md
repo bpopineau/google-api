@@ -1,18 +1,17 @@
-# Product Guide - MyGoog (mg)
-
-## Initial Concept
-MyGoog is a Personal Google Workspace Automation Hub & Extendable Desktop Bridge. It serves as a core operating system for productivity, merging the speed of local computing with the power of Google's cloud services.
-
-## Vision & Purpose
-MyGoog is designed to be a personal, extendable toolkit for mastering digital life. It bridges the local environment with Google Workspace to automate mundane tasks and accelerate important workflows.
-
-## Key Characteristics
-*   **Unified Command Center:** A single desktop application (mg) that consolidates Drive, Gmail, Calendar, Tasks, and Sheets into a fast, keyboard-friendly interface, eliminating browser tab fatigue.
-*   **"Hackable" Automation Engine:** Powered by `mygooglib`, a robust Python library that handles API authentication and complexity, enabling simple "one-liner" scripts for complex cross-service workflows.
-*   **Local-Cloud Bridge:** A seamless connector enabling workflows like automatic local-to-Drive syncing or generating Google Docs from local data files.
-*   **Evolving Platform:** Explicitly designed for growth, allowing users to start with core workflows (Backup, Email automation, Tracker updates) and extend with custom helper functions as needed.
+# Product Vision
 
 ## Target Audience
-*   **Power Users:** Seeking a keyboard-centric, high-performance interface for Google Workspace.
-*   **Developers:** Requiring a high-level library to build personal automations and integrations.
-*   **Automation Enthusiasts:** Looking to bridge the gap between their local files and Google's cloud ecosystem.
+- **Primary User:** The developer (for personal use).
+- **Persona:** A power user who wants a unified, hackable interface for their Google Workspace and values efficiency and automation over standard web UIs.
+
+## Core Goals
+1.  **Efficiency & Speed:** Perform common actions (email triage, calendar checks) faster than web browsers allow.
+2.  **Unified Command Center:** A single desktop view (GUI) and CLI for Drive, Gmail, Tasks, and Sheets.
+3.  **Automation Hub:** A platform for custom Python scripts to automate cross-service workflows.
+4.  **Local-to-Cloud Intelligence:** Extract data from local files to create, update, or manage cloud resources (e.g., updating Sheets trackers from local logs).
+
+## Key Features
+-   **Desktop GUI:** Modern, dark-mode PySide6 interface for rapid interaction.
+-   **Scripting Library (`mygooglib`):** Robust Python wrapper for easy API interactions.
+-   **Data Pipelines:** Workflows to parse local data and sync/push results to Google Sheets or Drive.
+-   **Instant Access:** Fast startup and background credential management.

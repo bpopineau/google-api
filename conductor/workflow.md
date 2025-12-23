@@ -5,7 +5,7 @@
 1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`
 2. **The Tech Stack is Deliberate:** Changes to the tech stack must be documented in `tech-stack.md` *before* implementation
 3. **Test-Driven Development:** Write unit tests before implementing functionality
-4. **Pragmatic Code Coverage:** Maintain >80% for core library, >70% for CLI, and >60% for GUI.
+4. **High Code Coverage:** Aim for >80% code coverage for all modules
 5. **User Experience First:** Every decision should prioritize user experience
 6. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools (tests, linters) to ensure single execution.
 
@@ -32,13 +32,11 @@ All tasks follow a strict lifecycle:
    - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
    - Rerun tests to ensure they still pass after refactoring.
 
-6. **Verify Coverage:** Run coverage reports using the project's chosen tools.
-   - **Core Library (`mygooglib/`):** Maintain >80% coverage.
-   - **CLI (`mygoog_cli/`):** Maintain >70% coverage.
-   - **GUI (`mygoog_gui/`):** Maintain >60% coverage (focus on logic/workers).
+6. **Verify Coverage:** Run coverage reports using the project's chosen tools. For example, in a Python project, this might look like:
    ```bash
-   pytest --cov=mygooglib --cov=mygoog_cli --cov=mygoog_gui --cov-report=html
+   pytest --cov=app --cov-report=html
    ```
+   Target: >80% coverage for new code. The specific tools and commands will vary by language and framework.
 
 7. **Document Deviations:** If implementation differs from tech stack:
    - **STOP** implementation
