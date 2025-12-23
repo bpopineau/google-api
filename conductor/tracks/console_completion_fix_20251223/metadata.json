@@ -1,0 +1,8 @@
+{
+    "id": "console_completion_fix_20251223",
+    "title": "Console Tab Completion Fix for Nested Calls",
+    "status": "complete",
+    "created": "2025-12-23T14:32:32-08:00",
+    "type": "bugfix",
+    "checkpoints": []
+}

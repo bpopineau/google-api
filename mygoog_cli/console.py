@@ -1,4 +1,5 @@
 """Unified Debug Console (REPL)."""
+
 from typing import Any
 
 from IPython import start_ipython  # type: ignore
@@ -9,13 +10,14 @@ from mygooglib import (
     get_clients,
     get_creds,
 )
-from mygooglib.core.utils import logging
 from mygooglib.core import types
+from mygooglib.core.utils import logging
+
 
 def build_context() -> dict[str, Any]:
     """Build the context dictionary for the REPL."""
     print("Initializing Unified Debug Console...")
-    
+
     # 1. Auth & Clients
     try:
         clients = get_clients()
@@ -37,34 +39,44 @@ def build_context() -> dict[str, Any]:
 
     # Add services shortcuts
     if clients:
-        context.update({
-            "drive": clients.drive,
-            "sheets": clients.sheets,
-            "gmail": clients.gmail,
-            "calendar": clients.calendar,
-            "tasks": clients.tasks,
-            "drv": clients.drive,
-            "sht": clients.sheets,
-            "gml": clients.gmail,
-            "cal": clients.calendar,
-            "tsk": clients.tasks,
-        })
-    
+        context.update(
+            {
+                "drive": clients.drive,
+                "sheets": clients.sheets,
+                "gmail": clients.gmail,
+                "calendar": clients.calendar,
+                "tasks": clients.tasks,
+                "drv": clients.drive,
+                "sht": clients.sheets,
+                "gml": clients.gmail,
+                "cal": clients.calendar,
+                "tsk": clients.tasks,
+            }
+        )
+
     # Add types to global namespace
     for name in dir(types):
         if not name.startswith("_") and name[0].isupper():
-             context[name] = getattr(types, name)
+            context[name] = getattr(types, name)
 
     return context
+
 
 def start_console() -> None:
     """Start the interactive IPython session."""
     context = build_context()
-    
+
     c = Config()
     c.InteractiveShell.colors = "Neutral"
     c.InteractiveShell.confirm_exit = False
-    c.Completer.greedy = True
+
+    # Configure completion for Google API Resource objects.
+    # - Completer.greedy was deprecated in IPython 8.8, replaced by evaluation
+    # - Jedi struggles with nested __getattr__ methods used by Google API clients
+    # - Setting evaluation='unsafe' enables completion for dynamic attributes
+    c.Completer.evaluation = "unsafe"
+    c.Completer.use_jedi = False
+
     c.InteractiveShellApp.exec_lines = [
         "print()",
         "print('Welcome to the MyGoog Debug Console!')",
@@ -74,6 +86,5 @@ def start_console() -> None:
         "print('Types are available in the global namespace (e.g., SpreadsheetDict).')",
     ]
 
-    
     # Start IPython with the context
     start_ipython(argv=[], user_ns=context, config=c)
