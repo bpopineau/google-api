@@ -14,8 +14,8 @@ Implementation of automated architectural constraints using `import-linter`.
 - [x] Task: Run the linter and analyze existing violations (if any). 0c51caf
 - [x] Task: Conductor - User Manual Verification 'Core Contracts' (Protocol in workflow.md) bb6a39c
 
-## Phase 3: Workflow Integration
-- [ ] Task: Create a simple script/command `scripts/run_arch_lint.py` (or similar) for easy execution.
-- [ ] Task: Update project documentation (e.g., `conductor/workflow.md` or `README.md`) to mention this new check.
-- [ ] Task: Perform a "Negative Test" (add a bad import, verify failure).
-- [ ] Task: Conductor - User Manual Verification 'Workflow Integration' (Protocol in workflow.md)
+## Phase 3: Workflow Integration [checkpoint: 00c3520]
+- [x] Task: Create a simple script/command `scripts/run_arch_lint.py` (or similar) for easy execution. 811d796
+- [x] Task: Update project documentation (e.g., `conductor/workflow.md` or `README.md`) to mention this new check. 811d796
+- [x] Task: Perform a "Negative Test" (add a bad import, verify failure). 811d796
+- [x] Task: Conductor - User Manual Verification 'Workflow Integration' (Protocol in workflow.md) 00c3520
