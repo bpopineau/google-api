@@ -58,24 +58,37 @@ A module is considered "AI-Ready" when it meets ALL of the following criteria:
 
 ---
 
-## Strategic Epics
+## Strategic Epics (Prioritized)
 
-*(To be prioritized in Phase 3)*
+### Epic 1: Fix Console.py Type Errors 🔴 High Priority
+**Goal:** Resolve the 10 mypy errors in `mygoog_cli/console.py`.
+**Impact:** Achieves 100% type compliance across entire codebase.
+**Effort:** Low (1-2 hours)
 
-### Epic 1: Complete Directory Manifest Coverage
-**Goal:** Every major directory has a `MANIFEST.md` summarizing its purpose, key files, and dependencies.
+### Epic 2: TypedDict Expansion 🟡 Medium Priority
+**Goal:** Add TypedDict schemas to remaining API response types (Calendar, Tasks, Contacts, Docs).
+**Impact:** Explicit contracts for all service responses, reducing type ambiguity.
+**Effort:** Medium (4-6 hours)
 
-### Epic 2: TypedDict Expansion
-**Goal:** Extend TypedDict schemas to all API response types across all services.
+### Epic 3: Executable Documentation 🟡 Medium Priority
+**Goal:** Add `doctest` examples to all utility functions in `mygooglib/core/`.
+**Impact:** Self-verifying documentation, agents can copy-paste working examples.
+**Effort:** Medium (3-4 hours)
 
-### Epic 3: GUI State Management Refactor
-**Goal:** Centralize and document UI state transitions to reduce logic scattering.
+### Epic 4: GUI State Documentation 🟢 Low Priority
+**Goal:** Document state transitions and signal flows in `mygoog_gui/`.
+**Impact:** Reduces logic scattering, clearer entry points for UI modifications.
+**Effort:** Medium (4-5 hours)
 
-### Epic 4: Context Window Optimization
-**Goal:** Identify and refactor modules that require excessive file loading for simple tasks.
+### Epic 5: Context Window Profiling 🟢 Low Priority
+**Goal:** Measure token cost for common development tasks, identify optimization targets.
+**Impact:** Data-driven approach to reducing context overload.
+**Effort:** Low (2-3 hours)
 
-### Epic 5: Executable Documentation
-**Goal:** Add `doctest` examples to all utility functions and ensure they're run in CI.
+### Epic 6: Docstring Audit 🟢 Low Priority
+**Goal:** Ensure all public functions have quality docstrings (not just one-liners).
+**Impact:** Better AI understanding of function behavior and edge cases.
+**Effort:** High (ongoing)
 
 ---
 
