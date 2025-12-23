@@ -23,7 +23,7 @@ This plan outlines the steps to audit the current codebase and formalize the AI 
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Standards & Strategy' (Protocol in workflow.md) [51ba267]
 
 ## Phase 4: Finalization & Handover
-- [~] Task: Final review of `conductor/ai_ergonomics.md` for clarity and actionability.
-- [ ] Task: Integrate the roadmap into the main `conductor/backlog.md` where appropriate.
-- [ ] Task: Create the first "Implementation Track" derived from the new roadmap.
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Finalization' (Protocol in workflow.md)
+- [x] Task: Final review of `conductor/ai_ergonomics.md` for clarity and actionability.
+- [x] Task: Integrate the roadmap into the main `conductor/backlog.md` where appropriate.
+- [x] Task: Create the first "Implementation Track" derived from the new roadmap.
+- [~] Task: Conductor - User Manual Verification 'Phase 4: Finalization' (Protocol in workflow.md)
