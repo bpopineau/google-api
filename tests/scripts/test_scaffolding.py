@@ -42,3 +42,40 @@ def test_write_file(tmp_path):
     # The current utils prints to stderr and returns False
     assert write_file(target, "new content") is False
     assert target.read_text(encoding="utf-8") == "content"
+
+
+def test_scaffold_cli_integration(tmp_path, monkeypatch):
+    """Test that scaffold_cli.py creates a file with expected content."""
+    # Mock get_project_root to return tmp_path/root_mock
+    root_mock = tmp_path / "root_mock"
+    root_mock.mkdir()
+    (root_mock / "pyproject.toml").touch()
+
+    import scaffold_utils
+
+    monkeypatch.setattr(scaffold_utils, "get_project_root", lambda: root_mock)
+
+    # We need to import the module dynamically or via runpy to test it,
+    # but since it's a script, we can also import the main function if we structure it right.
+    # However, scaffold_cli.py doesn't exist yet, so we can't import it.
+    # This test will fail importing it, which counts as RED phase.
+
+    from typer.testing import CliRunner
+
+    # Import the module - since it's a script in a non-package dir, this is a bit hacky but works due to sys.path append in conftest or earlier in file
+    try:
+        import scaffold_cli
+    except ImportError:
+        pytest.fail("Could not import scaffold_cli")
+
+    runner = CliRunner()
+    result = runner.invoke(scaffold_cli.app, ["my_new_cmd"])
+
+    assert result.exit_code == 0
+    assert "Success!" in result.stdout
+
+    # Check file created
+    expected_file = root_mock / "mygoog_cli" / "my_new_cmd.py"
+    assert expected_file.exists()
+    content = expected_file.read_text(encoding="utf-8")
+    assert 'app = typer.Typer(help="CLI commands for my-new-cmd")' in content

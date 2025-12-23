@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 
 import typer
-from typing_extensions import Annotated
 
 # Add scripts directory to path to import utils
 sys.path.append(str(Path(__file__).parent))
@@ -60,7 +59,7 @@ def main(name: str):
         print("Next steps:")
         print(f"1. Open [bold]{target_file}[/bold]")
         print("2. Verify api_call imports and service version.")
-        print(f"3. Register in [bold]mygooglib/services/__init__.py[/bold]:")
+        print("3. Register in [bold]mygooglib/services/__init__.py[/bold]:")
         print(f"   from .{valid_name} import {class_name}Service")
 
 
