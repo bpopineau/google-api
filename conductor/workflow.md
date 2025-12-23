@@ -141,6 +141,7 @@ Before marking any task complete, verify:
 - [ ] All tests pass
 - [ ] Code coverage meets requirements (>80%)
 - [ ] Code follows project's code style guidelines (as defined in `code_styleguides/`)
+- [ ] Architecture linter passes (`scripts/run_arch_lint.py`)
 - [ ] All public functions/methods are documented (e.g., docstrings, JSDoc, GoDoc)
 - [ ] Type safety is enforced (e.g., type hints, TypeScript types, Go types)
 - [ ] No linting or static analysis errors (using the project's configured tools)
@@ -164,6 +165,12 @@ Before marking any task complete, verify:
 # Example: Commands for common daily tasks (e.g., start dev server, run tests, lint, format)
 # e.g., for a Node.js project: npm run dev, npm test, npm run lint
 # e.g., for a Go project: go run main.go, go test ./..., go fmt ./...
+
+# Python specific daily development:
+uv run pytest
+uv run ruff check .
+uv run mypy .
+uv run python scripts/run_arch_lint.py
 ```
 
 ### Before Committing
