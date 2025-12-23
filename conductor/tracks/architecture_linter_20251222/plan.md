@@ -9,10 +9,10 @@ Implementation of automated architectural constraints using `import-linter`.
 - [x] Task: Conductor - User Manual Verification 'Setup and Configuration' (Protocol in workflow.md) 86f118b
 
 ## Phase 2: Core Contracts
-- [ ] Task: Define the "No Reverse Dependencies" contract (lib cannot import apps).
-- [ ] Task: Define the "Core Encapsulation" contract (limit access to `mygooglib.core`).
-- [ ] Task: Run the linter and analyze existing violations (if any).
-- [ ] Task: Conductor - User Manual Verification 'Core Contracts' (Protocol in workflow.md)
+- [x] Task: Define the "No Reverse Dependencies" contract (lib cannot import apps). 9290dcb
+- [x] Task: Define the "Core Encapsulation" contract (limit access to `mygooglib.core`). 0c51caf
+- [x] Task: Run the linter and analyze existing violations (if any). 0c51caf
+- [~] Task: Conductor - User Manual Verification 'Core Contracts' (Protocol in workflow.md)
 
 ## Phase 3: Workflow Integration
 - [ ] Task: Create a simple script/command `scripts/run_arch_lint.py` (or similar) for easy execution.
