@@ -17,6 +17,7 @@
 - **Testing:** Pytest
 - **Testing Extensions:** `pytest-qt` (GUI), `vcrpy` (API Recording)
 - **Linting & Formatting:** Ruff
+- **Architectural Linting:** `import-linter`
 - **Static Type Checking:** Mypy
 
 ## Data & Utilities
