@@ -717,3 +717,8 @@ class GmailClient(BaseClient):
             user_id=user_id,
             raw=raw,
         )
+
+    @property
+    def users(self) -> Any:
+        """Access the underlying Gmail users resource (discovery)."""
+        return self.service.users()

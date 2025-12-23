@@ -1281,6 +1281,11 @@ class SheetsClient(BaseClient):
         except Exception:
             return False
 
+    @property
+    def spreadsheets(self) -> Any:
+        """Access the underlying Google Sheets resource (discovery)."""
+        return self.service.spreadsheets()
+
 
 @api_call("Sheets clear_sheet", is_write=True)
 def clear_sheet(

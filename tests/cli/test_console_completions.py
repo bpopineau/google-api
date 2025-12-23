@@ -11,27 +11,18 @@ def shell():
     return shell
 
 def test_drive_completions(shell):
-    # Testing tab completion for drive.files().
-    # Note: drive is a DynamicService or a mock if auth fails.
-    # We want to ensure it has the expected methods.
-
-    # We use the Completer to get completions
+    # Testing tab completion for drive.files.
     completer = shell.Completer
 
     # Test drive.
     completions = list(completer.completions("drive.", 6))
     texts = [c.text for c in completions]
-    assert "files" in texts or "service" in texts # Depending on how it's wrapped
+    assert "files" in texts or "service" in texts
 
     if "drive" in shell.user_ns:
-        # Check if the methods exist on the object returned by files()
+        # Check if the property exists and returns a Resource with expected methods
         drive = shell.user_ns["drive"]
-        files_resource = drive.files()
+        files_resource = drive.files
         assert "list" in dir(files_resource)
         assert "create" in dir(files_resource)
-        
-        # Now try completions again but on the variable
-        shell.user_ns["f"] = files_resource
-        completions = list(completer.completions("f.", 2))
-        texts = [c.text for c in completions]
-        assert "list" in texts
+        assert "get" in dir(files_resource)

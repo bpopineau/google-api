@@ -773,3 +773,8 @@ class DriveClient(BaseClient):
     ) -> dict | None:
         """Resolve a human-readable path string to Drive file metadata."""
         return resolve_path(self.service, path, parent_id=parent_id)
+
+    @property
+    def files(self) -> Any:
+        """Access the underlying Google Drive files resource (discovery)."""
+        return self.service.files()
