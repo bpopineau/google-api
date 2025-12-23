@@ -1,0 +1,16 @@
+[importlinter]
+root_packages =
+    mygooglib
+    mygoog_cli
+    mygoog_gui
+include_external_packages = True
+
+[importlinter:contract:1]
+name = GUI Isolation
+type = forbidden
+source_modules =
+    mygoog_gui
+forbidden_modules =
+    googleapiclient
+    google
+allow_indirect_imports = True
