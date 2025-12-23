@@ -11,6 +11,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from mygooglib.core.utils.logging import get_logger
+from mygooglib.core.config import AppConfig
 
 # v0.1 scopes: Drive, Sheets, Gmail send/modify, Calendar, Tasks
 # Note: These are broad. For production, consider narrower scopes like 'drive.file'.
@@ -80,7 +81,9 @@ def get_creds(*, scopes: list[str] | None = None) -> Credentials:
     Returns:
         Authorized Credentials object.
     """
-    scopes = scopes or SCOPES
+    if scopes is None:
+        scopes = AppConfig().scopes or SCOPES
+    
     creds_path, token_path = _get_paths()
 
     logger = get_logger("mygooglib.core.auth")

@@ -20,6 +20,7 @@ class Config:
     window_geometry: list[int] = field(default_factory=lambda: [100, 100, 1200, 800])
     default_view: str = "home"
     log_level: str = "INFO"
+    scopes: list[str] | None = None
 
     # Example of nested or extensibility structure if needed later
     # features: dict[str, bool] = field(default_factory=dict)
@@ -130,3 +131,12 @@ class AppConfig:
     @property
     def log_level(self) -> str:
         return self._config.log_level
+
+    @property
+    def scopes(self) -> list[str] | None:
+        return self._config.scopes
+
+    @scopes.setter
+    def scopes(self, value: list[str] | None) -> None:
+        self._config.scopes = value
+        self.save()
