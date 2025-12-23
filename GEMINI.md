@@ -7,6 +7,7 @@ mg is a unified desktop application and automation hub for Google Workspace inte
 | File | Purpose |
 |------|---------|
 | `conductor/product.md` | Product vision and target audience |
+| `conductor/product-guidelines.md` | UI/UX standards and design philosophy |
 | `conductor/requirements.md` | Original product requirements (W1-W6) |
 | `conductor/strategy.md` | High-level strategic pillars |
 | `conductor/ai_ergonomics.md` | Roadmap for AI-friendly codebase improvements |
