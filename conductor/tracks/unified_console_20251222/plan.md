@@ -3,8 +3,8 @@
 Implementation of an interactive IPython-based console with pre-loaded context.
 
 ## Phase 1: Environment and Core Logic
-- [ ] Task: Add `ipython` to `pyproject.toml` (dev dependencies).
-- [ ] Task: Create `mygoog_cli/console.py` to house the REPL initialization logic.
+- [x] Task: Add `ipython` to `pyproject.toml` (dev dependencies). 3b43f69
+- [~] Task: Create `mygoog_cli/console.py` to house the REPL initialization logic.
 - [ ] Task: Implement the "Context Builder" that authenticates and imports all required objects.
 - [ ] Task: Conductor - User Manual Verification 'Environment and Core Logic' (Protocol in workflow.md)
 
