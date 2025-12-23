@@ -40,12 +40,15 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: Architecture Linter
 *Link: [./conductor/archive/architecture_linter_20251222/](./conductor/archive/architecture_linter_20251222/)*
 
----
 
-## [~] Track: Unified Debug Console
-*Link: [./conductor/tracks/unified_console_20251222/](./conductor/tracks/unified_console_20251222/)*
 
 ---
 
 ## [x] Track: Systemic Project Audit and Documentation
 *Link: [./conductor/archive/codebase_audit_20251223/](./conductor/archive/codebase_audit_20251223/)*
+
+---
+
+## [ ] Track: Console Tab Completion Fix for Nested Calls
+*ID: `console_completion_fix_20251223`*
+*Link: [./conductor/tracks/console_completion_fix_20251223/](./conductor/tracks/console_completion_fix_20251223/)*
