@@ -6,10 +6,16 @@ with automatic sanitization of sensitive data like OAuth tokens.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Any
 
-import pytest
+# Ensure scripts path is in sys.path
+scripts_dir = Path(__file__).parent.parent / "scripts"
+if str(scripts_dir) not in sys.path:
+    sys.path.append(str(scripts_dir))
+
+import pytest  # noqa: E402
 
 # Cassettes directory
 CASSETTES_DIR = Path(__file__).parent / "cassettes"

@@ -1,12 +1,4 @@
-import sys
-from pathlib import Path
-
 import pytest
-
-# Ensure scripts path is in sys.path
-scripts_dir = Path(__file__).parents[2] / "scripts"
-sys.path.append(str(scripts_dir))
-
 from scaffold_utils import get_project_root, validate_name, write_file
 
 
@@ -90,7 +82,8 @@ def test_scaffold_cli_integration(tmp_path, monkeypatch):
     # Check file created
     expected_file = root_mock / "mygoog_cli" / "my_new_cmd.py"
     assert expected_file.exists()
-    content = expected_file.read_text(encoding="utf-8")
+    # Read text to ensure it's readable
+    expected_file.read_text(encoding="utf-8")
 
 
 def test_write_file_dry_run(tmp_path, capsys):

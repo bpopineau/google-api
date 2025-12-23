@@ -38,7 +38,11 @@ def write_file(
         dry_run: If True, print content to console instead of writing.
     """
     if dry_run:
-        print(f"\n[Dry Run] Would write to: {path.relative_to(get_project_root())}")
+        try:
+            rel_path = path.relative_to(get_project_root())
+        except ValueError:
+            rel_path = path
+        print(f"\n[Dry Run] Would write to: {rel_path}")
         print("-" * 20)
         print(content)
         print("-" * 20)
@@ -54,7 +58,11 @@ def write_file(
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-        print(f"Created: {path.relative_to(get_project_root())}")
+        try:
+            rel_path = path.relative_to(get_project_root())
+        except ValueError:
+            rel_path = path
+        print(f"Created: {rel_path}")
         return True
     except Exception as e:
         print(f"Error writing to {path}: {e}", file=sys.stderr)
