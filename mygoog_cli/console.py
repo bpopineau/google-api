@@ -62,11 +62,10 @@ def start_console() -> None:
     
     c = Config()
     c.InteractiveShellApp.exec_lines = [
-        "print('\nWelcome to the MyGoog Debug Console!')",
+        "print()",
+        "print('Welcome to the MyGoog Debug Console!')",
         "print('Available objects: clients, drive, sheets, gmail, calendar, tasks')",
-        "print('Shortcuts: drv, sht, gml, cal, tsk')",
-        "print('Types are available in the global namespace (e.g., FileDict).')",
-    ]
+
     
     # Start IPython with the context
     start_ipython(argv=[], user_ns=context, config=c)

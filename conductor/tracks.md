@@ -42,7 +42,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Unified Debug Console
+## [~] Track: Unified Debug Console
 *Link: [./conductor/tracks/unified_console_20251222/](./conductor/tracks/unified_console_20251222/)*
 
 ---
