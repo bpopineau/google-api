@@ -27,7 +27,7 @@ def example_action(
     \"\"\"
     print(f"[bold green]Hello {{name}} from {command_name}![/bold green]")
     if verbose:
-        print(f"Verbose mode enabled for {command_name}")
+        print("Verbose mode enabled for {command_name}")
 
 if __name__ == "__main__":
     app()

@@ -10,7 +10,7 @@ from scaffold_utils import get_project_root, validate_name, write_file
 
 app = typer.Typer()
 
-SERVICE_TEMPLATE = """from typing import List, Optional, TypedDict
+SERVICE_TEMPLATE = """from typing import List, TypedDict
 from mygooglib.core.service_base import GoogleService
 from mygooglib.core.decorators import api_call
 

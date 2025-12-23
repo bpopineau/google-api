@@ -21,6 +21,6 @@ Implementation of CLI tools to generate boilerplate for services and commands.
 - [x] Task: Conductor - User Manual Verification 'Integration and Refinement' (Protocol in workflow.md) [aa6e26d]
 
 ## Phase 4: Verification
-- [ ] Task: Use the new tool to scaffold a "Dummy" service and CLI command.
-- [ ] Task: Verify the generated code passes all lint/type checks.
+- [x] Task: Use the new tool to scaffold a "Dummy" service and CLI command.
+- [x] Task: Verify the generated code passes all lint/type checks.
 - [ ] Task: Conductor - User Manual Verification 'Verification' (Protocol in workflow.md)
