@@ -9,9 +9,9 @@ Implementation of CLI tools to generate boilerplate for services and commands.
 - [x] Task: Conductor - User Manual Verification 'Foundation and Service Scaffolder' (Protocol in workflow.md)
 
 ## Phase 2: CLI Scaffolder
-- [ ] Task: Implement `scripts/scaffold_cli.py` with a Typer template.
-- [ ] Task: Add standard CLI imports and basic command structure.
-- [ ] Task: Implement the "Next Steps" reporting logic for both scripts.
+- [x] Task: Implement `scripts/scaffold_cli.py` with a Typer template. [693ab4b]
+- [x] Task: Add standard CLI imports and basic command structure. [693ab4b]
+- [x] Task: Implement the "Next Steps" reporting logic for both scripts. [693ab4b]
 - [ ] Task: Conductor - User Manual Verification 'CLI Scaffolder' (Protocol in workflow.md)
 
 ## Phase 3: Integration and Refinement
