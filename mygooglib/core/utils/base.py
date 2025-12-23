@@ -58,3 +58,11 @@ class BaseClient:
             service: The raw API service Resource from googleapiclient.discovery.build()
         """
         self.service = service
+
+    def __getattr__(self, name: str) -> Any:
+        """Delegate attribute access to the underlying service resource.
+        
+        This allows the wrapper to be used both with its ergonomic methods
+        AND as a direct proxy to the Google API Discovery resource (e.g., drive.files()).
+        """
+        return getattr(self.service, name)

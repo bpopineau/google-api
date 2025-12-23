@@ -62,6 +62,9 @@ def start_console() -> None:
     context = build_context()
     
     c = Config()
+    c.InteractiveShell.colors = "Neutral"
+    c.InteractiveShell.confirm_exit = False
+    c.Completer.greedy = True
     c.InteractiveShellApp.exec_lines = [
         "print()",
         "print('Welcome to the MyGoog Debug Console!')",
