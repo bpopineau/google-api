@@ -25,7 +25,7 @@ from mygooglib.workflows import global_search
 
 if TYPE_CHECKING:
     from mygoog_gui.widgets.activity import ActivityModel
-    from mygooglib.core.client import Clients
+    from mygooglib import Clients
 
 
 class HomePage(QScrollArea):

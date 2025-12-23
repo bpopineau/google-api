@@ -21,11 +21,10 @@ from mygoog_gui.pages.settings import SettingsPage
 from mygoog_gui.theme_manager import ThemeManager
 from mygoog_gui.widgets.activity import ActivityModel, ActivityWidget
 from mygoog_gui.widgets.sidebar import Sidebar
-from mygooglib.core.auth import verify_creds_exist
-from mygooglib.core.config import AppConfig
+from mygooglib import AppConfig, verify_creds_exist
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
+    from mygooglib import Clients
 
 
 class AsyncLoginWorker(QThread):

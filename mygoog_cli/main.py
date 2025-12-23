@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.traceback import install as install_rich_traceback
 
 from mygooglib import get_clients
-from mygooglib.core.exceptions import GoogleApiError
+from mygooglib import GoogleApiError
 
 from . import appscript as appscript_cmd
 from . import auth as auth_cmd

@@ -21,7 +21,7 @@ from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
     from mygoog_gui.widgets.activity import ActivityModel
-    from mygooglib.core.client import Clients
+    from mygooglib import Clients
 
 
 class SheetsPage(QWidget):

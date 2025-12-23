@@ -18,12 +18,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from mygooglib.core.config import AppConfig
+from mygooglib import AppConfig
 
 from ..theme_manager import ThemeManager
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
+    from mygooglib import Clients
 
 
 class SettingsPage(QWidget):
@@ -243,10 +243,10 @@ class SettingsPage(QWidget):
 
     def _do_sign_out(self) -> None:
         """Execute sign out by deleting credentials."""
-        from mygooglib.core.auth import _get_paths
+        from mygooglib import get_auth_paths
 
         try:
-            _, token_path = _get_paths()
+            _, token_path = get_auth_paths()
             if token_path.exists():
                 token_path.unlink()
 

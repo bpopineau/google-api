@@ -22,8 +22,8 @@ from mygoog_gui.styles import COLORS
 from mygoog_gui.workers import ApiWorker
 
 if TYPE_CHECKING:
-    from mygooglib.core.client import Clients
     from mygoog_gui.widgets.activity import ActivityModel
+    from mygooglib import Clients
 
 
 class TasksPage(QWidget):

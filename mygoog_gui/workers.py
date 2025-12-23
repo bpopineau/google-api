@@ -110,7 +110,7 @@ class SyncWorker(QThread):
         self.sheet_name = sheet_name
 
     def run(self) -> None:
-        from mygooglib.core.utils.file_scanner import FileScanner
+        from mygooglib import FileScanner
 
         try:
             # 1. Ensure spreadsheet exists

@@ -6,7 +6,7 @@ import typer
 from google.oauth2.credentials import Credentials
 from rich.table import Table
 
-from mygooglib.core.auth import SCOPES, get_auth_paths, get_creds
+from mygooglib import SCOPES, get_auth_paths, get_creds
 
 from .common import CliState, format_output, print_kv, print_success
 
