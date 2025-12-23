@@ -71,7 +71,7 @@ def start_console() -> None:
         "print('Available objects: clients, drive, sheets, gmail, calendar, tasks, config')",
         "print('Shortcuts: drv, sht, gml, cal, tsk')",
         "print('Utils: get_clients, get_creds, get_logger')",
-        "print('Types are available in the global namespace (e.g., FileDict).')",
+        "print('Types are available in the global namespace (e.g., SpreadsheetDict).')",
     ]
 
     
