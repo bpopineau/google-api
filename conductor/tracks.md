@@ -55,5 +55,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Re-establish AI Ergonomics Roadmap
-*Link: [./conductor/tracks/ai_ergonomics_20251223/](./conductor/tracks/ai_ergonomics_20251223/)*
+## [x] Track: Re-establish AI Ergonomics Roadmap
+*Link: [./conductor/archive/ai_ergonomics_20251223/](./conductor/archive/ai_ergonomics_20251223/)*
