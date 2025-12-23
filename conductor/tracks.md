@@ -37,7 +37,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Architecture Linter
+## [~] Track: Architecture Linter
 *Link: [./conductor/tracks/architecture_linter_20251222/](./conductor/tracks/architecture_linter_20251222/)*
 
 ---

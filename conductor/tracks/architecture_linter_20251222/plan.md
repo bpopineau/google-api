@@ -3,8 +3,8 @@
 Implementation of automated architectural constraints using `import-linter`.
 
 ## Phase 1: Setup and Configuration
-- [ ] Task: Add `import-linter` to `pyproject.toml` (dev dependencies).
-- [ ] Task: Create `.importlinter` configuration file.
+- [x] Task: Add `import-linter` to `pyproject.toml` (dev dependencies). 6bfb600
+- [~] Task: Create `.importlinter` configuration file.
 - [ ] Task: Define the "GUI Isolation" contract (forbid `googleapiclient` in `mygoog_gui`).
 - [ ] Task: Conductor - User Manual Verification 'Setup and Configuration' (Protocol in workflow.md)
 
