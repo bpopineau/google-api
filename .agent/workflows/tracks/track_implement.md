@@ -152,9 +152,32 @@ User Confirmation: Yes" $CHECKPOINT
 
 When all phases are complete:
 
-1. Update `conductor/tracks.md`: Change `[~]` to `[x]`
-2. Update `metadata.json`: Set status to `complete`
-3. Final commit: `conductor(track): Complete <track_id>`
+### Step 1: Update Track Status
+- Update `conductor/tracks.md`: Change `[~]` to `[x]`
+- Update `metadata.json`: Set status to `complete`
+
+### Step 2: Archive Track Folder
+```powershell
+# Move track from active to archive
+Move-Item conductor/tracks/<track_id>/ conductor/archive/<track_id>/
+```
+
+### Step 3: Final Commit
+```bash
+git add conductor/tracks.md conductor/archive/<track_id>/
+git commit -m "conductor(track): archive <track_id>"
+```
+
+### Step 4: Attach Summary Note
+```bash
+COMMIT=$(git log -1 --format="%H")
+git notes add -m "Track Complete: <track_title>
+
+Phases: <N> completed
+Tests: All passing
+Files Changed: <list key files>" $COMMIT
+```
 
 **Output:** Summary of all completed tasks, tests passed, and files changed.
+
 
