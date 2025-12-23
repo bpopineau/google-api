@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import typer
+from typing_extensions import Annotated
 
 # Add scripts directory to path to import utils
 sys.path.append(str(Path(__file__).parent))
@@ -38,7 +39,12 @@ class {class_name}Service(GoogleService):
 
 
 @app.command()
-def main(name: str):
+def main(
+    name: str,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Print content instead of writing file")
+    ] = False,
+):
     """
     Scaffold a new service in mygooglib/services/.
 
@@ -54,13 +60,16 @@ def main(name: str):
     root = get_project_root()
     target_file = root / "mygooglib" / "services" / f"{valid_name}.py"
 
-    if write_file(target_file, content):
-        print("\n[bold green]Success![/bold green]")
-        print("Next steps:")
-        print(f"1. Open [bold]{target_file}[/bold]")
-        print("2. Verify api_call imports and service version.")
-        print("3. Register in [bold]mygooglib/services/__init__.py[/bold]:")
-        print(f"   from .{valid_name} import {class_name}Service")
+    if write_file(target_file, content, dry_run=dry_run):
+        if not dry_run:
+            print("\n[bold green]Success![/bold green]")
+            print("Next steps:")
+            print(f"1. Open [bold]{target_file}[/bold]")
+            print("2. Verify api_call imports and service version.")
+            print("3. Register in [bold]mygooglib/services/__init__.py[/bold]:")
+            print(f"   from .{valid_name} import {class_name}Service")
+        else:
+            print("\n[bold yellow]Dry Run Complete[/bold yellow] - No files written.")
 
 
 if __name__ == "__main__":

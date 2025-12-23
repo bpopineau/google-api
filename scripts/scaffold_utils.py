@@ -25,8 +25,27 @@ def validate_name(name: str) -> str:
     return name
 
 
-def write_file(path: Path, content: str, overwrite: bool = False) -> bool:
-    """Writes content to a file, with overwrite protection."""
+def write_file(
+    path: Path, content: str, overwrite: bool = False, dry_run: bool = False
+) -> bool:
+    """
+    Writes content to a file, with overwrite protection.
+
+    Args:
+        path: Destination path.
+        content: Content to write.
+        overwrite: If True, overwrite existing files.
+        dry_run: If True, print content to console instead of writing.
+    """
+    if dry_run:
+        print(
+            f"\n[Dry Run] Would write to: {path.relative_to(get_project_root(), walk_up=True)}"
+        )
+        print("-" * 20)
+        print(content)
+        print("-" * 20)
+        return True
+
     if path.exists() and not overwrite:
         print(
             f"Error: File '{path}' already exists. Use --force to overwrite (not yet implemented in utils, manual check required).",

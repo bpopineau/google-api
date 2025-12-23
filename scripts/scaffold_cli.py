@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import typer
+from typing_extensions import Annotated
 
 # Add scripts directory to path to import utils
 sys.path.append(str(Path(__file__).parent))
@@ -34,7 +35,12 @@ if __name__ == "__main__":
 
 
 @app.command()
-def main(name: str):
+def main(
+    name: str,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", help="Print content instead of writing file")
+    ] = False,
+):
     """
     Scaffold a new CLI command in mygoog_cli/.
 
@@ -53,14 +59,17 @@ def main(name: str):
     root = get_project_root()
     target_file = root / "mygoog_cli" / f"{valid_name}.py"
 
-    if write_file(target_file, content):
-        print("\n[bold green]Success![/bold green]")
-        print("Next steps:")
-        print(f"1. Open [bold]{target_file}[/bold]")
-        print("2. Implement your commands using the `app` object.")
-        print("3. Register in [bold]mygoog_cli/main.py[/bold]:")
-        print(f"   from . import {valid_name}")
-        print(f'   app.add_typer({valid_name}.app, name="{command_name}")')
+    if write_file(target_file, content, dry_run=dry_run):
+        if not dry_run:
+            print("\n[bold green]Success![/bold green]")
+            print("Next steps:")
+            print(f"1. Open [bold]{target_file}[/bold]")
+            print("2. Implement your commands using the `app` object.")
+            print("3. Register in [bold]mygoog_cli/main.py[/bold]:")
+            print(f"   from . import {valid_name}")
+            print(f'   app.add_typer({valid_name}.app, name="{command_name}")')
+        else:
+            print("\n[bold yellow]Dry Run Complete[/bold yellow] - No files written.")
 
 
 if __name__ == "__main__":
