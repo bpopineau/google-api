@@ -68,5 +68,6 @@ dev = [
     "pytest-qt>=4.5.0",
     "pytest-recording>=0.13.4",
     "vcrpy>=8.1.0",
+    "import-linter>=2.0",
 ]
 
