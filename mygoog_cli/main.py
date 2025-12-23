@@ -137,6 +137,14 @@ def clients_cmd(ctx: typer.Context) -> None:
     state.console.print(format_output(output, json_mode=state.json))
 
 
+@app.command("console")
+def console_cmd(ctx: typer.Context) -> None:
+    """Open an interactive IPython debug console with pre-loaded context."""
+    from .console import start_console
+
+    start_console()
+
+
 def main() -> None:
     """Console script entrypoint."""
     try:

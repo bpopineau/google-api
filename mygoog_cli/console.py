@@ -30,6 +30,7 @@ def build_context() -> dict[str, Any]:
         "get_clients": get_clients,
         "get_creds": get_creds,
         "AppConfig": AppConfig,
+        "config": AppConfig(),
         "get_logger": logging.get_logger,
         "types": types,
     }
@@ -64,7 +65,11 @@ def start_console() -> None:
     c.InteractiveShellApp.exec_lines = [
         "print()",
         "print('Welcome to the MyGoog Debug Console!')",
-        "print('Available objects: clients, drive, sheets, gmail, calendar, tasks')",
+        "print('Available objects: clients, drive, sheets, gmail, calendar, tasks, config')",
+        "print('Shortcuts: drv, sht, gml, cal, tsk')",
+        "print('Utils: get_clients, get_creds, get_logger')",
+        "print('Types are available in the global namespace (e.g., FileDict).')",
+    ]
 
     
     # Start IPython with the context
