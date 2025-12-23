@@ -20,7 +20,7 @@ Implementation of CLI tools to generate boilerplate for services and commands.
 - [x] Task: Write unit tests in `tests/scripts/test_scaffolding.py`.
 - [x] Task: Conductor - User Manual Verification 'Integration and Refinement' (Protocol in workflow.md) [aa6e26d]
 
-## Phase 4: Verification
+## Phase 4: Verification [checkpoint: ac28d67]
 - [x] Task: Use the new tool to scaffold a "Dummy" service and CLI command.
 - [x] Task: Verify the generated code passes all lint/type checks.
-- [ ] Task: Conductor - User Manual Verification 'Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Verification' (Protocol in workflow.md) [ac28d67]
