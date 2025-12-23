@@ -81,10 +81,18 @@ This file tracks potential future tracks and feature ideas. These are "promoted"
     *   **Trust:** Critical for an "Automation Hub". User needs to know *exactly* what the script deleted.
     *   **Refinement:** "Undo" functionality becomes possible if we have the diffs.
 
-### 14. 🗺️ Re-establish AI Ergonomics Roadmap
-**Concept:** `conductor/ai_ergonomics.md` is missing but referenced in `strategy.md`. This track involves auditing the current "AI friendliness" and documenting the missing pieces (Context Maps, Doctests, etc.).
-*   **Strategic Impact:**
-    *   **Strategy:** Realigns the project with its core "AI First" philosophy.
+### 14. ~~Re-establish AI Ergonomics Roadmap~~ ✅ COMPLETE
+**Status:** Implemented in track `ai_ergonomics_20251223`. See `conductor/ai_ergonomics.md`.
+
+### 15. 🔴 Fix Console.py Type Errors (AI Ergonomics Epic 1)
+**Concept:** Resolve 10 mypy errors in `mygoog_cli/console.py` to achieve 100% type compliance.
+*   **Effort:** Low (1-2 hours)
+*   **Reference:** AI Ergonomics Roadmap Epic 1.
+
+### 16. 🟡 TypedDict Expansion (AI Ergonomics Epic 2)
+**Concept:** Add TypedDict schemas to Calendar, Tasks, Contacts, and Docs API responses.
+*   **Effort:** Medium (4-6 hours)
+*   **Reference:** AI Ergonomics Roadmap Epic 2.
 
 ---
 
