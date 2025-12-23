@@ -14,3 +14,13 @@ forbidden_modules =
     googleapiclient
     google
 allow_indirect_imports = True
+
+[importlinter:contract:2]
+name = No Reverse Dependencies
+type = forbidden
+source_modules =
+    mygooglib
+forbidden_modules =
+    mygoog_cli
+    mygoog_gui
+
