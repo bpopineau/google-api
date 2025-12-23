@@ -52,3 +52,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 ## [x] Track: Console Tab Completion Fix for Nested Calls
 *ID: `console_completion_fix_20251223`*
 *Link: [./conductor/tracks/console_completion_fix_20251223/](./conductor/tracks/console_completion_fix_20251223/)*
+
+---
+
+## [~] Track: Re-establish AI Ergonomics Roadmap
+*Link: [./conductor/tracks/ai_ergonomics_20251223/](./conductor/tracks/ai_ergonomics_20251223/)*
