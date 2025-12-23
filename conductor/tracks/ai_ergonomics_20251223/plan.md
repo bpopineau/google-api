@@ -9,11 +9,11 @@ This plan outlines the steps to audit the current codebase and formalize the AI 
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Foundation' (Protocol in workflow.md) [f606a55]
 
 ## Phase 2: Comprehensive Codebase Audit
-- [ ] Task: Audit `mygooglib/` for type hint coverage and documentation depth.
-- [ ] Task: Audit `mygoog_cli/` and `mygoog_gui/` for structural consistency and logic duplication.
-- [ ] Task: Audit existing "Context Maps" and directory `MANIFEST.md` files for accuracy.
-- [ ] Task: Analyze "Context Window" footprint for common development tasks.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Audit' (Protocol in workflow.md)
+- [x] Task: Audit `mygooglib/` for type hint coverage and documentation depth.
+- [x] Task: Audit `mygoog_cli/` and `mygoog_gui/` for structural consistency and logic duplication.
+- [x] Task: Audit existing "Context Maps" and directory `MANIFEST.md` files for accuracy.
+- [x] Task: Analyze "Context Window" footprint for common development tasks.
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Audit' (Protocol in workflow.md)
 
 ## Phase 3: Standards Formalization & Strategic Planning
 - [ ] Task: Formalize the "AI-Friendly" standard in `conductor/code_styleguides/ai_standards.md`.
