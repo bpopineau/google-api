@@ -216,6 +216,27 @@ class SheetInfoDict(TypedDict, total=False):
 
 
 # =============================================================================
+# Drive API Types
+# =============================================================================
+
+
+class FileDict(TypedDict, total=False):
+    """Represents a file in Google Drive.
+
+    https://developers.google.com/drive/api/reference/rest/v3/files#File
+    """
+
+    id: str
+    name: str
+    mimeType: str
+    modifiedTime: str
+    size: str  # size is a string in Drive API
+    parents: list[str]
+    trashed: bool
+    kind: str
+
+
+# =============================================================================
 # Gmail API Types
 # =============================================================================
 

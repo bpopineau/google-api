@@ -1,5 +1,6 @@
 import pytest
 from tests.factories.common import ColorFactory, DateFactory, SheetInfoFactory, MessageMetadataFactory
+from tests.factories.drive import FileFactory
 
 def test_color_factory():
     color = ColorFactory.build()
@@ -27,3 +28,9 @@ def test_factory_overrides():
     assert color["red"] == 1.0
     assert color["blue"] == 0.5
     assert color["green"] == 0.0  # Default remains
+
+def test_file_factory():
+    file_meta = FileFactory.build()
+    assert "id" in file_meta
+    assert "name" in file_meta
+    assert file_meta["mimeType"] == "text/plain"
