@@ -39,20 +39,19 @@ def build_context() -> dict[str, Any]:
 
     # Add services shortcuts
     if clients:
-        context.update(
-            {
-                "drive": clients.drive,
-                "sheets": clients.sheets,
-                "gmail": clients.gmail,
-                "calendar": clients.calendar,
-                "tasks": clients.tasks,
-                "drv": clients.drive,
-                "sht": clients.sheets,
-                "gml": clients.gmail,
-                "cal": clients.calendar,
-                "tsk": clients.tasks,
-            }
-        )
+        service_shortcuts: dict[str, Any] = {
+            "drive": clients.drive,
+            "sheets": clients.sheets,
+            "gmail": clients.gmail,
+            "calendar": clients.calendar,
+            "tasks": clients.tasks,
+            "drv": clients.drive,
+            "sht": clients.sheets,
+            "gml": clients.gmail,
+            "cal": clients.calendar,
+            "tsk": clients.tasks,
+        }
+        context.update(service_shortcuts)
 
     # Add types to global namespace
     for name in dir(types):

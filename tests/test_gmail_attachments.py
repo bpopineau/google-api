@@ -10,7 +10,7 @@ from mygooglib.services.gmail import (
     get_attachment,
     save_attachments,
 )
-from tests.factories.gmail import MessagePartFactory, MessageFactory
+from tests.factories.gmail import MessageFactory
 
 
 @pytest.fixture

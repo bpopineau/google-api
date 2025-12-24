@@ -1,5 +1,4 @@
 
-import pytest
 from unittest.mock import patch, MagicMock
 from mygooglib.core.client import get_clients
 

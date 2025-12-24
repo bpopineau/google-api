@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from mygooglib.core.types import (
     AppendValuesResponseDict,
-    AttachmentMetadataDict,
     BatchGetValuesResponseDict,
     BatchUpdateValuesResponseDict,
     # Type aliases
@@ -16,24 +15,11 @@ from mygooglib.core.types import (
     # Shared types
     ColorDict,
     DateDict,
-    GridPropertiesDict,
-    # Sheets types
-    GridRangeDict,
-    HeaderDict,
-    # Gmail types
-    LabelDict,
     MessageDict,
-    MessageFullDict,
-    MessageMetadataDict,
-    MessagePartBodyDict,
-    MessagePartDict,
     RangeData,
     RowData,
     SendMessageResponseDict,
-    SheetDict,
-    SheetPropertiesDict,
     SpreadsheetDict,
-    SpreadsheetPropertiesDict,
     ThreadDict,
     UpdateValuesResponseDict,
     ValueRangeDict,
