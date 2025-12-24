@@ -70,5 +70,6 @@ dev = [
     "vcrpy>=8.1.0",
     "import-linter>=2.0",
     "ipython>=8.0",
+    "polyfactory>=3.2.0",
 ]
 
