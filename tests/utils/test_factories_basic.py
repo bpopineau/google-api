@@ -1,6 +1,7 @@
 import pytest
 from tests.factories.common import ColorFactory, DateFactory, SheetInfoFactory, MessageMetadataFactory
 from tests.factories.drive import FileFactory
+from tests.factories.sheets import SpreadsheetFactory, ValueRangeFactory
 
 def test_color_factory():
     color = ColorFactory.build()
@@ -34,3 +35,12 @@ def test_file_factory():
     assert "id" in file_meta
     assert "name" in file_meta
     assert file_meta["mimeType"] == "text/plain"
+
+def test_sheets_factories():
+    ss = SpreadsheetFactory.build()
+    assert ss["spreadsheetId"] == "sheet123"
+    assert ss["properties"]["title"] == "Test Spreadsheet"
+    
+    vr = ValueRangeFactory.build()
+    assert "values" in vr
+    assert len(vr["values"]) == 2
