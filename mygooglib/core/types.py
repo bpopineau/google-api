@@ -216,6 +216,106 @@ class SheetInfoDict(TypedDict, total=False):
 
 
 # =============================================================================
+# Calendar API Types
+# =============================================================================
+
+
+class EventDateTimeDict(TypedDict, total=False):
+    """Event start/end time representation.
+
+    https://developers.google.com/calendar/api/v3/reference/events#resource
+    """
+
+    dateTime: str  # RFC3339 timestamp with timezone
+    date: str  # Date only (for all-day events)
+    timeZone: str
+
+
+class EventPersonDict(TypedDict, total=False):
+    """Represents a person (creator/organizer/attendee).
+
+    https://developers.google.com/calendar/api/v3/reference/events#resource
+    """
+
+    email: str
+    displayName: str
+    self: bool
+
+
+class CalendarEventDict(TypedDict, total=False):
+    """A Google Calendar event.
+
+    https://developers.google.com/calendar/api/v3/reference/events#resource
+    """
+
+    id: str
+    summary: str
+    description: str
+    location: str
+    start: EventDateTimeDict
+    end: EventDateTimeDict
+    status: str  # "confirmed", "tentative", "cancelled"
+    htmlLink: str
+    created: str
+    updated: str
+    creator: EventPersonDict
+    organizer: EventPersonDict
+    attendees: list[EventPersonDict]
+    recurrence: list[str]
+    recurringEventId: str
+
+
+class CalendarListEntryDict(TypedDict, total=False):
+    """An entry in the user's calendar list.
+
+    https://developers.google.com/calendar/api/v3/reference/calendarList#resource
+    """
+
+    id: str
+    summary: str
+    description: str
+    timeZone: str
+    accessRole: str  # "owner", "writer", "reader", "freeBusyReader"
+    primary: bool
+    backgroundColor: str
+    foregroundColor: str
+
+
+# =============================================================================
+# Tasks API Types
+# =============================================================================
+
+
+class TaskDict(TypedDict, total=False):
+    """A Google Task.
+
+    https://developers.google.com/tasks/reference/rest/v1/tasks#Task
+    """
+
+    id: str
+    title: str
+    notes: str
+    status: str  # "needsAction", "completed"
+    due: str  # RFC3339 timestamp
+    completed: str  # RFC3339 timestamp
+    parent: str
+    position: str
+    selfLink: str
+
+
+class TaskListDict(TypedDict, total=False):
+    """A Google Tasks list.
+
+    https://developers.google.com/tasks/reference/rest/v1/tasklists#TaskList
+    """
+
+    id: str
+    title: str
+    selfLink: str
+    updated: str
+
+
+# =============================================================================
 # Drive API Types
 # =============================================================================
 

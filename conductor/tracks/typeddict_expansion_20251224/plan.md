@@ -1,57 +1,42 @@
 # Implementation Plan - Pragmatic API Response Schemas
 
-## Phase 1: Foundation & Gmail Retrofit
-Establish the schema structure and migrate the existing Gmail implementation to set the pattern.
+> **Note:** Types already exist in `mygooglib/core/types.py` with Sheets, Drive, and Gmail schemas. This plan extends that file rather than creating a parallel `services/schemas/` package.
 
-- [ ] Task: Create `mygooglib/services/schemas/` package
-    - [ ] Create directory and empty `__init__.py`
-    - [ ] Create `mygooglib/services/schemas/common.py` for shared types (if any)
-- [ ] Task: Retrofit Gmail Schemas
-    - [ ] Create `mygooglib/services/schemas/gmail.py`
-    - [ ] Define `GmailMessage`, `GmailThread`, `GmailLabel`, `GmailDraft` (Pragmatic Subset)
-    - [ ] Update `mygooglib/services/gmail.py` to use new types
+## Phase 1: Calendar & Tasks Types
+Add TypedDicts for the simpler productivity services.
+
+- [~] Task: Implement Calendar Types
+    - [ ] Add `CalendarEvent`, `CalendarListEntry` to `core/types.py`
+    - [ ] Update `mygooglib/services/calendar.py` return type hints
     - [ ] Run `mypy` to verify
-- [ ] Task: Create Base Contract Test
-    - [ ] Create `tests/schemas/test_contract_base.py` with helper logic
-    - [ ] Create `tests/schemas/test_gmail_contract.py`
-    - [ ] Verify against existing VCR cassettes
-- [ ] Task: Conductor - User Manual Verification 'Foundation & Gmail Retrofit' (Protocol in workflow.md)
+- [ ] Task: Implement Tasks Types
+    - [ ] Add `Task`, `TaskList` to `core/types.py`
+    - [ ] Update `mygooglib/services/tasks.py` return type hints
+    - [ ] Run `mypy` to verify
+- [ ] Task: Add Contract Tests for Phase 1
+    - [ ] Create `tests/core/test_types_contract.py` with helper logic
+    - [ ] Add Calendar/Tasks contract assertions
+- [ ] Task: Conductor - Phase 1 Verification
 
-## Phase 2: Core Services (Calendar & Tasks)
-Implement schemas for the simpler, core productivity services.
+## Phase 2: Contacts & Docs Types
+Add TypedDicts for services with complex/nested structures.
 
-- [ ] Task: Implement Calendar Schemas
-    - [ ] Create `mygooglib/services/schemas/calendar.py`
-    - [ ] Define `CalendarEvent`, `CalendarListEntry`
-    - [ ] Update `mygooglib/services/calendar.py`
-    - [ ] Add contract tests `tests/schemas/test_calendar_contract.py`
-- [ ] Task: Implement Tasks Schemas
-    - [ ] Create `mygooglib/services/schemas/tasks.py`
-    - [ ] Define `Task`, `TaskList`
-    - [ ] Update `mygooglib/services/tasks.py`
-    - [ ] Add contract tests `tests/schemas/test_tasks_contract.py`
-- [ ] Task: Conductor - User Manual Verification 'Core Services (Calendar & Tasks)' (Protocol in workflow.md)
+- [ ] Task: Implement Contacts Types
+    - [ ] Add `Person`, `Connection` (Pragmatic Subset) to `core/types.py`
+    - [ ] Update `mygooglib/services/contacts.py` return type hints
+    - [ ] Add contract tests
+- [ ] Task: Implement Docs Types
+    - [ ] Add `Document` (Pragmatic Subset) to `core/types.py`
+    - [ ] Update `mygooglib/services/docs.py` return type hints
+    - [ ] Add contract tests
+- [ ] Task: Conductor - Phase 2 Verification
 
-## Phase 3: Complex Services (Contacts & Docs)
-Implement schemas for services with potentially deeply nested or complex structures.
-
-- [ ] Task: Implement Contacts Schemas
-    - [ ] Create `mygooglib/services/schemas/contacts.py`
-    - [ ] Define `Person`, `Connection` (Pragmatic Subset)
-    - [ ] Update `mygooglib/services/contacts.py`
-    - [ ] Add contract tests `tests/schemas/test_contacts_contract.py`
-- [ ] Task: Implement Docs Schemas
-    - [ ] Create `mygooglib/services/schemas/docs.py`
-    - [ ] Define `Document` (Pragmatic Subset)
-    - [ ] Update `mygooglib/services/docs.py`
-    - [ ] Add contract tests `tests/schemas/test_docs_contract.py`
-- [ ] Task: Conductor - User Manual Verification 'Complex Services (Contacts & Docs)' (Protocol in workflow.md)
-
-## Phase 4: Final Polish
-Ensure comprehensive coverage and clean up.
+## Phase 3: Final Polish
+Ensure comprehensive coverage and validation.
 
 - [ ] Task: Full Suite Verification
     - [ ] Run full `mypy` check
     - [ ] Run full test suite (unit + contract)
-    - [ ] Update `context_map.md` (if auto-generated, or manually) to reflect new schema locations
-- [ ] Task: Conductor - User Manual Verification 'Final Polish' (Protocol in workflow.md)
+    - [ ] Update `context_map.md` to reflect new types
+- [ ] Task: Re-export new types from `mygooglib/__init__.py`
+- [ ] Task: Conductor - Final Verification

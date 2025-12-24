@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any, cast
 
+from mygooglib.core.types import CalendarEventDict
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.datetime import from_rfc3339, to_rfc3339
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
@@ -26,7 +27,7 @@ def add_event(
     location: str | None = None,
     calendar_id: str = "primary",
     raw: bool = False,
-) -> str | dict:
+) -> str | CalendarEventDict:
     """Add an event to a Google Calendar.
 
     Args:
@@ -78,7 +79,7 @@ def add_event(
 
     request = calendar.events().insert(calendarId=calendar_id, body=event)
     response = execute_with_retry_http_error(request, is_write=True)
-    return cast(dict, response) if raw else cast(str, response.get("id"))
+    return cast(CalendarEventDict, response) if raw else cast(str, response.get("id"))
 
 
 @api_call("Calendar list_events", is_write=False)
@@ -91,7 +92,7 @@ def list_events(
     max_results: int = 100,
     raw: bool = False,
     progress_callback: Any | None = None,
-) -> list[dict] | dict:
+) -> list[CalendarEventDict] | dict[str, list[CalendarEventDict]]:
     """List events from a calendar.
 
     Args:
@@ -106,7 +107,7 @@ def list_events(
     Returns:
         List of event dicts by default, or full response if raw=True.
     """
-    all_items: list[dict] = []
+    all_items: list[CalendarEventDict] = []
     page_token = None
 
     while True:
@@ -161,10 +162,10 @@ class CalendarClient(BaseClient):
         location: str | None = None,
         calendar_id: str = "primary",
         raw: bool = False,
-    ) -> str | dict:
+    ) -> str | CalendarEventDict:
         """Add an event to a Google Calendar."""
         return cast(
-            str | dict,
+            str | CalendarEventDict,
             add_event(
                 self.service,
                 summary=summary,
@@ -187,10 +188,10 @@ class CalendarClient(BaseClient):
         max_results: int = 100,
         raw: bool = False,
         progress_callback: Any | None = None,
-    ) -> list[dict] | dict:
+    ) -> list[CalendarEventDict] | dict[str, list[CalendarEventDict]]:
         """List events from a calendar."""
         return cast(
-            list[dict] | dict,
+            list[CalendarEventDict] | dict[str, list[CalendarEventDict]],
             list_events(
                 self.service,
                 calendar_id=calendar_id,

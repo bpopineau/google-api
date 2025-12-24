@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime as dt
 from typing import Any, cast
 
+from mygooglib.core.types import TaskDict, TaskListDict
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.datetime import to_rfc3339
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
@@ -20,7 +21,7 @@ def list_tasklists(
     *,
     max_results: int = 100,
     raw: bool = False,
-) -> list[dict] | dict:
+) -> list[TaskListDict] | dict[str, Any]:
     """List the user's task lists.
 
     Args:
@@ -33,7 +34,11 @@ def list_tasklists(
     """
     request = tasks.tasklists().list(maxResults=max_results)
     response = execute_with_retry_http_error(request, is_write=False)
-    return cast(dict, response) if raw else cast(list, response.get("items", []))
+    return (
+        cast(dict[str, Any], response)
+        if raw
+        else cast(list[TaskListDict], response.get("items", []))
+    )
 
 
 @api_call("Tasks add_task", is_write=True)
@@ -45,7 +50,7 @@ def add_task(
     notes: str | None = None,
     due: dt.datetime | dt.date | None = None,
     raw: bool = False,
-) -> str | dict:
+) -> str | TaskDict:
     """Add a task to a task list.
 
     Args:
@@ -67,7 +72,7 @@ def add_task(
 
     request = tasks.tasks().insert(tasklist=tasklist_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return cast(dict, response) if raw else cast(str, response.get("id"))
+    return cast(TaskDict, response) if raw else cast(str, response.get("id"))
 
 
 @api_call("Tasks list_tasks", is_write=False)
@@ -80,7 +85,7 @@ def list_tasks(
     max_results: int = 100,
     raw: bool = False,
     progress_callback: Any | None = None,
-) -> list[dict] | dict:
+) -> list[TaskDict] | dict[str, list[TaskDict]]:
     """List tasks in a task list.
 
     Args:
@@ -95,7 +100,7 @@ def list_tasks(
     Returns:
         List of task dicts by default, or full response if raw=True.
     """
-    all_items: list[dict[str, Any]] = []
+    all_items: list[TaskDict] = []
     page_token: str | None = None
 
     while True:
@@ -129,12 +134,12 @@ def complete_task(
     *,
     tasklist_id: str = "@default",
     raw: bool = False,
-) -> dict | None:
+) -> TaskDict | None:
     """Mark a task as completed."""
     body = {"status": "completed"}
     request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return cast(dict, response) if raw else None
+    return cast(TaskDict, response) if raw else None
 
 
 @api_call("Tasks delete_task", is_write=True)
@@ -160,7 +165,7 @@ def update_task(
     status: str | None = None,
     due: dt.datetime | dt.date | None = None,
     raw: bool = False,
-) -> dict | None:
+) -> TaskDict | None:
     """Update a task's properties.
 
     Args:
@@ -191,7 +196,7 @@ def update_task(
 
     request = tasks.tasks().patch(tasklist=tasklist_id, task=task_id, body=body)
     response = execute_with_retry_http_error(request, is_write=True)
-    return cast(dict, response) if raw else None
+    return cast(TaskDict, response) if raw else None
 
 
 class TasksClient(BaseClient):
@@ -199,10 +204,10 @@ class TasksClient(BaseClient):
 
     def list_tasklists(
         self, *, max_results: int = 100, raw: bool = False
-    ) -> list[dict] | dict:
+    ) -> list[TaskListDict] | dict[str, Any]:
         """List the user's task lists."""
         return cast(
-            list[dict] | dict,
+            list[TaskListDict] | dict[str, Any],
             list_tasklists(self.service, max_results=max_results, raw=raw),
         )
 
@@ -214,10 +219,10 @@ class TasksClient(BaseClient):
         notes: str | None = None,
         due: dt.datetime | dt.date | None = None,
         raw: bool = False,
-    ) -> str | dict:
+    ) -> str | TaskDict:
         """Add a task to a task list."""
         return cast(
-            str | dict,
+            str | TaskDict,
             add_task(
                 self.service,
                 title=title,
@@ -237,10 +242,10 @@ class TasksClient(BaseClient):
         max_results: int = 100,
         raw: bool = False,
         progress_callback: Any | None = None,
-    ) -> list[dict] | dict:
+    ) -> list[TaskDict] | dict[str, list[TaskDict]]:
         """List tasks in a task list."""
         return cast(
-            list[dict] | dict,
+            list[TaskDict] | dict[str, list[TaskDict]],
             list_tasks(
                 self.service,
                 tasklist_id=tasklist_id,
@@ -258,10 +263,10 @@ class TasksClient(BaseClient):
         *,
         tasklist_id: str = "@default",
         raw: bool = False,
-    ) -> dict | None:
+    ) -> TaskDict | None:
         """Mark a task as completed."""
         return cast(
-            dict | None,
+            TaskDict | None,
             complete_task(
                 self.service,
                 task_id,
@@ -290,10 +295,10 @@ class TasksClient(BaseClient):
         status: str | None = None,
         due: dt.datetime | dt.date | None = None,
         raw: bool = False,
-    ) -> dict | None:
+    ) -> TaskDict | None:
         """Update a task's properties."""
         return cast(
-            dict | None,
+            TaskDict | None,
             update_task(
                 self.service,
                 task_id,
