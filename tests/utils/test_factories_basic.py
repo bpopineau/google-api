@@ -44,3 +44,15 @@ def test_sheets_factories():
     vr = ValueRangeFactory.build()
     assert "values" in vr
     assert len(vr["values"]) == 2
+
+def test_types_validation():
+    # Verify that types are correct
+    color = ColorFactory.build()
+    assert isinstance(color["red"], (float, int))
+    
+    date = DateFactory.build()
+    assert isinstance(date["year"], int)
+    
+    file_meta = FileFactory.build()
+    assert isinstance(file_meta["id"], str)
+    assert isinstance(file_meta["parents"], list)
