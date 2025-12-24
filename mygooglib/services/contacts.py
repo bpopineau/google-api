@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from mygooglib.core.types import ContactDict
 from mygooglib.core.utils.base import BaseClient
 from mygooglib.core.utils.retry import api_call, execute_with_retry_http_error
 
@@ -17,7 +18,7 @@ def list_contacts(
     *,
     page_size: int = 30,
     sort_order: str = "FIRST_NAME_ASCENDING",
-) -> list[dict]:
+) -> list[ContactDict]:
     """List contacts from the user's connection.
 
     Args:
@@ -46,7 +47,7 @@ def list_contacts(
 def search_contacts(
     people_service: Any,
     query: str,
-) -> list[dict]:
+) -> list[ContactDict]:
     """Search contacts by query.
 
     Args:
@@ -69,7 +70,7 @@ def search_contacts(
 def get_contact_by_resource_name(
     people_service: Any,
     resource_name: str,
-) -> dict:
+) -> ContactDict:
     """Get a single contact by resource name (e.g., 'people/c123...')."""
     request = people_service.people().get(
         resourceName=resource_name,
@@ -79,7 +80,7 @@ def get_contact_by_resource_name(
     return _flatten_person(response)
 
 
-def _flatten_person(person: dict) -> dict:
+def _flatten_person(person: dict[str, Any]) -> ContactDict:
     """Helper: Flatten complex People API person object to simple dict."""
     names = person.get("names", [])
     emails = person.get("emailAddresses", [])
@@ -102,7 +103,7 @@ def create_contact(
     family_name: str | None = None,
     email: str | None = None,
     phone: str | None = None,
-) -> dict:
+) -> ContactDict:
     """Create a new contact.
 
     Args:
@@ -147,7 +148,7 @@ def update_contact(
     family_name: str | None = None,
     email: str | None = None,
     phone: str | None = None,
-) -> dict:
+) -> ContactDict:
     """Update an existing contact.
 
     Args:
@@ -222,15 +223,15 @@ class ContactsClient(BaseClient):
         *,
         page_size: int = 30,
         sort_order: str = "FIRST_NAME_ASCENDING",
-    ) -> list[dict]:
+    ) -> list[ContactDict]:
         """List contacts."""
         return list_contacts(self.service, page_size=page_size, sort_order=sort_order)  # type: ignore[no-any-return]
 
-    def search_contacts(self, query: str) -> list[dict]:
+    def search_contacts(self, query: str) -> list[ContactDict]:
         """Search contacts."""
         return search_contacts(self.service, query)  # type: ignore[no-any-return]
 
-    def get_contact(self, resource_name: str) -> dict:
+    def get_contact(self, resource_name: str) -> ContactDict:
         """Get a specific contact."""
         return get_contact_by_resource_name(self.service, resource_name)  # type: ignore[no-any-return]
 
@@ -241,7 +242,7 @@ class ContactsClient(BaseClient):
         family_name: str | None = None,
         email: str | None = None,
         phone: str | None = None,
-    ) -> dict:
+    ) -> ContactDict:
         """Create a new contact."""
         return create_contact(  # type: ignore[no-any-return]
             self.service,
@@ -259,7 +260,7 @@ class ContactsClient(BaseClient):
         family_name: str | None = None,
         email: str | None = None,
         phone: str | None = None,
-    ) -> dict:
+    ) -> ContactDict:
         """Update an existing contact."""
         return update_contact(  # type: ignore[no-any-return]
             self.service,

@@ -316,6 +316,42 @@ class TaskListDict(TypedDict, total=False):
 
 
 # =============================================================================
+# Contacts (People API) Types
+# =============================================================================
+
+
+class ContactDict(TypedDict, total=False):
+    """A flattened contact returned by mygooglib contacts functions.
+
+    This is a library-specific type representing the normalized format
+    returned by list_contacts, search_contacts, etc. (not a raw API type).
+    """
+
+    resourceName: str | None
+    name: str | None
+    email: str | None
+    phone: str | None
+    etag: str | None
+
+
+# =============================================================================
+# Docs API Types
+# =============================================================================
+
+
+class DocumentDict(TypedDict, total=False):
+    """A Google Document (minimal subset).
+
+    https://developers.google.com/docs/api/reference/rest/v1/documents#Document
+    """
+
+    documentId: str
+    title: str
+    body: dict[str, Any]
+    revisionId: str
+
+
+# =============================================================================
 # Drive API Types
 # =============================================================================
 

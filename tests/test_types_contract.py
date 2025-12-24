@@ -6,12 +6,7 @@ the fields present in actual Google API responses.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, get_type_hints
-
-import pytest
-
-if TYPE_CHECKING:
-    from collections.abc import Sequence
+from typing import Any, get_type_hints
 
 
 def get_typeddict_keys(typed_dict_class: type) -> set[str]:
@@ -110,3 +105,39 @@ class TestTasksTypeDictContracts:
         }
 
         assert_keys_exist(sample_tasklist, TaskListDict)
+
+
+class TestContactsTypeDictContracts:
+    """Contract tests for People/Contacts API TypedDicts."""
+
+    def test_contact_keys_exist(self) -> None:
+        """Verify ContactDict matches actual flattened contact structure."""
+        from mygooglib.core.types import ContactDict
+
+        # Sample flattened contact (as returned by _flatten_person)
+        sample_contact: dict[str, Any] = {
+            "resourceName": "people/c123456789",
+            "name": "John Doe",
+            "email": "john@example.com",
+            "phone": "+1234567890",
+            "etag": "%EgUBBwg...",
+        }
+
+        assert_keys_exist(sample_contact, ContactDict)
+
+
+class TestDocsTypeDictContracts:
+    """Contract tests for Docs API TypedDicts."""
+
+    def test_document_keys_exist(self) -> None:
+        """Verify DocumentDict matches actual API response structure."""
+        from mygooglib.core.types import DocumentDict
+
+        sample_document: dict[str, Any] = {
+            "documentId": "doc123abc",
+            "title": "My Document",
+            "body": {"content": []},
+            "revisionId": "abc123",
+        }
+
+        assert_keys_exist(sample_document, DocumentDict)
