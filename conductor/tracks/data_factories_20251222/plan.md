@@ -8,11 +8,11 @@ Implementation of type-safe, deterministic mock data generators using `polyfacto
 - [x] Task: Implement `tests/factories/common.py` for shared types and library-specific normalized dicts. 710240d
 - [x] Task: Conductor - User Manual Verification 'Environment and Foundation' (Protocol in workflow.md) e586488
 
-## Phase 2: Drive and Sheets Factories [checkpoint: pending]
+## Phase 2: Drive and Sheets Factories [checkpoint: b812ecb]
 - [x] Task: Implement `tests/factories/drive.py` (FileDict, etc.). d3d529f
 - [x] Task: Implement `tests/factories/sheets.py` (ValueRangeDict, SpreadsheetDict, etc.). ffb65ba
 - [x] Task: Write tests in `tests/utils/test_factories_basic.py` to ensure factories generate valid types. 86dbc09
-- [x] Task: Conductor - User Manual Verification 'Drive and Sheets Factories' (Protocol in workflow.md) pending
+- [x] Task: Conductor - User Manual Verification 'Drive and Sheets Factories' (Protocol in workflow.md) b812ecb
 
 ## Phase 3: Gmail Factories
 - [ ] Task: Implement `tests/factories/gmail.py` (MessageDict, ThreadDict, etc.).
