@@ -8,19 +8,23 @@ Implementation of type-safe, deterministic mock data generators using `polyfacto
 - [x] Task: Implement `tests/factories/common.py` for shared types and library-specific normalized dicts. 710240d
 - [x] Task: Conductor - User Manual Verification 'Environment and Foundation' (Protocol in workflow.md) e586488
 
-## Phase 2: Drive and Sheets Factories
-- [ ] Task: Implement `tests/factories/drive.py` (FileDict, etc.).
-- [ ] Task: Implement `tests/factories/sheets.py` (ValueRangeDict, SpreadsheetDict, etc.).
-- [ ] Task: Write tests in `tests/utils/test_factories_basic.py` to ensure factories generate valid types.
-- [ ] Task: Conductor - User Manual Verification 'Drive and Sheets Factories' (Protocol in workflow.md)
+## Phase 2: Drive and Sheets Factories [checkpoint: pending]
+- [x] Task: Implement `tests/factories/drive.py` (FileDict, etc.). d3d529f
+- [x] Task: Implement `tests/factories/sheets.py` (ValueRangeDict, SpreadsheetDict, etc.). ffb65ba
+- [x] Task: Write tests in `tests/utils/test_factories_basic.py` to ensure factories generate valid types. 86dbc09
+- [x] Task: Conductor - User Manual Verification 'Drive and Sheets Factories' (Protocol in workflow.md) pending
 
 ## Phase 3: Gmail Factories
 - [ ] Task: Implement `tests/factories/gmail.py` (MessageDict, ThreadDict, etc.).
 - [ ] Task: Update `tests/utils/test_factories_basic.py` with Gmail factory tests.
 - [ ] Task: Conductor - User Manual Verification 'Gmail Factories' (Protocol in workflow.md)
 
-## Phase 4: Integration and Refactoring
+## Phase 4: Integration and AI Ergonomics Compliance
 - [ ] Task: Identify 2-3 existing tests using hardcoded dictionaries (e.g., in Drive or Sheets services).
 - [ ] Task: Refactor identified tests to use the new factories.
+- [ ] Task: Verify AI Ergonomics compliance:
+    - [ ] Sub-task: Run `uv run mypy tests/factories/` - ensure 0 errors
+    - [ ] Sub-task: Run `uv run ruff check tests/factories/` - ensure no linting errors
+    - [ ] Sub-task: Verify all factory classes have docstrings
 - [ ] Task: Verify all tests pass and coverage is maintained.
-- [ ] Task: Conductor - User Manual Verification 'Integration and Refactoring' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Integration and AI Ergonomics' (Protocol in workflow.md)

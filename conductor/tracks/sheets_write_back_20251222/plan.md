@@ -42,16 +42,22 @@ This phase adds a form to append new rows of data to the sheet.
 
 - [ ] Task: Conductor - User Manual Verification 'Append Functionality' (Protocol in workflow.md)
 
-## Phase 3: Polish and Error Handling
-This phase ensures a smooth user experience and handles potential failures gracefully.
+## Phase 3: Polish and AI Ergonomics Compliance
+This phase ensures a smooth user experience, handles potential failures gracefully, and meets AI ergonomics standards.
 
 - [ ] Task: Implement Async Feedback and Error Handling
     - [ ] Sub-task: Ensure save/append operations use async workers and show loading indicators
     - [ ] Sub-task: Implement error dialogs for API failures using "Friendly but Direct" tone
     - [ ] Sub-task: Add success notifications upon data synchronization
 
+- [ ] Task: Verify AI Ergonomics Compliance (per `conductor/ai_ergonomics.md`)
+    - [ ] Sub-task: Run `uv run mypy mygoog_gui/pages/sheets.py` - ensure 0 errors
+    - [ ] Sub-task: Run `uv run ruff check mygoog_gui/pages/sheets.py` - no linting errors
+    - [ ] Sub-task: Add docstrings to all new public methods (`_on_save`, append logic)
+    - [ ] Sub-task: Run `uv run python scripts/run_arch_lint.py` - verify import boundaries
+
 - [ ] Task: Verify Project Quality Gates
     - [ ] Sub-task: Verify GUI coverage >60%
-    - [ ] Sub-task: Run `ruff check .` and `mypy .`
+    - [ ] Sub-task: Run full test suite `uv run pytest`
 
-- [ ] Task: Conductor - User Manual Verification 'Polish and Error Handling' (Protocol in workflow.md)
+- [ ] Task: Conductor - User Manual Verification 'Polish and AI Ergonomics' (Protocol in workflow.md)
