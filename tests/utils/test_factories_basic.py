@@ -2,6 +2,7 @@ import pytest
 from tests.factories.common import ColorFactory, DateFactory, SheetInfoFactory, MessageMetadataFactory
 from tests.factories.drive import FileFactory
 from tests.factories.sheets import SpreadsheetFactory, ValueRangeFactory
+from tests.factories.gmail import MessageFactory, ThreadFactory
 
 def test_color_factory():
     color = ColorFactory.build()
@@ -44,6 +45,17 @@ def test_sheets_factories():
     vr = ValueRangeFactory.build()
     assert "values" in vr
     assert len(vr["values"]) == 2
+
+def test_gmail_factories():
+    msg = MessageFactory.build()
+    assert msg["id"] == "msg123"
+    assert "payload" in msg
+    assert msg["payload"]["mimeType"] == "text/plain"
+
+    thread = ThreadFactory.build()
+    assert thread["id"] == "thread123"
+    assert len(thread["messages"]) == 1
+    assert thread["messages"][0]["id"] == "msg123"
 
 def test_types_validation():
     # Verify that types are correct
