@@ -60,7 +60,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Deterministic Data Factories
+## [x] Track: Deterministic Data Factories
 *Link: [./conductor/tracks/data_factories_20251222/](./conductor/tracks/data_factories_20251222/)*
 
 ---
