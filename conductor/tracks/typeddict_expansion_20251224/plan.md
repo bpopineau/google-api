@@ -5,17 +5,17 @@
 ## Phase 1: Calendar & Tasks Types
 Add TypedDicts for the simpler productivity services.
 
-- [~] Task: Implement Calendar Types
-    - [ ] Add `CalendarEvent`, `CalendarListEntry` to `core/types.py`
-    - [ ] Update `mygooglib/services/calendar.py` return type hints
-    - [ ] Run `mypy` to verify
-- [ ] Task: Implement Tasks Types
-    - [ ] Add `Task`, `TaskList` to `core/types.py`
-    - [ ] Update `mygooglib/services/tasks.py` return type hints
-    - [ ] Run `mypy` to verify
-- [ ] Task: Add Contract Tests for Phase 1
-    - [ ] Create `tests/core/test_types_contract.py` with helper logic
-    - [ ] Add Calendar/Tasks contract assertions
+- [x] Task: Implement Calendar Types [f5f0d56]
+    - [x] Add `CalendarEvent`, `CalendarListEntry` to `core/types.py`
+    - [x] Update `mygooglib/services/calendar.py` return type hints
+    - [x] Run `mypy` to verify
+- [x] Task: Implement Tasks Types [f5f0d56]
+    - [x] Add `Task`, `TaskList` to `core/types.py`
+    - [x] Update `mygooglib/services/tasks.py` return type hints
+    - [x] Run `mypy` to verify
+- [x] Task: Add Contract Tests for Phase 1 [f5f0d56]
+    - [x] Create `tests/test_types_contract.py` with helper logic
+    - [x] Add Calendar/Tasks contract assertions
 - [ ] Task: Conductor - Phase 1 Verification
 
 ## Phase 2: Contacts & Docs Types
