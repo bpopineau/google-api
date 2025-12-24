@@ -5,7 +5,7 @@ Implementation of type-safe, deterministic mock data generators using `polyfacto
 ## Phase 1: Environment and Foundation
 - [x] Task: Add `polyfactory` to `pyproject.toml` (dev-dependencies) and install. 2d6b769
 - [x] Task: Create directory structure: `tests/factories/` with `__init__.py`. 7ed1498
-- [ ] Task: Implement `tests/factories/common.py` for shared types and library-specific normalized dicts.
+- [x] Task: Implement `tests/factories/common.py` for shared types and library-specific normalized dicts. 710240d
 - [ ] Task: Conductor - User Manual Verification 'Environment and Foundation' (Protocol in workflow.md)
 
 ## Phase 2: Drive and Sheets Factories
