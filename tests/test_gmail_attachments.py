@@ -86,9 +86,7 @@ def test_save_attachments_creates_files(
             }
         ]
     }
-    msg = MessageFactory.build(id="msg123")
-    msg["payload"] = payload
-    mock_execute.return_value = msg
+    mock_execute.return_value = MessageFactory.build(id="msg123", payload=payload)  # type: ignore
 
     # Mock attachment download
     mock_get_att.return_value = b"File content here"
@@ -125,9 +123,7 @@ def test_save_attachments_applies_filter(
             },
         ]
     }
-    msg = MessageFactory.build(id="msg123")
-    msg["payload"] = payload
-    mock_execute.return_value = msg
+    mock_execute.return_value = MessageFactory.build(id="msg123", payload=payload)  # type: ignore
 
     mock_get_att.return_value = b"PDF content"
     # Filter to only PDFs

@@ -9,9 +9,9 @@ from mygooglib import (
     AppConfig,
     get_clients,
     get_creds,
+    get_logger,
+    types,
 )
-from mygooglib.core import types
-from mygooglib.core.utils import logging
 
 
 def build_context() -> dict[str, Any]:
@@ -33,7 +33,7 @@ def build_context() -> dict[str, Any]:
         "get_creds": get_creds,
         "AppConfig": AppConfig,
         "config": AppConfig(),
-        "get_logger": logging.get_logger,
+        "get_logger": get_logger,
         "types": types,
     }
 

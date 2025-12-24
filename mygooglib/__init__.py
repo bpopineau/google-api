@@ -9,11 +9,12 @@ Quick start:
     clients.gmail.send_email(to="me@example.com", subject="Hello", body="World")
 """
 
+# Re-export the entire types module for console access
+from mygooglib.core import types
 from mygooglib.core.auth import SCOPES, get_auth_paths, get_creds, verify_creds_exist
 from mygooglib.core.client import Clients, get_clients
 from mygooglib.core.config import AppConfig
 from mygooglib.core.exceptions import GoogleApiError
-from mygooglib.core.utils.file_scanner import FileScanner
 
 # Re-export high-value types for strict typing
 from mygooglib.core.types import (
@@ -31,6 +32,8 @@ from mygooglib.core.types import (
     UpdateValuesResponseDict,
     ValueRangeDict,
 )
+from mygooglib.core.utils.file_scanner import FileScanner
+from mygooglib.core.utils.logging import get_logger
 
 # Non-breaking aliases for a cleaner public API.
 create = get_clients
@@ -49,6 +52,8 @@ __all__ = [
     "get_auth_paths",
     "verify_creds_exist",
     "FileScanner",
+    "get_logger",
+    "types",
     # Sheets Types
     "RangeData",
     "SheetInfoDict",

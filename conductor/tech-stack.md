@@ -16,6 +16,7 @@
 ## Development Tools
 - **Testing:** Pytest
 - **Testing Extensions:** `pytest-qt` (GUI), `vcrpy` (API Recording)
+- **Mock Data Generation:** `polyfactory` (deterministic factories)
 - **Interactive Debugging:** IPython
 - **Linting & Formatting:** Ruff
 - **Architectural Linting:** `import-linter`

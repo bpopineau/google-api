@@ -60,10 +60,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [x] Track: Deterministic Data Factories
-*Link: [./conductor/tracks/data_factories_20251222/](./conductor/tracks/data_factories_20251222/)*
-
----
-
 ## [ ] Track: Sheets Write-Back
 *Link: [./conductor/tracks/sheets_write_back_20251222/](./conductor/tracks/sheets_write_back_20251222/)*

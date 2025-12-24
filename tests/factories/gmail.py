@@ -54,4 +54,8 @@ class ThreadFactory(TypedDictFactory[ThreadDict]):
     __model__ = ThreadDict
     id = "thread123"
     snippet = ""
-    messages = Use(MessageFactory.batch, size=1)
+
+    @post_generated
+    @classmethod
+    def messages(cls, messages: list[MessageDict] | None = None) -> list[MessageDict]:
+        return messages or MessageFactory.batch(size=1)
