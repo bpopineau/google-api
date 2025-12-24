@@ -1,4 +1,5 @@
 from polyfactory import Use
+from polyfactory.decorators import post_generated
 from polyfactory.factories.typed_dict_factory import TypedDictFactory
 
 from mygooglib.core.types import (
@@ -32,7 +33,7 @@ class MessagePartFactory(TypedDictFactory[MessagePartDict]):
     mimeType = "text/plain"
     filename = ""
     body = Use(MessagePartBodyFactory.build)
-    parts = []
+    parts = Use(list)  # type: ignore[var-annotated]
 
 
 class MessageFactory(TypedDictFactory[MessageDict]):
@@ -40,7 +41,12 @@ class MessageFactory(TypedDictFactory[MessageDict]):
     id = "msg123"
     threadId = "thread123"
     snippet = ""
-    payload = Use(MessagePartFactory.build)
+
+    @post_generated
+    @classmethod
+    def payload(cls, payload: MessagePartDict | None = None) -> MessagePartDict:
+        return payload or MessagePartFactory.build()
+
     # Ensure payload can be overridden
 
 
