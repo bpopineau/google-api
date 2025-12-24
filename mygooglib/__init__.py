@@ -20,6 +20,13 @@ from mygooglib.core.exceptions import GoogleApiError
 from mygooglib.core.types import (
     # Gmail types
     AttachmentMetadataDict,
+    # Calendar types
+    CalendarEventDict,
+    CalendarListEntryDict,
+    # Contacts types
+    ContactDict,
+    # Docs types
+    DocumentDict,
     LabelDict,
     MessageDict,
     MessageFullDict,
@@ -29,6 +36,9 @@ from mygooglib.core.types import (
     SendMessageResponseDict,
     SheetInfoDict,
     SpreadsheetDict,
+    # Tasks types
+    TaskDict,
+    TaskListDict,
     UpdateValuesResponseDict,
     ValueRangeDict,
 )
@@ -54,12 +64,13 @@ __all__ = [
     "FileScanner",
     "get_logger",
     "types",
-    # Sheets Types
-    "RangeData",
-    "SheetInfoDict",
-    "SpreadsheetDict",
-    "UpdateValuesResponseDict",
-    "ValueRangeDict",
+    # Calendar Types
+    "CalendarEventDict",
+    "CalendarListEntryDict",
+    # Contacts Types
+    "ContactDict",
+    # Docs Types
+    "DocumentDict",
     # Gmail Types
     "AttachmentMetadataDict",
     "LabelDict",
@@ -67,4 +78,13 @@ __all__ = [
     "MessageFullDict",
     "MessageMetadataDict",
     "SendMessageResponseDict",
+    # Sheets Types
+    "RangeData",
+    "SheetInfoDict",
+    "SpreadsheetDict",
+    "UpdateValuesResponseDict",
+    "ValueRangeDict",
+    # Tasks Types
+    "TaskDict",
+    "TaskListDict",
 ]
