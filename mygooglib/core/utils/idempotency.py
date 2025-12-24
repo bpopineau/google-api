@@ -17,7 +17,17 @@ DEFAULT_DB_PATH = Path.home() / ".mygoog" / "idempotency.db"
 
 
 class IdempotencyStore:
-    """Local SQLite store for tracking processed keys."""
+    """Local SQLite store for tracking processed keys.
+
+    Example:
+        >>> import tempfile
+        >>> store = IdempotencyStore(tempfile.mktemp(suffix='.db'))
+        >>> store.check('email-123')
+        False
+        >>> store.add('email-123')
+        >>> store.check('email-123')
+        True
+    """
 
     def __init__(self, db_path: Path | str | None = None):
         """Initialize the store.

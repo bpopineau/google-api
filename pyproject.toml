@@ -73,3 +73,6 @@ dev = [
     "polyfactory>=3.2.0",
 ]
 
+[tool.pytest.ini_options]
+addopts = "--doctest-modules"
+testpaths = ["tests", "mygooglib/core/utils"]

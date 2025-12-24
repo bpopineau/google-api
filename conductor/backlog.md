@@ -249,15 +249,11 @@ This file tracks potential future tracks and feature ideas. These are "promoted"
 ### 14. ~~Re-establish AI Ergonomics Roadmap~~ ✅ COMPLETE
 **Status:** Implemented in track `ai_ergonomics_20251223`. See `conductor/ai_ergonomics.md`.
 
-### 15. 🔴 Fix Console.py Type Errors (AI Ergonomics Epic 1)
-**Concept:** Resolve 10 mypy errors in `mygoog_cli/console.py` to achieve 100% type compliance.
-*   **Effort:** Low (1-2 hours)
-*   **Reference:** AI Ergonomics Roadmap Epic 1.
+### 15. ~~Fix Console.py Type Errors (AI Ergonomics Epic 1)~~ ✅ COMPLETE
+**Status:** Resolved as part of the `type_fixing_20251224` track. Mypy now reports 0 errors.
 
-### 16. 🟡 TypedDict Expansion (AI Ergonomics Epic 2)
-**Concept:** Add TypedDict schemas to Calendar, Tasks, Contacts, and Docs API responses.
-*   **Effort:** Medium (4-6 hours)
-*   **Reference:** AI Ergonomics Roadmap Epic 2.
+### 16. ~~TypedDict Expansion (AI Ergonomics Epic 2)~~ ✅ COMPLETE
+**Status:** Implemented in track `typeddict_expansion_20251224`. Added `CalendarEvent`, `Task`, `ContactDict`, `DocumentDict` and more to `core/types.py`.
 
 ---
 

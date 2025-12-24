@@ -67,20 +67,20 @@ A module is considered "AI-Ready" when it meets ALL of the following criteria:
 **Status:** ✅ **0 errors in 123 source files** (Completed 2025-12-24)
 **Breakdown:** All modules now pass mypy strict. Key fixes were type annotations in `console.py` and `factories/common.py`.
 
-### Epic 2: TypedDict Expansion 🟡 Medium Priority
+### Epic 2: TypedDict Expansion ✅ COMPLETED
 **Goal:** Add TypedDict schemas to remaining API response types (Calendar, Tasks, Contacts, Docs).
-**Impact:** Explicit contracts for all service responses, reducing type ambiguity.
-**Effort:** Medium (4-6 hours)
+**Status:** ✅ Implemented in track `typeddict_expansion_20251224` (Completed 2025-12-24)
+**Breakdown:** Added `CalendarEvent`, `Task`, `ContactDict`, `DocumentDict` and supporting nested types to `core/types.py`.
 
-### Epic 3: Executable Documentation 🟡 Medium Priority
+### Epic 3: Executable Documentation 🟡 IN PROGRESS
 **Goal:** Add `doctest` examples to all utility functions in `mygooglib/core/`.
-**Impact:** Self-verifying documentation, agents can copy-paste working examples.
-**Effort:** Medium (3-4 hours)
+**Status:** Partial — `a1.py`, `datetime.py`, `idempotency.py` have doctests. Pytest configured with `--doctest-modules`.
+**Remaining:** `pagination.py`, `retry.py` could use examples.
 
-### Epic 4: GUI State Documentation 🟢 Low Priority
+### Epic 4: GUI State Documentation ✅ COMPLETED
 **Goal:** Document state transitions and signal flows in `mygoog_gui/`.
-**Impact:** Reduces logic scattering, clearer entry points for UI modifications.
-**Effort:** Medium (4-5 hours)
+**Status:** ✅ Created `mygoog_gui/STATE_MACHINE.md` (Completed 2025-12-24)
+**Breakdown:** Documents auth flow, page navigation signals, worker patterns, and modification entry points.
 
 ### Epic 5: Context Window Profiling 🟢 Low Priority
 **Goal:** Measure token cost for common development tasks, identify optimization targets.

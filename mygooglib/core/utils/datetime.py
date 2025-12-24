@@ -33,6 +33,12 @@ def to_rfc3339(value: dt.datetime | dt.date) -> str:
     - date -> 'YYYY-MM-DD' (all-day event format)
     - naive datetime -> localized to DEFAULT_TZ then formatted
     - aware datetime -> formatted as-is
+
+    Examples:
+        >>> to_rfc3339(dt.date(2024, 1, 15))
+        '2024-01-15'
+        >>> to_rfc3339(dt.datetime(2024, 1, 15, 10, 30, tzinfo=dt.timezone.utc))
+        '2024-01-15T10:30:00+00:00'
     """
     if isinstance(value, dt.datetime):
         if value.tzinfo is None:
@@ -43,7 +49,14 @@ def to_rfc3339(value: dt.datetime | dt.date) -> str:
 
 
 def from_rfc3339(value: str) -> dt.datetime | dt.date:
-    """Parse an RFC3339 string back to datetime or date."""
+    """Parse an RFC3339 string back to datetime or date.
+
+    Examples:
+        >>> from_rfc3339('2024-01-15')
+        datetime.date(2024, 1, 15)
+        >>> from_rfc3339('2024-01-15T10:30:00+00:00')
+        datetime.datetime(2024, 1, 15, 10, 30, tzinfo=datetime.timezone.utc)
+    """
     # All-day events come as 'YYYY-MM-DD'
     if len(value) == 10:
         return dt.date.fromisoformat(value)
