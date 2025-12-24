@@ -1,25 +1,30 @@
 from polyfactory import Use
 from polyfactory.factories.typed_dict_factory import TypedDictFactory
+
 from mygooglib.core.types import (
+    HeaderDict,
     LabelDict,
     MessageDict,
-    ThreadDict,
-    MessagePartDict,
     MessagePartBodyDict,
-    HeaderDict,
+    MessagePartDict,
+    ThreadDict,
 )
+
 
 class LabelFactory(TypedDictFactory[LabelDict]):
     __model__ = LabelDict
+
 
 class HeaderFactory(TypedDictFactory[HeaderDict]):
     __model__ = HeaderDict
     name = "Subject"
     value = "Test"
 
+
 class MessagePartBodyFactory(TypedDictFactory[MessagePartBodyDict]):
     __model__ = MessagePartBodyDict
     size = 0
+
 
 class MessagePartFactory(TypedDictFactory[MessagePartDict]):
     __model__ = MessagePartDict
@@ -29,6 +34,7 @@ class MessagePartFactory(TypedDictFactory[MessagePartDict]):
     body = Use(MessagePartBodyFactory.build)
     parts = []
 
+
 class MessageFactory(TypedDictFactory[MessageDict]):
     __model__ = MessageDict
     id = "msg123"
@@ -36,9 +42,9 @@ class MessageFactory(TypedDictFactory[MessageDict]):
     snippet = ""
     payload = Use(MessagePartFactory.build)
 
+
 class ThreadFactory(TypedDictFactory[ThreadDict]):
     __model__ = ThreadDict
     id = "thread123"
     snippet = ""
-    messages = Use(lambda: [MessageFactory.build()])
-
+    messages = Use(MessageFactory.batch, size=1)
