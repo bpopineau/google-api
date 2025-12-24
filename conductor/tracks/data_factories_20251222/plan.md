@@ -14,10 +14,10 @@ Implementation of type-safe, deterministic mock data generators using `polyfacto
 - [x] Task: Write tests in `tests/utils/test_factories_basic.py` to ensure factories generate valid types. 86dbc09
 - [x] Task: Conductor - User Manual Verification 'Drive and Sheets Factories' (Protocol in workflow.md) b812ecb
 
-## Phase 3: Gmail Factories
-- [ ] Task: Implement `tests/factories/gmail.py` (MessageDict, ThreadDict, etc.).
-- [ ] Task: Update `tests/utils/test_factories_basic.py` with Gmail factory tests.
-- [ ] Task: Conductor - User Manual Verification 'Gmail Factories' (Protocol in workflow.md)
+## Phase 3: Gmail Factories [checkpoint: a9728f6]
+- [x] Task: Implement `tests/factories/gmail.py` (MessageDict, ThreadDict, etc.). 5b3da0c
+- [x] Task: Update `tests/utils/test_factories_basic.py` with Gmail factory tests. 5b3da0c
+- [x] Task: Conductor - User Manual Verification 'Gmail Factories' (Protocol in workflow.md) a9728f6
 
 ## Phase 4: Integration and AI Ergonomics Compliance
 - [ ] Task: Identify 2-3 existing tests using hardcoded dictionaries (e.g., in Drive or Sheets services).
