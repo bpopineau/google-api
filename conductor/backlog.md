@@ -44,6 +44,171 @@ This file tracks potential future tracks and feature ideas. These are "promoted"
 *   **AI Ergonomics:** Uses **Strict Schemas** for typed rendering. Leverages **Data Factories** for performance benchmarking.
 *   **Reference:** Strategy Pillar #1 (Thick Library).
 
+### 9. Global Keyboard Shortcuts & Command Palette
+**Concept:** Implement comprehensive keyboard shortcuts across the GUI and add a VS Code-style command palette (Ctrl+Shift+P).
+*   **Priority:** High - Core product guideline missing from current implementation.
+*   **Features:**
+    *   Global hotkeys for rapid actions (quick add task, archive email, etc.)
+    *   Full keyboard navigation support across all widgets
+    *   Command palette for all actions
+    *   Tooltips showing keyboard shortcuts on all buttons
+*   **Reference:** Product Guidelines (Keyboard Centricity).
+
+### 10. Elevated Global Omnibar
+**Concept:** Transform the home page search into a true global overlay modal (Ctrl+K) accessible from any page.
+*   **Priority:** High - Product guideline emphasizes "Unified Search" as central Omnibar.
+*   **Features:**
+    *   Overlay modal with instant search across Drive, Gmail, Calendar, Tasks
+    *   Keyboard-driven results navigation
+    *   Quick actions on results (open, archive, delete)
+    *   Recent searches history
+*   **Reference:** Product Guidelines (Unified Search) + Strategy Pillar #3.
+
+### 11. GUI Visual Polish & Professional Icons
+**Concept:** Replace emoji icons with professional icon set and enhance visual hierarchy with modern design patterns.
+*   **Priority:** Medium - Improves "Polished Feel" from product guidelines.
+*   **Features:**
+    *   Replace emoji with Material Icons or Phosphor icon set
+    *   Add subtle shadows, depth cues to cards
+    *   Implement smooth page transitions (QPropertyAnimation)
+    *   Add micro-interactions (hover effects, loading states)
+    *   Compact sidebar mode (icon-only toggle)
+*   **Reference:** Product Guidelines (Polished Feel, Modern Dark Mode).
+
+### 12. Split View & Enhanced Activity Feedback
+**Concept:** Implement split-view capability and enhanced activity widget for background tasks.
+*   **Priority:** Medium - Product guideline feature gap.
+*   **Features:**
+    *   Split views for simultaneous contexts (Task list + Calendar)
+    *   Enhanced activity widget with real-time automation feedback
+    *   Status bar at bottom for background task progress
+    *   Console feedback panel for automation task logs
+*   **Reference:** Product Guidelines (Split Views, Console Feedback).
+
+### 13. Quick Capture Panel (Floating Mini-Interface)
+**Concept:** Global hotkey-activated floating panel for rapid task/email/event creation without switching to the full app.
+*   **Priority:** High - Maximum impact/effort ratio for keyboard-centric users.
+*   **Features:**
+    *   Global hotkey (e.g., `Ctrl+Shift+N`) to summon floating panel
+    *   Quick task creator with minimal fields
+    *   "Save to Drive" for clipboard URLs/files
+    *   Email draft starter
+    *   Event quick-add with natural language parsing
+    *   Always-on-top, compact UI
+*   **Impact:** Massive friction reduction for power users during flow state.
+*   **Reference:** Product Guidelines (Keyboard Centricity, Efficiency).
+
+### 14. "Today View" - Contextual Daily Dashboard
+**Concept:** Single-pane daily execution dashboard combining calendar, tasks, and priority emails.
+*   **Priority:** High - Addresses "Unified Command Center" vision.
+*   **Features:**
+    *   Morning agenda: Next 3 calendar events with one-click join links
+    *   Today's task list with drag-to-reorder priority
+    *   Unread priority emails (starred/important)
+    *   Quick stats dashboard: meetings remaining, tasks completed, emails processed
+    *   Time-aware: adapts throughout the day
+*   **Impact:** Single pane of glass for daily execution, reduces context switching.
+*   **Reference:** Strategy Pillar #3 (Unified Command Center).
+
+### 15. Drag-and-Drop Cross-Service Actions
+**Concept:** Universal drag-and-drop for moving information between Google services.
+*   **Priority:** High - Natural, visual workflow shortcuts.
+*   **Features:**
+    *   Drag Gmail message → Tasks = "Create task from email"
+    *   Drag Drive file → Gmail = "Attach to draft"
+    *   Drag Calendar event → Drive = "Create meeting notes doc"
+    *   Drag Task → Calendar = "Schedule time to work on this"
+    *   Visual feedback during drag operations
+*   **Impact:** Intuitive cross-service workflows, demonstrates "Cross-Service Value".
+*   **Reference:** Strategy Pillar #3 (Cross-Service Value).
+
+### 16. Smart Context Sidebar (Dynamic "What's Relevant Now")
+**Concept:** Transform activity widget into context-aware assistant showing actionable information.
+*   **Priority:** Medium - Enhances existing right sidebar with intelligence.
+*   **Features:**
+    *   During calendar events: Show event details, attendees, related files from Drive
+    *   When viewing emails: Show related threads, calendar events with sender
+    *   When on Tasks page: Show available calendar slots to schedule work
+    *   "Pending actions" section: unanswered emails, overdue tasks, upcoming deadlines
+    *   Context changes based on current page and time of day
+*   **Impact:** Reduces cognitive load and tab-switching.
+*   **Reference:** Product Guidelines (Functional Density).
+
+### 17. Batch Operations Toolbar
+**Concept:** Multi-select mode with keyboard-driven batch actions across all services.
+*   **Priority:** Medium - 10x efficiency for power users.
+*   **Features:**
+    *   Multi-select mode (checkbox UI + keyboard shortcuts)
+    *   Batch actions: Archive all, Label all, Move all, Share with team
+    *   Keyboard shortcuts: select-all (`Ctrl+A`), select-by-filter, invert selection
+    *   Undo history for batch operations with visual confirmation
+    *   Works across Gmail, Drive, Tasks
+*   **Impact:** Massive efficiency gain for bulk email/file processing.
+*   **Reference:** Product Guidelines (Keyboard Centricity, Efficiency).
+
+### 18. "Focus Mode" with Do Not Disturb
+**Concept:** Toggle mode that silences live updates and distractions to support deep work.
+*   **Priority:** Low - Nice-to-have for concentration.
+*   **Features:**
+    *   Pauses activity feed updates and notifications
+    *   Hides unread counts/badges from all tabs
+    *   Optional: Auto-reply to emails during focus blocks
+    *   Pomodoro timer integration (25min work, 5min break)
+    *   Keyboard shortcut to toggle (`Ctrl+Shift+F`)
+    *   Restoration of state when exiting focus mode
+*   **Impact:** Supports deep work habits for knowledge workers.
+*   **Reference:** Product Guidelines (Polished Feel).
+
+### 19. Universal "Link Anything" System (Internal URI Scheme)
+**Concept:** Internal `mygoog://` URI scheme for linking between items across services.
+*   **Priority:** Medium - Power-user feature for building "second brain".
+*   **Features:**
+    *   Right-click any item → "Copy MyGoog Link"
+    *   Generates shareable internal URIs (e.g., `mygoog://task/abc123`)
+    *   Paste into notes, task descriptions, calendar event details
+    *   Links open directly in the app to that specific item
+    *   Works for Drive files, emails, tasks, calendar events, sheets
+    *   Enables building interconnected knowledge graphs
+*   **Impact:** Powerful for knowledge workers who build reference systems.
+*   **Reference:** Strategy Pillar #3 (Cross-Service Value).
+
+### 20. Template & Snippet Library
+**Concept:** Built-in templates system for recurring email replies, task structures, and event descriptions.
+*   **Priority:** Low - Reduces repetitive typing.
+*   **Features:**
+    *   Email templates with variable substitution (e.g., "Meeting Follow-up")
+    *   Task list templates (e.g., "New Project Setup Checklist")
+    *   Calendar event templates with pre-filled details and attendees
+    *   Accessible via command palette or dedicated hotkey
+    *   Import/export templates for sharing with team
+*   **Impact:** Time savings on routine communications.
+*   **Reference:** Product Guidelines (Efficiency).
+
+### 21. Timeline View (Unified Activity Stream)
+**Concept:** Chronological timeline showing all activity across services for retrospectives.
+*   **Priority:** Low - Great for time tracking and accountability.
+*   **Features:**
+    *   Unified chronological stream: emails sent/received, files uploaded, events attended, tasks completed
+    *   Filterable by service type and date range
+    *   Search within timeline
+    *   Export to CSV for time tracking
+    *   Useful for daily reviews and retrospectives
+*   **Impact:** Visibility into "what happened today" across all services.
+*   **Reference:** Strategy Pillar #3 (Unified Command Center).
+
+### 22. Mini-Map Navigation (Spatial File Browser)
+**Concept:** Visual folder tree sidebar for Drive navigation (VS Code-style file explorer).
+*   **Priority:** Medium - Essential for Drive power users.
+*   **Features:**
+    *   Collapsible folder tree structure in left panel
+    *   Drag files between folders in the tree view
+    *   Breadcrumb navigation at top of content area
+    *   Keyboard navigation: arrow keys to traverse tree, Enter to open
+    *   "Starred" and "Recent" smart folders at top
+    *   Right-click context menu for folder operations
+*   **Impact:** Eliminates clicking through deep folder hierarchies.
+*   **Reference:** Product Guidelines (Functional Density, Keyboard Centricity).
+
 ## 🧪 Experimental / Refinement
 
 ### 9. Local-to-Cloud Sync (W1 Upgrade)

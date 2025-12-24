@@ -6,6 +6,7 @@ class FileFactory(TypedDictFactory[FileDict]):
 
     id = "file123"
     name = "test_file.txt"
+    title = "test_file.txt"  # Alias for name used in some UI components
     mimeType = "text/plain"
     modifiedTime = "2025-12-23T10:00:00.000Z"
     size = "1024"

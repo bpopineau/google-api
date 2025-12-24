@@ -40,6 +40,7 @@ class MessageMetadataFactory(TypedDictFactory[MessageMetadataDict]):
     labelIds = ["INBOX"]
     hasAttachment = False
     isUnread = True
+    title = "Test Subject"
 
 class AttachmentMetadataFactory(TypedDictFactory[AttachmentMetadataDict]):
     __model__ = AttachmentMetadataDict

@@ -325,6 +325,10 @@ class MessageMetadataDict(TypedDict, total=False):
     labelIds: list[str]
     hasAttachment: bool
     isUnread: bool
+    title: str  # Alias for subject used in search
+    # Use string key for 'from' since it's a reserved word but often used in dicts
+    # In TypedDict we can't easily have 'from' as a key unless we use Functional syntax
+    # but we can just use the from_ convention.
 
 
 class MessageFullDict(TypedDict, total=False):

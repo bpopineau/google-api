@@ -5,34 +5,33 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from mygoog_gui.pages.home import HomePage
+from tests.factories.drive import FileFactory
+from tests.factories.common import MessageMetadataFactory
 
 
 @pytest.fixture
 def mock_clients():
     clients = MagicMock()
     clients.drive.list_files.return_value = [
-        {
-            "id": "1",
-            "name": "Test Doc",
-            "mimeType": "application/vnd.google-apps.document",
-        }
+        FileFactory.build(
+            id="1",
+            name="Test Doc",
+            mimeType="application/vnd.google-apps.document",
+        )
     ]
     clients.gmail.search_messages.return_value = [
-        {
-            "id": "100",
-            "subject": "Test Email",
-            "snippet": "Hello",
-            "from": "test@example.com",
-        }
+        MessageMetadataFactory.build(
+            id="100",
+            subject="Test Email",
+            snippet="Hello",
+            from_="test@example.com",
+        )
     ]
     return clients
 
 
 def test_on_search_calls_apis(qapp, mock_clients):
-    """Verify that searching triggers global_search workflow.
-
-    The qapp fixture ensures QApplication exists (required for QWidgets).
-    """
+    """Verify that searching triggers global_search workflow."""
     # Patch the global_search function used in the home page
     with patch("mygoog_gui.pages.home.global_search") as mock_search:
         mock_search.return_value = [

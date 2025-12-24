@@ -10,6 +10,7 @@ from mygooglib.services.gmail import (
     get_attachment,
     save_attachments,
 )
+from tests.factories.gmail import MessagePartFactory, MessageFactory
 
 
 @pytest.fixture
@@ -76,18 +77,18 @@ def test_save_attachments_creates_files(
     mock_search.return_value = [{"id": "msg123"}]
 
     # Mock full message with attachment
-    mock_execute.return_value = {
-        "id": "msg123",
-        "payload": {
-            "parts": [
-                {
-                    "filename": "test.txt",
-                    "mimeType": "text/plain",
-                    "body": {"attachmentId": "att789", "size": 100},
-                }
-            ]
-        },
+    payload = {
+        "parts": [
+            {
+                "filename": "test.txt",
+                "mimeType": "text/plain",
+                "body": {"attachmentId": "att789", "size": 100},
+            }
+        ]
     }
+    msg = MessageFactory.build(id="msg123")
+    msg["payload"] = payload
+    mock_execute.return_value = msg
 
     # Mock attachment download
     mock_get_att.return_value = b"File content here"
@@ -110,26 +111,25 @@ def test_save_attachments_applies_filter(
     """Test that filename_filter works correctly."""
     mock_search.return_value = [{"id": "msg123"}]
 
-    mock_execute.return_value = {
-        "id": "msg123",
-        "payload": {
-            "parts": [
-                {
-                    "filename": "invoice.pdf",
-                    "mimeType": "application/pdf",
-                    "body": {"attachmentId": "att1", "size": 100},
-                },
-                {
-                    "filename": "image.png",
-                    "mimeType": "image/png",
-                    "body": {"attachmentId": "att2", "size": 200},
-                },
-            ]
-        },
+    payload = {
+        "parts": [
+            {
+                "filename": "invoice.pdf",
+                "mimeType": "application/pdf",
+                "body": {"attachmentId": "att1", "size": 100},
+            },
+            {
+                "filename": "image.png",
+                "mimeType": "image/png",
+                "body": {"attachmentId": "att2", "size": 200},
+            },
+        ]
     }
+    msg = MessageFactory.build(id="msg123")
+    msg["payload"] = payload
+    mock_execute.return_value = msg
 
     mock_get_att.return_value = b"PDF content"
-
     # Filter to only PDFs
     result = save_attachments(
         mock_gmail, "has:attachment", tmp_path, filename_filter="pdf"
