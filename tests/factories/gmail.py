@@ -41,6 +41,7 @@ class MessageFactory(TypedDictFactory[MessageDict]):
     threadId = "thread123"
     snippet = ""
     payload = Use(MessagePartFactory.build)
+    # Ensure payload can be overridden
 
 
 class ThreadFactory(TypedDictFactory[ThreadDict]):
