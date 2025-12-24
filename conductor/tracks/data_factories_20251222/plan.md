@@ -3,7 +3,7 @@
 Implementation of type-safe, deterministic mock data generators using `polyfactory` for use in unit tests.
 
 ## Phase 1: Environment and Foundation
-- [ ] Task: Add `polyfactory` to `pyproject.toml` (dev-dependencies) and install.
+- [x] Task: Add `polyfactory` to `pyproject.toml` (dev-dependencies) and install. 2d6b769
 - [ ] Task: Create directory structure: `tests/factories/` with `__init__.py`.
 - [ ] Task: Implement `tests/factories/common.py` for shared types and library-specific normalized dicts.
 - [ ] Task: Conductor - User Manual Verification 'Environment and Foundation' (Protocol in workflow.md)
